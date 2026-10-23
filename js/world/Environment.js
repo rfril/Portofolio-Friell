@@ -754,139 +754,200 @@ export class Environment {
   }
 
 
-  // 4. DYNAMIC 3D TRAFFIC LIGHT GANTRIES
+    // 4. DYNAMIC 3D TRAFFIC LIGHT GANTRIES (ORIENTATION-PERFECT OVER EACH APPROACH)
   buildTrafficLightSystem() {
     const metalDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
     const housingMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
 
-    const createTrafficGantry = (x, z, rotY, streetName = "MAIN AVE", phaseGroup = "A") => {
+    const createApproachTrafficGantry = ({
+      roadType,   // "NS" or "EW"
+      roadCenter, // Center of road (X for NS, Z for EW)
+      roadWidth,  // Width of road
+      stopPos,    // Position along road (Z for NS, X for EW)
+      facingDir,  // "-Z" (North), "+Z" (South), "-X" (West), "+X" (East)
+      streetName, // Text on sign
+      phaseGroup  // "A" or "B"
+    }) => {
       const g = new THREE.Group();
-      g.position.set(x, 0, z);
-      g.rotation.y = rotY;
-
       const mastH = 6.8;
-      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, mastH, 12), metalDark);
-      mast.position.set(-9.2, mastH / 2, 0);
-      mast.castShadow = true;
-      g.add(mast);
 
-      const basePlate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 1.2), metalDark);
-      basePlate.position.set(-9.2, 0.15, 0);
-      g.add(basePlate);
-
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(11.0, 0.35, 0.35), metalDark);
-      arm.position.set(-3.7, 6.2, 0);
-      arm.castShadow = true;
-      g.add(arm);
-
-      const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.8, 8), metalDark);
-      strut.position.set(-7.5, 5.3, 0);
-      strut.rotation.z = -0.785;
-      g.add(strut);
-
-      const signTex = this.createStreetNameTexture(streetName);
-      const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.9), new THREE.MeshBasicMaterial({ map: signTex }));
-      signMesh.position.set(-2.5, 7.0, 0.22);
-      g.add(signMesh);
-
-      const createSignalHead = (posX) => {
+      const buildHead = (posX, posY, posZ, dir) => {
         const headGroup = new THREE.Group();
-        headGroup.position.set(posX, 5.4, 0);
+        headGroup.position.set(posX, posY, posZ);
 
-        const box = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.85, 0.5), housingMat);
+        const isNS = (dir === "-Z" || dir === "+Z");
+        const boxGeo = isNS
+          ? new THREE.BoxGeometry(0.65, 1.85, 0.45)
+          : new THREE.BoxGeometry(0.45, 1.85, 0.65);
+        const box = new THREE.Mesh(boxGeo, housingMat);
         headGroup.add(box);
 
-        [-0.55, 0.0, 0.55].forEach(vy => {
-          const visor = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.25, 12, 1, true, 0, Math.PI), metalDark);
-          visor.position.set(0, vy + 0.12, 0.26);
-          visor.rotation.x = Math.PI / 2;
-          headGroup.add(visor);
-        });
-
-        const redMat = new THREE.MeshStandardMaterial({
-          color: 0x330505,
-          emissive: 0xef4444,
-          emissiveIntensity: 0.05,
-          roughness: 0.2
-        });
-        const yellowMat = new THREE.MeshStandardMaterial({
-          color: 0x332505,
-          emissive: 0xf59e0b,
-          emissiveIntensity: 0.05,
-          roughness: 0.2
-        });
-        const greenMat = new THREE.MeshStandardMaterial({
-          color: 0x053315,
-          emissive: 0x10b981,
-          emissiveIntensity: 0.05,
-          roughness: 0.2
-        });
+        const redMat = new THREE.MeshStandardMaterial({ color: 0x330505, emissive: 0xef4444, emissiveIntensity: 0.05, roughness: 0.2 });
+        const yellowMat = new THREE.MeshStandardMaterial({ color: 0x332505, emissive: 0xf59e0b, emissiveIntensity: 0.05, roughness: 0.2 });
+        const greenMat = new THREE.MeshStandardMaterial({ color: 0x053315, emissive: 0x10b981, emissiveIntensity: 0.05, roughness: 0.2 });
 
         const lensGeo = new THREE.SphereGeometry(0.16, 12, 12);
+        const lensOffset = 0.24;
+        let lX = 0, lZ = 0;
+        let rotY = 0;
+
+        if (dir === "-Z") {
+          lZ = -lensOffset;
+          rotY = Math.PI;
+        } else if (dir === "+Z") {
+          lZ = lensOffset;
+          rotY = 0;
+        } else if (dir === "-X") {
+          lX = -lensOffset;
+          rotY = -Math.PI / 2;
+        } else if (dir === "+X") {
+          lX = lensOffset;
+          rotY = Math.PI / 2;
+        }
 
         const redLens = new THREE.Mesh(lensGeo, redMat);
-        redLens.position.set(0, 0.55, 0.22);
+        redLens.position.set(lX, 0.55, lZ);
         headGroup.add(redLens);
 
         const yellowLens = new THREE.Mesh(lensGeo, yellowMat);
-        yellowLens.position.set(0, 0.0, 0.22);
+        yellowLens.position.set(lX, 0.0, lZ);
         headGroup.add(yellowLens);
 
         const greenLens = new THREE.Mesh(lensGeo, greenMat);
-        greenLens.position.set(0, -0.55, 0.22);
+        greenLens.position.set(lX, -0.55, lZ);
         headGroup.add(greenLens);
 
-        const signalLight = new THREE.PointLight(0x10b981, 0.8, 12);
-        signalLight.position.set(0, 0, 0.8);
-        headGroup.add(signalLight);
-
-        this.trafficLightSets.push({
-          redMat,
-          yellowMat,
-          greenMat,
-          light: signalLight,
-          phase: phaseGroup
+        [-0.55, 0.0, 0.55].forEach(vy => {
+          const visor = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.25, 12, 1, true, 0, Math.PI), metalDark);
+          visor.rotation.x = Math.PI / 2;
+          visor.rotation.z = -rotY;
+          visor.position.set(lX * 1.05, vy + 0.12, lZ * 1.05);
+          headGroup.add(visor);
         });
 
+        const light = new THREE.PointLight(0x10b981, 0.8, 12);
+        light.position.set(lX * 2.5, 0, lZ * 2.5);
+        headGroup.add(light);
+
+        this.trafficLightSets.push({ redMat, yellowMat, greenMat, light, phase: phaseGroup });
         return headGroup;
       };
 
-      g.add(createSignalHead(-5.0));
-      g.add(createSignalHead(-1.2));
+      if (roadType === "NS") {
+        const isFacingNorth = (facingDir === "-Z");
+        const mastX = isFacingNorth
+          ? roadCenter + roadWidth / 2 + 1.2
+          : roadCenter - roadWidth / 2 - 1.2;
 
-      this.scene.add(g);
-      this.collision.addCircle(x - Math.cos(rotY) * 9.2, z + Math.sin(rotY) * 9.2, 0.7, "traffic_light_mast");
+        const armReachX = isFacingNorth
+          ? roadCenter - roadWidth * 0.25
+          : roadCenter + roadWidth * 0.25;
+
+        const armLen = Math.abs(mastX - armReachX);
+        const armMidX = (mastX + armReachX) / 2;
+
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, mastH, 12), metalDark);
+        mast.position.set(mastX, mastH / 2, stopPos);
+        mast.castShadow = true;
+        g.add(mast);
+
+        const basePlate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 1.2), metalDark);
+        basePlate.position.set(mastX, 0.15, stopPos);
+        g.add(basePlate);
+
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(armLen, 0.35, 0.35), metalDark);
+        arm.position.set(armMidX, 6.2, stopPos);
+        arm.castShadow = true;
+        g.add(arm);
+
+        const signTex = this.createStreetNameTexture(streetName);
+        const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.9), new THREE.MeshBasicMaterial({ map: signTex }));
+        const signZ = isFacingNorth ? stopPos - 0.22 : stopPos + 0.22;
+        signMesh.position.set(roadCenter, 7.0, signZ);
+        if (isFacingNorth) signMesh.rotation.y = Math.PI;
+        g.add(signMesh);
+
+        const lane1X = isFacingNorth ? roadCenter + roadWidth * 0.25 : roadCenter - roadWidth * 0.25;
+        const lane2X = isFacingNorth ? roadCenter - roadWidth * 0.1 : roadCenter + roadWidth * 0.1;
+        g.add(buildHead(lane1X, 5.4, stopPos, facingDir));
+        g.add(buildHead(lane2X, 5.4, stopPos, facingDir));
+
+        this.scene.add(g);
+        this.collision.addCircle(mastX, stopPos, 0.7, "traffic_mast");
+
+      } else {
+        const isFacingWest = (facingDir === "-X");
+        const mastZ = isFacingWest
+          ? roadCenter + roadWidth / 2 + 1.2
+          : roadCenter - roadWidth / 2 - 1.2;
+
+        const armReachZ = isFacingWest
+          ? roadCenter - roadWidth * 0.25
+          : roadCenter + roadWidth * 0.25;
+
+        const armLen = Math.abs(mastZ - armReachZ);
+        const armMidZ = (mastZ + armReachZ) / 2;
+
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, mastH, 12), metalDark);
+        mast.position.set(stopPos, mastH / 2, mastZ);
+        mast.castShadow = true;
+        g.add(mast);
+
+        const basePlate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 1.2), metalDark);
+        basePlate.position.set(stopPos, 0.15, mastZ);
+        g.add(basePlate);
+
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, armLen), metalDark);
+        arm.position.set(stopPos, 6.2, armMidZ);
+        arm.castShadow = true;
+        g.add(arm);
+
+        const signTex = this.createStreetNameTexture(streetName);
+        const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.9), new THREE.MeshBasicMaterial({ map: signTex }));
+        const signX = isFacingWest ? stopPos - 0.22 : stopPos + 0.22;
+        signMesh.position.set(signX, 7.0, roadCenter);
+        signMesh.rotation.y = isFacingWest ? -Math.PI / 2 : Math.PI / 2;
+        g.add(signMesh);
+
+        const lane1Z = isFacingWest ? roadCenter + roadWidth * 0.25 : roadCenter - roadWidth * 0.25;
+        const lane2Z = isFacingWest ? roadCenter - roadWidth * 0.1 : roadCenter + roadWidth * 0.1;
+        g.add(buildHead(stopPos, 5.4, lane1Z, facingDir));
+        g.add(buildHead(stopPos, 5.4, lane2Z, facingDir));
+
+        this.scene.add(g);
+        this.collision.addCircle(stopPos, mastZ, 0.7, "traffic_mast");
+      }
     };
 
-    // Central Roundabout (Radius 16m)
-    createTrafficGantry(0, -18, 0, "MAIN AVE NORTH", "A");
-    createTrafficGantry(0, 18, Math.PI, "MAIN AVE SOUTH", "A");
-    createTrafficGantry(18, 0, -Math.PI / 2, "CENTRAL BLVD EAST", "B");
-    createTrafficGantry(-18, 0, Math.PI / 2, "CENTRAL BLVD WEST", "B");
+    // 1. Central Roundabout (Radius 16m)
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -18, facingDir: "-Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 18, facingDir: "+Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 18, facingDir: "+X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -18, facingDir: "-X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
 
-    // North Central Hub (0, -140)
-    createTrafficGantry(0, -149, 0, "MAIN AVE NORTH", "A");
-    createTrafficGantry(0, -131, Math.PI, "MAIN AVE SOUTH", "A");
-    createTrafficGantry(9, -140, -Math.PI / 2, "METRO EXP EAST", "B");
-    createTrafficGantry(-9, -140, Math.PI / 2, "METRO EXP WEST", "B");
+    // 2. North Central Hub (0, -140)
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -149, facingDir: "-Z", streetName: "MAIN AVE SOUTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -131, facingDir: "+Z", streetName: "MAIN AVE NORTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: -140, roadWidth: 14, stopPos: 10, facingDir: "+X", streetName: "METRO EXP WEST", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: -140, roadWidth: 14, stopPos: -10, facingDir: "-X", streetName: "METRO EXP EAST", phaseGroup: "B" });
 
-    // South Central Hub (0, 140)
-    createTrafficGantry(0, 131, 0, "MAIN AVE NORTH", "A");
-    createTrafficGantry(0, 149, Math.PI, "MAIN AVE SOUTH", "A");
-    createTrafficGantry(9, 140, -Math.PI / 2, "METRO EXP EAST", "B");
-    createTrafficGantry(-9, 140, Math.PI / 2, "METRO EXP WEST", "B");
+    // 3. South Central Hub (0, 140)
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 131, facingDir: "-Z", streetName: "MAIN AVE SOUTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 149, facingDir: "+Z", streetName: "MAIN AVE NORTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 140, roadWidth: 14, stopPos: 10, facingDir: "+X", streetName: "METRO EXP WEST", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 140, roadWidth: 14, stopPos: -10, facingDir: "-X", streetName: "METRO EXP EAST", phaseGroup: "B" });
 
-    // East Central Hub (140, 0)
-    createTrafficGantry(140, -9, 0, "COMMERCE NORTH", "A");
-    createTrafficGantry(140, 9, Math.PI, "COMMERCE SOUTH", "A");
-    createTrafficGantry(149, 0, -Math.PI / 2, "CENTRAL BLVD EAST", "B");
-    createTrafficGantry(131, 0, Math.PI / 2, "CENTRAL BLVD WEST", "B");
+    // 4. East Central Hub (140, 0)
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 140, roadWidth: 14, stopPos: -10, facingDir: "-Z", streetName: "COMMERCE SOUTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 140, roadWidth: 14, stopPos: 10, facingDir: "+Z", streetName: "COMMERCE NORTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 131, facingDir: "-X", streetName: "CENTRAL BLVD EAST", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 149, facingDir: "+X", streetName: "CENTRAL BLVD WEST", phaseGroup: "B" });
 
-    // West Central Hub (-140, 0)
-    createTrafficGantry(-140, -9, 0, "TECH NORTH", "A");
-    createTrafficGantry(-140, 9, Math.PI, "TECH SOUTH", "A");
-    createTrafficGantry(-131, 0, -Math.PI / 2, "CENTRAL BLVD EAST", "B");
-    createTrafficGantry(-149, 0, Math.PI / 2, "CENTRAL BLVD WEST", "B");
+    // 5. West Central Hub (-140, 0)
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: -140, roadWidth: 14, stopPos: -10, facingDir: "-Z", streetName: "TECH SOUTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: -140, roadWidth: 14, stopPos: 10, facingDir: "+Z", streetName: "TECH NORTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -131, facingDir: "+X", streetName: "CENTRAL BLVD WEST", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -149, facingDir: "-X", streetName: "CENTRAL BLVD EAST", phaseGroup: "B" });
   }
 
   updateTrafficLights(time) {
