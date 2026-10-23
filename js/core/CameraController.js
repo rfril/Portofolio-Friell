@@ -58,7 +58,18 @@ export class CameraController {
   }
 
   bindPointerEvents() {
-    // 1. Mouse Drag (Klik & Geser Layar untuk Mengubah Sudut Pandang)
+    // 0. Cegah Menu Konteks Klik Kanan Browser (Bebas Klik Kanan untuk Menggeser Kamera!)
+    window.addEventListener("contextmenu", (e) => {
+      const el = e.target?.closest ? e.target : e.target?.parentElement;
+      // Tetap izinkan menu klik kanan jika user berada di input atau textarea form
+      if (el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.closest("input") || el?.closest("textarea")) {
+        return;
+      }
+      e.preventDefault();
+      return false;
+    });
+
+    // 1. Mouse Drag (Klik Kiri, Klik Tengah, maupun Klik Kanan untuk Mengubah Sudut Pandang)
     window.addEventListener("mousedown", (e) => {
       // Abaikan jika klik tombol UI, modal dialog, dsb
       const el = e.target?.closest ? e.target : e.target?.parentElement;
@@ -67,10 +78,18 @@ export class CameraController {
         el?.closest(".hud-pill") ||
         el?.closest(".project-modal-backdrop") ||
         el?.closest(".top-hud") ||
-        el?.closest(".zone-announcer")
+        el?.closest(".zone-announcer") ||
+        el?.tagName === "INPUT" ||
+        el?.tagName === "TEXTAREA"
       ) {
         return;
       }
+
+      // Cegah aksi default browser untuk klik kanan dan tengah
+      if (e.button === 2 || e.button === 1) {
+        e.preventDefault();
+      }
+
       this.isDragging = true;
       this.lastPointerX = e.clientX;
       this.lastPointerY = e.clientY;
@@ -90,7 +109,10 @@ export class CameraController {
       this.orbitPitch = Math.max(-0.4, Math.min(0.8, this.orbitPitch));
     });
 
-    window.addEventListener("mouseup", () => {
+    window.addEventListener("mouseup", (e) => {
+      if (e.button === 2) {
+        e.preventDefault();
+      }
       this.isDragging = false;
     });
 
