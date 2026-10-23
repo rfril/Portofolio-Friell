@@ -33,6 +33,7 @@ export class CarController {
 
     // Collision boundary radius
     this.colliderRadius = 1.6;
+    this.lastBoundaryImpact = 0;
 
     this.buildCarModel();
     this.scene.add(this.mesh);
@@ -269,12 +270,16 @@ export class CarController {
     }
 
     // 3. Vehicle Turning & Yaw Rotation
-    if (Math.abs(this.speed) > 0.2) {
+    const isMoving = Math.abs(this.speed) > 0.2;
+    const isSteering = Math.abs(this.steerAngle) > 0.05;
+
+    // Aktif saat mobil bergerak ATAU saat setir dibelokkan ketika berhenti (agar mobil tidak macet saat menempel dinding)
+    if (isMoving || isSteering) {
       const turnMultiplier = 1.35;
-      const speedRatio = Math.abs(this.speed) / CONFIG.CAR.MAX_SPEED_FORWARD;
+      const speedRatio = isMoving ? (Math.abs(this.speed) / CONFIG.CAR.MAX_SPEED_FORWARD) : 0.45;
       
-      // Saat mundur (speed < 0), balik arah putaran yaw agar belok kiri tetap bergerak ke kiri (arcade / intuitive reverse)
-      const reverseFactor = this.speed > 0 ? 1 : -1;
+      // Saat mundur (speed < -0.1), balik arah putaran yaw agar belok kiri tetap bergerak ke kiri (arcade / intuitive reverse)
+      const reverseFactor = this.speed < -0.1 ? -1 : 1;
       const deltaYaw = this.steerAngle * speedRatio * turnMultiplier * reverseFactor * deltaTime;
       this.mesh.rotation.y += deltaYaw;
 
@@ -296,19 +301,32 @@ export class CarController {
     const displacement = forwardVector.multiplyScalar(this.speed * deltaTime);
     this.mesh.position.add(displacement);
 
-    // 5. World Bounds Check (Bounce gently off boundaries)
+    // 5. World Bounds Check (Bounce gently off boundaries, anti-spam)
     const boundLimit = (CONFIG.WORLD.WIDTH / 2) - CONFIG.WORLD.BOUND_PADDING;
+    const now = performance.now();
+
     if (Math.abs(this.mesh.position.x) > boundLimit) {
       this.mesh.position.x = Math.sign(this.mesh.position.x) * boundLimit;
-      this.speed *= -0.35; // Gentle bounce
-      this.audio.playBumpSound();
-      if (this.particles) this.particles.emitImpact(this.mesh.position);
+      if (Math.abs(this.speed) > 2.5 && (now - this.lastBoundaryImpact > 350)) {
+        this.lastBoundaryImpact = now;
+        this.speed *= -0.3; // Clean recoil
+        this.audio.playBumpSound();
+        if (this.particles) this.particles.emitImpact(this.mesh.position);
+      } else {
+        this.speed = 0; // Hentikan gerakan masuk batas, cegah getar / nyepam
+      }
     }
+
     if (Math.abs(this.mesh.position.z) > boundLimit) {
       this.mesh.position.z = Math.sign(this.mesh.position.z) * boundLimit;
-      this.speed *= -0.35;
-      this.audio.playBumpSound();
-      if (this.particles) this.particles.emitImpact(this.mesh.position);
+      if (Math.abs(this.speed) > 2.5 && (now - this.lastBoundaryImpact > 350)) {
+        this.lastBoundaryImpact = now;
+        this.speed *= -0.3;
+        this.audio.playBumpSound();
+        if (this.particles) this.particles.emitImpact(this.mesh.position);
+      } else {
+        this.speed = 0;
+      }
     }
 
     // 6. Wheel Spin Rotation
