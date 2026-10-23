@@ -143,38 +143,40 @@ export class Environment {
       ctx.lineWidth = 8;
       ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
 
-      // Category tag pill
+      // Category tag pill (dynamic width)
+      ctx.font = "bold 14px sans-serif";
+      const tagText = tag.toUpperCase();
+      const tagWidth = Math.max(120, ctx.measureText(tagText).width + 36);
       ctx.fillStyle = color1;
-      ctx.fillRect(32, 28, 150, 32);
+      ctx.fillRect(32, 26, tagWidth, 32);
       ctx.fillStyle = "#000000";
-      ctx.font = "bold 15px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(tag.toUpperCase(), 107, 44);
+      ctx.fillText(tagText, 32 + tagWidth / 2, 42);
 
       // Icon badge
-      ctx.font = "bold 34px sans-serif";
+      ctx.font = "bold 32px sans-serif";
       ctx.fillStyle = color2;
       ctx.textAlign = "right";
-      ctx.fillText(icon, canvas.width - 32, 52);
+      ctx.fillText(icon, canvas.width - 32, 48);
 
       // Main Title
       ctx.fillStyle = "#ffffff";
-      ctx.font = "800 36px sans-serif";
+      ctx.font = "800 34px sans-serif";
       ctx.textAlign = "left";
       ctx.fillText(title, 32, 115);
 
       // Subtitle
       ctx.fillStyle = color1;
-      ctx.font = "600 20px sans-serif";
-      ctx.fillText(sub, 32, 160);
+      ctx.font = "600 18px sans-serif";
+      ctx.fillText(sub, 32, 158);
 
       // Bottom separator & footer
       ctx.fillStyle = color2;
-      ctx.fillRect(32, 195, canvas.width - 64, 4);
+      ctx.fillRect(32, 195, canvas.width - 64, 3);
       ctx.fillStyle = "#94a3b8";
-      ctx.font = "600 14px sans-serif";
-      ctx.fillText("FEATURED ON RAFRIEL METROPOLIS PORTFOLIO", 32, 222);
+      ctx.font = "600 13px sans-serif";
+      ctx.fillText("METROPOLIS DEVELOPER CITY • 2026", 32, 222);
 
       return new THREE.CanvasTexture(canvas);
     };
@@ -832,30 +834,36 @@ export class Environment {
     const helipadTex = this.createHelipadTexture();
     const helipadMat = new THREE.MeshStandardMaterial({ map: helipadTex, roughness: 0.6 });
 
-    // Procedural Electronic LED Billboards (Projects & Flagships)
-    const bbApexsions = this.createBillboardTexture("APEXSIONS RPG MMO", "Java 21 • 3 Kerajaan • BlueMap 3D", "FLAGSHIP", "#f59e0b", "#ef4444", "⚔️");
-    const bbKasir = this.createBillboardTexture("POS KASIR FRIEL 2.0", "Nuxt 4 + Laravel REST API", "FULLSTACK", "#a855f7", "#06b6d4", "💻");
-    const bbPororo = this.createBillboardTexture("PORORO GELATO CAFE", "Artisan Desserts • Figma Design", "CREATIVE", "#10b981", "#f59e0b", "🍦");
-    const bbJesko = this.createBillboardTexture("KOENIGSEGG JESKO", "1600 HP Twin-Turbo • Aircore Carbon", "HYPERCAR", "#84cc16", "#38bdf8", "⚡");
-    const bbDev = this.createBillboardTexture("RAFRIEL RADITYA W.", "Game Developer & Systems Engineer", "PROFILE", "#38bdf8", "#f43f5e", "🚀");
+    // =========================================================================
+    // ELECTRONIC LED CITY BILLBOARDS (VARIED, RELEVANT & AUTHENTIC METROPOLIS ADS)
+    // =========================================================================
+    // 1. Soft Skills & Developer Mindset (Universal, genuine, not tied to any single project)
+    const bbSkillKomunikasi = this.createBillboardTexture("KOMUNIKASI EFEKTIF", "Menyampaikan Ide & Solusi Teknis Secara Lugas", "COLLABORATION", "#38bdf8", "#60a5fa", "💬");
+    const bbSkillTeamwork = this.createBillboardTexture("KERJA SAMA TIM", "Kolaborasi Aktif, Sinergi, & Saling Mendukung", "TEAMWORK", "#818cf8", "#38bdf8", "🤝");
+    const bbSkillProblemSolving = this.createBillboardTexture("PROBLEM SOLVING", "Pendekatan Analitis Menemukan Solusi Efisien", "CRITICAL THINKING", "#f59e0b", "#ef4444", "💡");
+    const bbSkillCleanCode = this.createBillboardTexture("KETELITIAN & DETAIL", "Membangun Kode Bersih, Terstruktur, & Teruji", "ENGINEERING", "#10b981", "#34d399", "✨");
+    const bbSkillSelfLearning = this.createBillboardTexture("KEMAUAN BELAJAR", "Cepat Beradaptasi & Eksplorasi Teknologi Baru", "GROWTH", "#ec4899", "#f43f5e", "🚀");
 
-    // All 5 Soft Skills Billboards (Converted into High-Impact In-World Billboards as Requested!)
-    const bbSkillKomunikasi = this.createBillboardTexture("KOMUNIKASI TEKNIS", "Menjelaskan Arsitektur Sistem & Alur Logika Game", "SOFT SKILL #1", "#38bdf8", "#60a5fa", "💬");
-    const bbSkillTeamwork = this.createBillboardTexture("KERJA SAMA TIM", "Kolaborasi Aktif Proyek & Sinergi Tim Developer", "SOFT SKILL #2", "#818cf8", "#38bdf8", "👥");
-    const bbSkillProblemSolving = this.createBillboardTexture("PROBLEM SOLVING", "Analitis Debugging, 20 TPS Server Stability & Query", "SOFT SKILL #3", "#f59e0b", "#ef4444", "💡");
-    const bbSkillCleanCode = this.createBillboardTexture("KETELITIAN KODE", "Struktur Semantik, Validasi Slot & Standar Java 21", "SOFT SKILL #4", "#10b981", "#34d399", "🔍");
-    const bbSkillSelfLearning = this.createBillboardTexture("BELAJAR MANDIRI", "Cepat Menguasai PaperMC, Nuxt 4 & Laravel 11", "SOFT SKILL #5", "#ec4899", "#f43f5e", "⚡");
+    // 2. Engineering Mantras & Creative Tech
+    const bbCleanArch = this.createBillboardTexture("CLEAN CODE MANTRA", "Readable Code Is Better Than Clever Code", "DEV CULTURE", "#10b981", "#38bdf8", "📐");
+    const bbCreativeCode = this.createBillboardTexture("CREATIVE TECH LAB", "Eksplorasi WebGL 3D, Grafika Interaktif, & Fisika", "INNOVATION", "#6366f1", "#38bdf8", "⚡");
+    const bbJesko = this.createBillboardTexture("KOENIGSEGG JESKO", "Presisi Aerodinamika & Karakter Kemudi Responsif", "SUPERCAR", "#84cc16", "#38bdf8", "🏎️");
 
-    // Education, Tech Stack & Contact Billboards
-    const bbEducation = this.createBillboardTexture("SMKN 71 JAKARTA", "Rekayasa Perangkat Lunak • Calon Game Developer", "EDUCATION", "#38bdf8", "#fbbf24", "🎓");
-    const bbTechStack = this.createBillboardTexture("CORE TECH STACK", "Java 21 • PaperMC • Nuxt 4 • Laravel 11 • Three.js", "SYSTEMS", "#6366f1", "#38bdf8", "⚙️");
-    const bbContact = this.createBillboardTexture("HUBUNGI PENGEMBANG", "rafriel.developer@gmail.com • GitHub: Rafriel", "CONNECT", "#06b6d4", "#a855f7", "✉️");
+    // 3. Urban Lifestyle & City Signs
+    const bbCoffee = this.createBillboardTexture("SYNTAX COFFEE ROAST", "Seduhan Segar Menemani Sesi Eksplorasi Kode", "CAFE & LOUNGE", "#f59e0b", "#d97706", "☕");
+    const bbTransitSafety = this.createBillboardTexture("METRO SAFETY DRIVE", "Kendarai dengan Cermat • Nikmati Suasana Kota", "PUBLIC NOTICE", "#06b6d4", "#3b82f6", "🚦");
+    const bbCyberNight = this.createBillboardTexture("NEON DISTRICT", "Eksplorasi Kota 3D di Bawah Cahaya Lampu Malam", "CITY VIBE", "#a855f7", "#ec4899", "🌃");
+
+    // 4. Education & Developer Profile
+    const bbEducation = this.createBillboardTexture("SMKN 71 JAKARTA", "Konsentrasi Rekayasa Perangkat Lunak (RPL)", "EDUCATION", "#38bdf8", "#fbbf24", "🎓");
+    const bbDev = this.createBillboardTexture("PORTFOLIO DEVELOPER", "Rafriel Raditya Widodo • Aspiring Game Developer", "PROFILE", "#38bdf8", "#f43f5e", "🎮");
+    const bbContact = this.createBillboardTexture("MARI BERDISKUSI", "rafriel.developer@gmail.com • GitHub: Rafriel", "CONNECT", "#06b6d4", "#a855f7", "✉️");
 
     // Times Square Live Vertical Ticker Ribbons
-    const tickerApex = this.createVerticalTickerTexture(["APEXSIONS RPG", "SERVER: 20 TPS", "JAVA 21 ENGINE", "BLUEMAP 3D", "CUSTOM SKILLS"], "#f59e0b", "#38bdf8");
-    const tickerNuxt = this.createVerticalTickerTexture(["POS KASIR 2.0", "NUXT 4 FRONTEND", "LARAVEL 11 API", "RESTFUL SERVICES", "FAST INVENTORY"], "#a855f7", "#06b6d4");
-    const tickerSkills = this.createVerticalTickerTexture(["DEV SOFT SKILLS", "PROBLEM SOLVING", "TEAM COLLAB", "CLEAN CODE", "FAST LEARNING"], "#10b981", "#f59e0b");
-    const tickerMetro = this.createVerticalTickerTexture(["METROPOLIS LIVE", "FPS: 60 STABLE", "PBR SHADERS", "PHYSICS DRIFT", "HIGH SPEED"], "#38bdf8", "#ec4899");
+    const tickerCityFeed = this.createVerticalTickerTexture(["METROPOLIS LIVE", "WEATHER: 24°C CLEAR", "AIR QUALITY: GOOD", "DRIVE CAREFULLY", "ENJOY THE VIEW"], "#38bdf8", "#10b981");
+    const tickerDevTips = this.createVerticalTickerTexture(["DEV DAILY TIPS", "COMMIT OFTEN", "WRITE CLEAN LOGIC", "TEST THOROUGHLY", "STAY CURIOUS"], "#f59e0b", "#38bdf8");
+    const tickerValues = this.createVerticalTickerTexture(["CORE VALUES", "COMMUNICATION", "PROBLEM SOLVING", "TEAM COLLABORATION", "CLEAN CODE"], "#10b981", "#818cf8");
+    const tickerTechSim = this.createVerticalTickerTexture(["SIMULATION STATS", "FPS: 60 STABLE", "PHYSICS: ACTIVE", "WebGL 3D GRAPHICS", "DEVELOPER WORLD"], "#ec4899", "#06b6d4");
 
     // Architectural Facade Materials
     const matGlassBlue = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.92, roughness: 0.12, map: windowTexBlue });
@@ -1594,14 +1602,14 @@ export class Environment {
     // TIMES SQUARE TOWER 1: Facing South-West directly at Roundabout & Main Avenue Approach
     createTimesSquareTower(24, -48, 16, 16, 86, matGlassBlue, "ts_tower_ne_roundabout", {
       mainBillboard: bbSkillKomunikasi,
-      verticalTicker: tickerSkills,
+      verticalTicker: tickerValues,
       billboardSide: "S",
       accentMat: ledAccentMat
     });
 
     createSuperSkyscraper(48, -48, 16, 16, 88, matGlassBlue, "skyscraper_ne_zenithar", {
       crownType: "helipad",
-      billboard: bbApexsions,
+      billboard: bbCleanArch,
       billboardSide: "W",
       accentMat: ledGoldAccentMat
     });
@@ -1624,7 +1632,7 @@ export class Environment {
     // TIMES SQUARE TOWER 2: Facing South-East directly at Roundabout & Main Avenue Approach
     createTimesSquareTower(-24, -48, 16, 16, 84, matGlassCyan, "ts_tower_nw_roundabout", {
       mainBillboard: bbSkillProblemSolving,
-      verticalTicker: tickerApex,
+      verticalTicker: tickerDevTips,
       billboardSide: "S",
       accentMat: ledGoldAccentMat
     });
@@ -1652,7 +1660,7 @@ export class Environment {
     // TIMES SQUARE TOWER 3: Facing North towards Roundabout & West Boulevard
     createTimesSquareTower(-24, 24, 16, 16, 80, matGlassGold, "ts_tower_sw_boulevard", {
       mainBillboard: bbSkillTeamwork,
-      verticalTicker: tickerMetro,
+      verticalTicker: tickerCityFeed,
       billboardSide: "N",
       accentMat: ledGoldAccentMat
     });
@@ -1664,7 +1672,7 @@ export class Environment {
     });
 
     createMidriseBlock(-24, 56, 16, 12, 28, matCorporateWhite, "midrise_sw_dining", {
-      billboard: bbPororo,
+      billboard: bbCoffee,
       billboardSide: "N",
       awningColor: 0x10b981
     });
@@ -1682,7 +1690,7 @@ export class Environment {
 
     createSuperSkyscraper(58, 48, 15, 15, 80, matGlassBlue, "skyscraper_se_parkview", {
       crownType: "helipad",
-      billboard: bbKasir,
+      billboard: bbCreativeCode,
       billboardSide: "W",
       accentMat: ledAccentMat
     });
@@ -1752,7 +1760,7 @@ export class Environment {
     // TIMES SQUARE TOWER 4: Facing West along East Boulevard towards POS Kasir Plaza
     createTimesSquareTower(126, -36, 16, 16, 74, matGlassCyan, "ts_tower_em_boulevard", {
       mainBillboard: bbSkillCleanCode,
-      verticalTicker: tickerNuxt,
+      verticalTicker: tickerDevTips,
       billboardSide: "W",
       accentMat: ledAccentMat
     });
@@ -1775,7 +1783,7 @@ export class Environment {
     // TIMES SQUARE TOWER 5: Facing East along West Boulevard towards PoRoRo Cafe Plaza
     createTimesSquareTower(-126, 24, 16, 16, 76, matGlassBlue, "ts_tower_wm_boulevard", {
       mainBillboard: bbSkillSelfLearning,
-      verticalTicker: tickerSkills,
+      verticalTicker: tickerTechSim,
       billboardSide: "E",
       accentMat: ledPinkAccentMat
     });
@@ -1820,7 +1828,7 @@ export class Environment {
     // Standalone double-sided monolith billboards placed along highways in plain driver view!
     createHighwayMonolithBillboard(12, -85, 0, bbEducation, "monolith_bb_education");
     createHighwayMonolithBillboard(-12, 85, 0, bbContact, "monolith_bb_contact");
-    createHighwayMonolithBillboard(85, 12, Math.PI / 2, bbTechStack, "monolith_bb_techstack");
+    createHighwayMonolithBillboard(85, 12, Math.PI / 2, bbCleanArch, "monolith_bb_cleanarch");
     createHighwayMonolithBillboard(-85, -12, Math.PI / 2, bbSkillProblemSolving, "monolith_bb_problem_solving");
 
     createHighwayMonolithBillboard(60, -195, Math.PI / 2, bbSkillKomunikasi, "monolith_bb_komunikasi");

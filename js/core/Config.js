@@ -41,25 +41,33 @@ export const CONFIG = {
 
   // Camera Settings
   CAMERA: {
-    DEFAULT_MODE: "isometric", // "isometric" | "chase" | "topdown"
+    DEFAULT_MODE: "chase", // "chase" | "cinematic" | "isometric" | "topdown"
     MODES: {
-      isometric: {
-        offset: { x: 38, y: 44, z: 38 },
-        fov: 40,
-        lookOffset: { x: 0, y: 1.5, z: 0 },
-        damping: 0.065
-      },
       chase: {
-        offset: { x: 0, y: 9, z: -18 },
+        dist: 11.8,
+        height: 3.8,
+        lookAhead: 14.0,
+        fov: 58,
+        damping: 0.12
+      },
+      cinematic: {
+        dist: 17.5,
+        height: 6.5,
+        lookAhead: 20.0,
         fov: 52,
-        lookOffset: { x: 0, y: 2.2, z: 8 },
-        damping: 0.09
+        damping: 0.08
+      },
+      isometric: {
+        offset: { x: 26, y: 22, z: 26 },
+        fov: 42,
+        lookOffset: { x: 0, y: 1.2, z: 0 },
+        damping: 0.08
       },
       topdown: {
-        offset: { x: 0, y: 75, z: 0.001 },
+        offset: { x: 0, y: 60, z: 0.001 },
         fov: 45,
         lookOffset: { x: 0, y: 0, z: 0 },
-        damping: 0.08
+        damping: 0.09
       }
     }
   },

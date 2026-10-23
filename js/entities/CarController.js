@@ -675,18 +675,18 @@ export class CarController {
       }
     }
 
-    // 5. VEHICLE TURNING & YAW ROTATION (HALUS & TERKONTROL SAAT DRIFT)
+    // 5. VEHICLE TURNING & YAW ROTATION (RESPONSIF, LINCAH & TERKONTROL)
     if (Math.abs(this.speed) > 0.15) {
       const turnDirection = Math.sign(this.speed);
-      const speedRatio = Math.min(1.0, Math.max(0.35, Math.abs(this.speed) / 16.0));
+      const speedRatio = Math.min(1.0, Math.max(0.55, Math.abs(this.speed) / 14.0));
 
       let deltaYaw;
       if (this.isDrifting) {
         // Belok saat drift: halus dan stabil (multiplier 1.35x, tidak ngebut/blender)
         const steerAmt = steerInput !== 0 ? -steerInput : -this.driftDirection * 0.5;
-        deltaYaw = steerAmt * turnDirection * speedRatio * 2.2 * (CONFIG.CAR.DRIFT_STEER_BOOST || 1.35) * deltaTime;
+        deltaYaw = steerAmt * turnDirection * speedRatio * 2.5 * (CONFIG.CAR.DRIFT_STEER_BOOST || 1.35) * deltaTime;
       } else {
-        deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.2 * deltaTime;
+        deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.5 * deltaTime;
       }
       this.mesh.rotation.y += deltaYaw;
     }

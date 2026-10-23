@@ -1,11 +1,12 @@
 /**
- * CAMERA CONTROLLER (INTERACTIVE DRAGGABLE ORBIT & AUTO-FOLLOW)
+ * CAMERA CONTROLLER (ARCADE VEHICLE CHASE & 360° FREE-LOOK ORBIT)
  * Mengendalikan kamera perspektif 3D dengan:
- * - Dukungan geser/putar kamera bebas (Orbit Mouse & Touch Drag 360 Derajat).
- * - Zoom in / Zoom out halus dengan mouse wheel atau gesture cubit.
- * - 3 Mode Sudut Pandang (Isometrik, Chase Cam, Top-Down).
- * - Peredaman dinamis (smooth lerp follow) mengikuti mobil ke mana pun melaju.
- * - Efek goyangan kamera (camera impact shake) saat benturan.
+ * - Sudut Pandang Utama (Chase Cam): Berada di belakang mobil dengan ketinggian proporsional & pandangan jauh ke depan jalan.
+ * - Orbit 360° Bebas: Klik/drag mouse atau usap layar sentuh untuk melihat seluruh sudut kota & baliho secara leluasa.
+ * - Smart Auto-Recenter: Kamera otomatis menyelaraskan kembali ke belakang mobil saat mulai melaju.
+ * - Dynamic Angular Tracking: Melacak sudut putaran mobil tanpa distorsi jarak (anti distance-pumping / anti mual).
+ * - Dynamic FOV: Bidang pandang melebar dinamis saat melaju kencang untuk sensasi kecepatan arcade.
+ * - Mode Kamera Lengkap: Chase (Default), Sinematik Luas, Isometrik Kota, dan Peta Top-Down.
  */
 
 import { CONFIG } from "./Config.js";
@@ -14,19 +15,25 @@ export class CameraController {
   constructor(camera, targetObject) {
     this.camera = camera;
     this.target = targetObject;
-    this.mode = CONFIG.CAMERA.DEFAULT_MODE; // "isometric" | "chase" | "topdown"
+    this.mode = CONFIG.CAMERA.DEFAULT_MODE || "chase";
 
     // Internal state positions
     this.currentPosition = new THREE.Vector3().copy(this.camera.position);
     this.currentTarget = new THREE.Vector3();
 
-    // Interactive Orbit Drag States (Bisa digeser-geser oleh user!)
-    this.orbitYaw = 0;      // Sudut putaran horizontal (radian)
-    this.orbitPitch = 0;    // Sudut elevasi vertikal (radian)
-    this.zoomScale = 1.0;   // Skala zoom kamera
+    // Smoothed angular heading behind car (prevent distance shrink during drift/turns)
+    this.smoothedYaw = Math.PI; // Inisialisasi awal di belakang mobil (mobil menghadap +Z)
+    this.smoothedDist = 11.8;
+    this.smoothedHeight = 3.8;
+
+    // Interactive Free-Look Orbit Drag States
+    this.orbitYaw = 0;       // Sudut putaran horizontal manual (radian)
+    this.orbitPitch = 0;     // Sudut elevasi vertikal manual (radian)
+    this.zoomScale = 1.0;    // Skala zoom kamera
     this.isDragging = false;
     this.lastPointerX = 0;
     this.lastPointerY = 0;
+    this.dragIdleTimer = 0;  // Waktu sejak pemain selesai menggeser kamera
 
     this.shakeIntensity = 0;
 
@@ -35,6 +42,9 @@ export class CameraController {
 
   setTarget(target) {
     this.target = target;
+    if (this.target && this.target.rotation) {
+      this.smoothedYaw = this.target.rotation.y + Math.PI;
+    }
   }
 
   setMode(modeName) {
@@ -42,15 +52,22 @@ export class CameraController {
       this.mode = modeName;
       this.camera.fov = CONFIG.CAMERA.MODES[modeName].fov;
       this.camera.updateProjectionMatrix();
+      this.resetOrbit();
     }
   }
 
   cycleMode() {
-    const modes = ["isometric", "chase", "topdown"];
+    const modes = ["chase", "cinematic", "isometric", "topdown"];
     const currentIndex = modes.indexOf(this.mode);
     const nextMode = modes[(currentIndex + 1) % modes.length];
     this.setMode(nextMode);
     return nextMode;
+  }
+
+  resetOrbit() {
+    this.orbitYaw = 0;
+    this.orbitPitch = 0;
+    this.dragIdleTimer = 0;
   }
 
   triggerShake(intensity = 0.5) {
@@ -58,10 +75,9 @@ export class CameraController {
   }
 
   bindPointerEvents() {
-    // 0. Cegah Menu Konteks Klik Kanan Browser (Bebas Klik Kanan untuk Menggeser Kamera!)
+    // 0. Cegah menu konteks klik kanan browser di area canvas 3D
     window.addEventListener("contextmenu", (e) => {
       const el = e.target?.closest ? e.target : e.target?.parentElement;
-      // Tetap izinkan menu klik kanan jika user berada di input atau textarea form
       if (el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.closest("input") || el?.closest("textarea")) {
         return;
       }
@@ -69,9 +85,8 @@ export class CameraController {
       return false;
     });
 
-    // 1. Mouse Drag (Klik Kiri, Klik Tengah, maupun Klik Kanan untuk Mengubah Sudut Pandang)
+    // 1. Mouse Drag (Klik Kiri, Klik Tengah, maupun Klik Kanan untuk Melihat Sekitar)
     window.addEventListener("mousedown", (e) => {
-      // Abaikan jika klik tombol UI, modal dialog, dsb
       const el = e.target?.closest ? e.target : e.target?.parentElement;
       if (
         el?.closest("button") ||
@@ -79,18 +94,26 @@ export class CameraController {
         el?.closest(".project-modal-backdrop") ||
         el?.closest(".top-hud") ||
         el?.closest(".zone-announcer") ||
+        el?.closest(".touch-controls-layer") ||
         el?.tagName === "INPUT" ||
         el?.tagName === "TEXTAREA"
       ) {
         return;
       }
 
-      // Cegah aksi default browser untuk klik kanan dan tengah
-      if (e.button === 2 || e.button === 1) {
+      // Middle click: Reset orbit ke belakang mobil langsung
+      if (e.button === 1) {
+        e.preventDefault();
+        this.resetOrbit();
+        return;
+      }
+
+      if (e.button === 2) {
         e.preventDefault();
       }
 
       this.isDragging = true;
+      this.dragIdleTimer = 0;
       this.lastPointerX = e.clientX;
       this.lastPointerY = e.clientY;
     });
@@ -102,21 +125,27 @@ export class CameraController {
       this.lastPointerX = e.clientX;
       this.lastPointerY = e.clientY;
 
-      this.orbitYaw -= deltaX * 0.007;
-      this.orbitPitch -= deltaY * 0.005;
+      // Geser kamera secara intuitif & presisi
+      this.orbitYaw -= deltaX * 0.0075;
+      this.orbitPitch -= deltaY * 0.0055;
 
-      // Batasi elevasi vertikal agar kamera tidak tembus ke bawah tanah atau terbalik
-      this.orbitPitch = Math.max(-0.4, Math.min(0.8, this.orbitPitch));
+      // Batasi sudut elevasi pitch agar pemandangan gedung tinggi terlihat tanpa kamera menembus aspal
+      this.orbitPitch = Math.max(-0.45, Math.min(0.70, this.orbitPitch));
     });
 
     window.addEventListener("mouseup", (e) => {
-      if (e.button === 2) {
-        e.preventDefault();
-      }
       this.isDragging = false;
+      this.dragIdleTimer = 0;
     });
 
-    // 2. Touch Drag (Usap layar smartphone / tablet untuk menggeser kamera)
+    // Double Click: Reset sudut kamera langsung ke tengah
+    window.addEventListener("dblclick", (e) => {
+      const el = e.target?.closest ? e.target : e.target?.parentElement;
+      if (el?.closest("button") || el?.closest(".project-modal-backdrop")) return;
+      this.resetOrbit();
+    });
+
+    // 2. Touch Drag (Usap layar smartphone / tablet untuk melihat sekeliling)
     window.addEventListener(
       "touchstart",
       (e) => {
@@ -132,6 +161,7 @@ export class CameraController {
             return;
           }
           this.isDragging = true;
+          this.dragIdleTimer = 0;
           this.lastPointerX = touch.clientX;
           this.lastPointerY = touch.clientY;
         }
@@ -149,15 +179,16 @@ export class CameraController {
         this.lastPointerX = touch.clientX;
         this.lastPointerY = touch.clientY;
 
-        this.orbitYaw -= deltaX * 0.008;
-        this.orbitPitch -= deltaY * 0.006;
-        this.orbitPitch = Math.max(-0.4, Math.min(0.8, this.orbitPitch));
+        this.orbitYaw -= deltaX * 0.0085;
+        this.orbitPitch -= deltaY * 0.0065;
+        this.orbitPitch = Math.max(-0.45, Math.min(0.70, this.orbitPitch));
       },
       { passive: true }
     );
 
     window.addEventListener("touchend", () => {
       this.isDragging = false;
+      this.dragIdleTimer = 0;
     });
 
     // 3. Mouse Wheel Zoom In / Out
@@ -166,7 +197,7 @@ export class CameraController {
       (e) => {
         if (document.getElementById("projectModalBackdrop")?.classList.contains("visible")) return;
         this.zoomScale += e.deltaY * 0.001;
-        this.zoomScale = Math.max(0.65, Math.min(1.65, this.zoomScale));
+        this.zoomScale = Math.max(0.75, Math.min(1.45, this.zoomScale));
       },
       { passive: true }
     );
@@ -175,28 +206,100 @@ export class CameraController {
   update(deltaTime, currentSpeed = 0) {
     if (!this.target) return;
 
-    const modeConfig = CONFIG.CAMERA.MODES[this.mode];
+    const modeConfig = CONFIG.CAMERA.MODES[this.mode] || CONFIG.CAMERA.MODES.chase;
     const targetPos = this.target.position;
     const targetRotY = this.target.rotation ? this.target.rotation.y : 0;
+    const absSpeed = Math.abs(currentSpeed);
+
+    // =========================================================================
+    // SMART AUTO-RECENTER
+    // =========================================================================
+    // Jika pemain tidak sedang menggeser mouse:
+    // a. Saat mobil melaju kencang (> 2.5 m/s): perlahan selaraskan kamera kembali ke belakang
+    // b. Saat mobil berhenti: berikan jeda 3 detik agar pemain bebas mengamati baliho/gedung
+    if (!this.isDragging) {
+      this.dragIdleTimer += deltaTime;
+      if (absSpeed > 2.5) {
+        const recenterSpeed = Math.min(1.0, (2.8 + absSpeed * 0.05) * deltaTime);
+        this.orbitYaw += (0 - this.orbitYaw) * recenterSpeed;
+        this.orbitPitch += (0 - this.orbitPitch) * recenterSpeed;
+      } else if (this.dragIdleTimer > 3.0) {
+        const gentleRecenter = Math.min(1.0, 1.2 * deltaTime);
+        this.orbitYaw += (0 - this.orbitYaw) * gentleRecenter;
+        this.orbitPitch += (0 - this.orbitPitch) * gentleRecenter;
+      }
+    }
 
     let desiredPos = new THREE.Vector3();
     let lookAtPos = new THREE.Vector3();
 
-    if (this.mode === "isometric") {
-      // Jarak dasar isometrik dikalikan zoomScale
+    // =========================================================================
+    // MODE 1 & 2: CHASE (DEFAULT) & CINEMATIC DRIVING
+    // =========================================================================
+    if (this.mode === "chase" || this.mode === "cinematic") {
+      const isCinematic = this.mode === "cinematic";
+      const baseDist = (modeConfig.dist || (isCinematic ? 17.5 : 11.8)) * this.zoomScale;
+      const baseHeight = (modeConfig.height || (isCinematic ? 6.5 : 3.8)) * this.zoomScale;
+      const lookAheadDist = modeConfig.lookAhead || (isCinematic ? 20.0 : 14.0);
+
+      // Target angle di belakang mobil (mobil menghadap +Z saat rotasi 0)
+      const targetAngle = targetRotY + Math.PI;
+
+      // Smooth Angular Follow menggunakan busur terpendek (Mencegah chord-cutting / mual)
+      let angleDiff = targetAngle - this.smoothedYaw;
+      angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+
+      // Respon kamera lebih dinamis saat berbelok atau melaju kencang
+      const followRate = absSpeed > 1.0 ? 8.5 : 5.0;
+      this.smoothedYaw += angleDiff * Math.min(1.0, followRate * deltaTime);
+
+      // Gabungkan dengan Free-Look Orbit
+      const effectiveYaw = this.smoothedYaw + this.orbitYaw;
+      const effectivePitch = this.orbitPitch;
+
+      // Dynamic Speed Distance & FOV
+      const speedRatio = Math.min(absSpeed / 42.0, 1.0);
+      const dynamicDist = baseDist + (isCinematic ? speedRatio * 3.0 : speedRatio * 2.2);
+      const groundDist = dynamicDist * Math.cos(effectivePitch);
+
+      // Hitung posisi kamera di dunia 3D
+      const camY = targetPos.y + Math.max(1.8, baseHeight + Math.sin(effectivePitch) * 8.5);
+      desiredPos.set(
+        targetPos.x + Math.sin(effectiveYaw) * groundDist,
+        camY,
+        targetPos.z + Math.cos(effectiveYaw) * groundDist
+      );
+
+      // Hitung titik bidik (Look-At)
+      // Melihat jauh ke depan di jalan raya pada arah hadap kamera/mobil
+      const lookDirYaw = effectiveYaw + Math.PI;
+      const lookY = targetPos.y + 1.4 - effectivePitch * 9.0;
+      lookAtPos.set(
+        desiredPos.x + Math.sin(lookDirYaw) * (groundDist + lookAheadDist),
+        lookY,
+        desiredPos.z + Math.cos(lookDirYaw) * (groundDist + lookAheadDist)
+      );
+
+      // Dynamic FOV saat melaju kencang
+      const targetFov = modeConfig.fov + speedRatio * 10;
+      this.camera.fov += (targetFov - this.camera.fov) * Math.min(1.0, 6.0 * deltaTime);
+      this.camera.updateProjectionMatrix();
+
+    } else if (this.mode === "isometric") {
+      // =========================================================================
+      // MODE 3: ISOMETRIC (KOTA 3D PERSPEKTIF BIRD'S EYE)
+      // =========================================================================
       const baseDistXZ = Math.hypot(modeConfig.offset.x, modeConfig.offset.z) * this.zoomScale;
       const baseHeight = modeConfig.offset.y * this.zoomScale;
       const defaultAngle = Math.atan2(modeConfig.offset.x, modeConfig.offset.z);
 
-      // Gabungkan rotasi orbit manual pengguna (orbitYaw & orbitPitch)
       const totalYaw = defaultAngle + this.orbitYaw;
-      const totalPitch = this.orbitPitch;
-      const cosPitch = Math.cos(totalPitch);
-      const sinPitch = Math.sin(totalPitch);
+      const cosPitch = Math.cos(this.orbitPitch);
+      const sinPitch = Math.sin(this.orbitPitch);
 
       desiredPos.set(
         targetPos.x + Math.sin(totalYaw) * (baseDistXZ * cosPitch),
-        targetPos.y + baseHeight + (baseDistXZ * sinPitch),
+        targetPos.y + Math.max(8.0, baseHeight + baseDistXZ * sinPitch),
         targetPos.z + Math.cos(totalYaw) * (baseDistXZ * cosPitch)
       );
 
@@ -205,50 +308,37 @@ export class CameraController {
         targetPos.y + modeConfig.lookOffset.y,
         targetPos.z + modeConfig.lookOffset.z
       );
-    } else if (this.mode === "chase") {
-      // Mode Chase: Belakang mobil dengan tambahan orbitYaw jika digeser
-      const angle = targetRotY + Math.PI + this.orbitYaw;
-      const dist = 16 * this.zoomScale;
-      const height = (7.5 + this.orbitPitch * 8) * this.zoomScale;
 
-      desiredPos.set(
-        targetPos.x + Math.sin(angle) * dist,
-        targetPos.y + Math.max(2.0, height),
-        targetPos.z + Math.cos(angle) * dist
-      );
+      if (Math.abs(this.camera.fov - modeConfig.fov) > 0.1) {
+        this.camera.fov += (modeConfig.fov - this.camera.fov) * 0.1;
+        this.camera.updateProjectionMatrix();
+      }
 
-      lookAtPos.set(
-        targetPos.x - Math.sin(angle) * 5,
-        targetPos.y + 1.8,
-        targetPos.z - Math.cos(angle) * 5
-      );
     } else if (this.mode === "topdown") {
+      // =========================================================================
+      // MODE 4: TOP-DOWN (PETA NAVIGASI KOTA DARI ATAS)
+      // =========================================================================
       const height = modeConfig.offset.y * this.zoomScale;
       desiredPos.set(
-        targetPos.x + Math.sin(this.orbitYaw) * 15,
+        targetPos.x + Math.sin(this.orbitYaw) * 10,
         targetPos.y + height,
-        targetPos.z + Math.cos(this.orbitYaw) * 15
+        targetPos.z + Math.cos(this.orbitYaw) * 10
       );
       lookAtPos.set(targetPos.x, targetPos.y, targetPos.z);
+
+      if (Math.abs(this.camera.fov - modeConfig.fov) > 0.1) {
+        this.camera.fov += (modeConfig.fov - this.camera.fov) * 0.1;
+        this.camera.updateProjectionMatrix();
+      }
     }
 
-    // Dynamic FOV berdasarkan kecepatan di chase mode
-    if (this.mode === "chase") {
-      const speedRatio = Math.min(Math.abs(currentSpeed) / 38.0, 1.0);
-      const targetFov = 50 + speedRatio * 14;
-      this.camera.fov += (targetFov - this.camera.fov) * 0.08;
-      this.camera.updateProjectionMatrix();
-    } else if (Math.abs(this.camera.fov - modeConfig.fov) > 0.1) {
-      this.camera.fov += (modeConfig.fov - this.camera.fov) * 0.1;
-      this.camera.updateProjectionMatrix();
-    }
+    // Smooth Lerp Camera Position & Target Focus
+    const damping = modeConfig.damping || 0.12;
+    const lerpFactor = Math.min(1.0, damping * (deltaTime / 0.016));
+    this.currentPosition.lerp(desiredPos, lerpFactor);
+    this.currentTarget.lerp(lookAtPos, lerpFactor);
 
-    // Smooth Lerp Camera Follow
-    const damping = modeConfig.damping;
-    this.currentPosition.lerp(desiredPos, damping);
-    this.currentTarget.lerp(lookAtPos, damping);
-
-    // Apply Camera Shake jika ada benturan
+    // Apply Camera Shake saat benturan batas kota
     if (this.shakeIntensity > 0.01) {
       const shakeX = (Math.random() - 0.5) * this.shakeIntensity;
       const shakeY = (Math.random() - 0.5) * this.shakeIntensity;

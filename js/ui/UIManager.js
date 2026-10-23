@@ -167,9 +167,10 @@ export class UIManager {
   updateCameraBtnText(mode) {
     if (!this.camViewBtn) return;
     const labels = {
-      isometric: "Kamera: Isometrik",
       chase: "Kamera: Belakang (Chase)",
-      topdown: "Kamera: Atas (Top-Down)"
+      cinematic: "Kamera: Sinematik Luas",
+      isometric: "Kamera: Kota (Isometrik)",
+      topdown: "Kamera: Peta Atas"
     };
     const span = this.camViewBtn.querySelector("span");
     if (span) span.textContent = labels[mode] || "Kamera";
