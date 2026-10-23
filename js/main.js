@@ -88,12 +88,30 @@ window.addEventListener("DOMContentLoaded", () => {
     showClassicView();
   }
 
+  // Copy code snippet button in classic hero IDE window
+  const copyCodeBtn = document.getElementById("copyCodeBtn");
+  if (copyCodeBtn) {
+    copyCodeBtn.addEventListener("click", () => {
+      const codeElem = document.querySelector(".ide-code-content code");
+      if (codeElem) {
+        navigator.clipboard.writeText(codeElem.innerText).then(() => {
+          copyCodeBtn.innerHTML = '<i class="fa-solid fa-check" style="color: #10b981;"></i>';
+          setTimeout(() => {
+            copyCodeBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+          }, 2000);
+        }).catch(() => {
+          copyCodeBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+        });
+      }
+    });
+  }
+
   // Contact form submission demo in classic view
   const contactForm = document.getElementById("classicContactForm");
   if (contactForm) {
     contactForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      alert("Terima kasih! Pesan Anda telah tersimpan (Mode Demo). Untuk respon cepat, silakan klik tombol WhatsApp resmi kami.");
+      alert("Terima kasih! Pesan Anda telah tersimpan (Mode Demo). Untuk diskusi teknis atau tawaran kerja sama, silakan kirim email ke kontak resmi: rafriel.developer@gmail.com.");
       contactForm.reset();
     });
   }

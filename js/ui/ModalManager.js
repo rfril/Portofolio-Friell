@@ -23,7 +23,7 @@ export class ModalManager {
     this.navTabs = document.getElementById("modalNavTabs");
     this.contentArea = document.getElementById("modalContentArea");
 
-    this.activeTab = "projects";
+    this.activeTab = "about";
     this.selectedProjectId = null; // Ketika memilih 1 proyek untuk dibuka lengkap
 
     this.bindEvents();
@@ -112,7 +112,7 @@ export class ModalManager {
     });
   }
 
-  open(preferredZoneOrTab = "projects") {
+  open(preferredZoneOrTab = "about") {
     // Jika pemain berinteraksi langsung di zona proyek 3D tertentu,
     // langsung buka proyek tersebut secara mendalam!
     if (["apexsions", "kasir", "pororo"].includes(preferredZoneOrTab)) {
@@ -120,10 +120,10 @@ export class ModalManager {
       this.selectedProjectId = preferredZoneOrTab;
       this.progression.unlockZone(preferredZoneOrTab);
     } else if (preferredZoneOrTab === "spawn") {
-      this.activeTab = "projects";
+      this.activeTab = "about";
       this.selectedProjectId = null;
     } else {
-      this.activeTab = preferredZoneOrTab || "projects";
+      this.activeTab = preferredZoneOrTab || "about";
       this.selectedProjectId = null;
     }
 
@@ -163,11 +163,12 @@ export class ModalManager {
 
     const stats = this.progression.getStats();
 
+    // Susunan standar portofolio: Tentang Saya -> Keahlian -> Proyek -> Linimasa -> Kontak -> Radar
     const tabs = [
+      { id: "about", icon: "fa-solid fa-user-astronaut text-indigo", label: "Tentang Saya", zoneId: "about" },
+      { id: "skills", icon: "fa-solid fa-laptop-code text-green", label: "Skills Lab", zoneId: "skills" },
       { id: "projects", icon: "fa-solid fa-folder-open text-gold", label: "Proyek Portofolio", zoneId: null },
       { id: "journey", icon: "fa-solid fa-route text-cyan", label: "Linimasa Perjalanan", zoneId: "journey" },
-      { id: "skills", icon: "fa-solid fa-laptop-code text-green", label: "Skills Lab", zoneId: "skills" },
-      { id: "about", icon: "fa-solid fa-user-astronaut text-indigo", label: "Tentang Saya", zoneId: "about" },
       { id: "contact", icon: "fa-solid fa-satellite-dish text-rose", label: "Kontak", zoneId: "contact" },
       { id: "radar", icon: "fa-solid fa-compass text-cyan", label: `Radar (${stats.discoveredCount}/8)`, zoneId: null }
     ];
@@ -577,11 +578,24 @@ export class ModalManager {
     this.contentArea.innerHTML = `
       <div class="modal-about-view">
         <div class="modal-about-top">
-          <img src="${profileData.avatarUrl}" alt="${profileData.fullName}" class="modal-avatar">
+          <div class="modal-code-badge">
+            <div class="modal-code-badge-bar">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+              <span class="badge-title"><i class="fa-brands fa-java text-gold"></i> RafrielProfile.java</span>
+            </div>
+            <pre class="modal-code-badge-body"><code><span class="code-kw">class</span> <span class="code-class">Rafriel</span> {
+  <span class="code-type">String</span> role = <span class="code-str">"Game Developer"</span>;
+  <span class="code-type">String</span> school = <span class="code-str">"SMKN 71 Jakarta (RPL)"</span>;
+  <span class="code-type">double</span> targetTPS = <span class="code-num">20.0</span>;
+  <span class="code-type">int</span> customPlugins = <span class="code-num">9</span>;
+}</code></pre>
+          </div>
           <div>
             <span class="modal-badge badge-accent">${profileData.status}</span>
             <h2 class="modal-title">${profileData.fullName}</h2>
-            <p class="modal-subtitle">${profileData.major} &bull; Cita-cita: <strong>${profileData.goal}</strong></p>
+            <p class="modal-subtitle">${profileData.major} &bull; Target: <strong>${profileData.goal}</strong></p>
             <p class="modal-tagline">${profileData.tagline}</p>
           </div>
         </div>

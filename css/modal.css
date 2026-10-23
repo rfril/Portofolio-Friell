@@ -451,14 +451,52 @@
   margin-bottom: 1.25rem;
 }
 
-.modal-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--accent-cyan);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+.modal-code-badge {
+  background: #090d16;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  min-width: 250px;
+  max-width: 320px;
   flex-shrink: 0;
+}
+
+.modal-code-badge-bar {
+  background: #0f172a;
+  padding: 0.4rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+}
+
+.modal-code-badge-bar .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.modal-code-badge-bar .dot-red { background: #ef4444; }
+.modal-code-badge-bar .dot-yellow { background: #f59e0b; }
+.modal-code-badge-bar .dot-green { background: #10b981; }
+
+.modal-code-badge-bar .badge-title {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-left: 0.25rem;
+}
+
+.modal-code-badge-body {
+  padding: 0.75rem 1rem;
+  margin: 0;
+  line-height: 1.5;
+  color: #e2e8f0;
+  background: #060911;
+  overflow-x: auto;
 }
 
 .modal-tagline {

@@ -228,9 +228,9 @@
 
         <ul class="nav-links">
           <li><a href="#about-section">Tentang</a></li>
+          <li><a href="#skills-section">Keahlian</a></li>
           <li><a href="#projects-section">Proyek</a></li>
           <li><a href="#journey-section">Perjalanan</a></li>
-          <li><a href="#skills-section">Keahlian</a></li>
           <li><a href="#contact-section">Kontak</a></li>
         </ul>
 
@@ -264,26 +264,302 @@
               <i class="fa-solid fa-gamepad"></i>
               <span>Mainkan Mode Game 3D</span>
             </button>
-            <a href="#projects-section" class="btn btn-secondary">
+            <a href="#about-section" class="btn btn-secondary">
+              <i class="fa-solid fa-user"></i>
+              <span>Tentang Saya</span>
+            </a>
+            <a href="#projects-section" class="btn btn-secondary" style="border-color: rgba(56, 189, 248, 0.4);">
               <i class="fa-solid fa-folder-open"></i>
-              <span>Lihat Daftar Proyek</span>
+              <span>Lihat Proyek</span>
             </a>
           </div>
         </div>
 
-        <div class="hero-avatar-card">
-          <img src="assets/developer-avatar.svg" alt="Rafriel Developer Avatar" class="hero-avatar-img">
-          <div class="hero-avatar-overlay">
-            <div class="avatar-badge-text">
-              <i class="fa-solid fa-gamepad"></i> Game Developer Avatar
+        <!-- Interactive IDE Code Editor Window (Menggantikan Foto Wajah Sesuai Privasi & Standar Portofolio) -->
+        <div class="hero-ide-window">
+          <div class="ide-window-header">
+            <div class="ide-window-dots">
+              <span class="ide-dot ide-dot-red" title="Close"></span>
+              <span class="ide-dot ide-dot-yellow" title="Minimize"></span>
+              <span class="ide-dot ide-dot-green" title="Maximize"></span>
             </div>
-            <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.2rem;">SMKN 71 Jakarta &bull; RPL 2026</div>
+            <div class="ide-window-tabs">
+              <div class="ide-tab active">
+                <i class="fa-brands fa-java" style="color: #f59e0b;"></i>
+                <span class="ide-tab-name">DeveloperProfile.java</span>
+                <span class="ide-tab-close">&times;</span>
+              </div>
+              <div class="ide-tab ide-tab-secondary">
+                <i class="fa-brands fa-vuejs" style="color: #10b981;"></i>
+                <span class="ide-tab-name">App.vue</span>
+              </div>
+            </div>
+            <div class="ide-window-actions">
+              <button class="ide-action-btn" id="copyCodeBtn" title="Salin Cuplikan Kode"><i class="fa-regular fa-copy"></i></button>
+            </div>
+          </div>
+
+          <div class="ide-breadcrumbs">
+            <span>src</span> <i class="fa-solid fa-chevron-right"></i>
+            <span>main</span> <i class="fa-solid fa-chevron-right"></i>
+            <span>java</span> <i class="fa-solid fa-chevron-right"></i>
+            <span>com.rafriel.developer</span> <i class="fa-solid fa-chevron-right"></i>
+            <span class="text-cyan">DeveloperProfile.java</span>
+          </div>
+
+          <div class="ide-editor-body">
+            <div class="ide-line-numbers">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+              <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+              <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+              <span>16</span><span>17</span><span>18</span><span>19</span>
+            </div>
+            <pre class="ide-code-content"><code><span class="code-kw">package</span> com.rafriel.developer;
+
+<span class="code-comment">/**
+ * Rafriel Raditya Widodo
+ * Game Developer & Systems Engineer
+ */</span>
+<span class="code-kw">public class</span> <span class="code-class">DeveloperProfile</span> {
+    <span class="code-kw">public static final</span> <span class="code-type">String</span> <span class="code-var">NAME</span> = <span class="code-str">"Rafriel Raditya Widodo"</span>;
+    <span class="code-kw">public static final</span> <span class="code-type">String</span> <span class="code-var">SCHOOL</span> = <span class="code-str">"SMKN 71 Jakarta (RPL)"</span>;
+    <span class="code-kw">public static final</span> <span class="code-type">String</span> <span class="code-var">FOCUS</span> = <span class="code-str">"Game Mechanics & Server Architecture"</span>;
+
+    <span class="code-kw">public void</span> <span class="code-method">buildEcosystem</span>() {
+        <span class="code-type">MinecraftServer</span> <span class="code-var">server</span> = <span class="code-kw">new</span> <span class="code-class">ApexsionsServer</span>(<span class="code-str">"Java 21 LTS"</span>);
+        <span class="code-var">server</span>.<span class="code-method">loadCustomPlugins</span>(<span class="code-num">9</span>); <span class="code-comment">// Economy, RPG, Teritori</span>
+        <span class="code-var">server</span>.<span class="code-method">setTargetStability</span>(<span class="code-num">20.0</span>); <span class="code-comment">// 20 TPS Benchmark</span>
+        <span class="code-var">server</span>.<span class="code-method">connectDatabase</span>(<span class="code-str">"MySQL"</span>, <span class="code-str">"HikariCP"</span>);
+        <span class="code-var">server</span>.<span class="code-method">deploy</span>();
+    }
+}</code></pre>
+          </div>
+
+          <div class="ide-status-footer">
+            <div class="ide-status-left">
+              <span><i class="fa-solid fa-code-branch" style="color: #a855f7;"></i> master*</span>
+              <span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> 0 errors</span>
+              <span class="ide-status-tps"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> 20.0 TPS</span>
+            </div>
+            <div class="ide-status-right">
+              <span>Java 21 LTS</span>
+              <span>UTF-8</span>
+              <span>Ln 14, Col 28</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Verified Projects Section -->
+    <!-- 1. About Section (Profil & Filosofi Pengembang) -->
+    <section class="classic-section" id="about-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Profil &amp; Filosofi</span>
+          <h2 class="section-title">Tentang Saya</h2>
+          <p class="section-desc">Mengenal lebih dekat latar belakang, filosofi rekayasa perangkat lunak, dan dedikasi di dunia game development.</p>
+        </div>
+
+        <div class="about-grid">
+          <!-- Left Column: Story & Vision -->
+          <div class="about-card-box">
+            <div class="about-card-badge">
+              <i class="fa-solid fa-compass" style="color: #38bdf8;"></i>
+              <span>Dari Pemain Menjadi Kreator</span>
+            </div>
+            <h3 class="about-card-title">Eksplorasi Dunia Game &amp; Rekayasa Sistem Server</h3>
+            <p class="about-text">
+              Saya adalah siswa SMK Negeri 71 Jakarta jurusan Rekayasa Perangkat Lunak (RPL) yang memiliki antusiasme mendalam pada pengembangan sistem game dan rekayasa perangkat lunak.
+            </p>
+            <p class="about-text">
+              Perjalanan saya dimulai dari kecintaan bermain Minecraft saat pandemi COVID-19, berkembang menjadi eksplorasi modding Bedrock dan Java, hingga merancang serta mengimplementasikan plugin server game secara mandiri menggunakan Java 21, Nuxt, dan Laravel.
+            </p>
+            <p class="about-text">
+              Fokus utama saya adalah menciptakan ekosistem game yang stabil, dinamis, dan menyenangkan dengan arsitektur kode yang rapi, modular, dan teruji.
+            </p>
+
+            <div class="about-meta-list">
+              <div class="about-meta-item">
+                <i class="fa-solid fa-graduation-cap text-gold"></i>
+                <div>
+                  <strong>Pendidikan Formal</strong>
+                  <span>SMK Negeri 71 Jakarta &bull; RPL (Angkatan 2026)</span>
+                </div>
+              </div>
+              <div class="about-meta-item">
+                <i class="fa-solid fa-gamepad text-cyan"></i>
+                <div>
+                  <strong>Spesialisasi Minat</strong>
+                  <span>Game Server Engineering &bull; Fullstack Web Development</span>
+                </div>
+              </div>
+              <div class="about-meta-item">
+                <i class="fa-solid fa-bolt text-green"></i>
+                <div>
+                  <strong>Standar Kinerja</strong>
+                  <span>20.0 Target Server TPS &bull; Asynchronous Query Execution</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Soft Skills & Work Ethic -->
+          <div class="about-card-box">
+            <div class="about-card-badge">
+              <i class="fa-solid fa-brain" style="color: #a855f7;"></i>
+              <span>Karakter Kerja &amp; Soft Skills</span>
+            </div>
+            <h3 class="about-card-title">5 Karakter Kerja Pengembang</h3>
+
+            <div class="about-softskills-grid">
+              <div class="about-soft-card">
+                <div class="about-soft-icon" style="color: #38bdf8; background: rgba(56, 189, 248, 0.12);">
+                  <i class="fa-solid fa-comments"></i>
+                </div>
+                <div>
+                  <h4>Komunikasi Teknis</h4>
+                  <p>Mampu menjelaskan konsep teknis, alur logika sistem, dan ide perancangan game dengan bahasa yang jelas kepada rekan tim maupun komunitas.</p>
+                </div>
+              </div>
+
+              <div class="about-soft-card">
+                <div class="about-soft-icon" style="color: #818cf8; background: rgba(129, 140, 248, 0.12);">
+                  <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                  <h4>Kerja Sama Tim</h4>
+                  <p>Terbiasa berkolaborasi dalam proyek kelompok sekolah (seperti Project MKK Kelompok 6) maupun pembagian peran teknis developer.</p>
+                </div>
+              </div>
+
+              <div class="about-soft-card">
+                <div class="about-soft-icon" style="color: #f59e0b; background: rgba(245, 158, 11, 0.12);">
+                  <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div>
+                  <h4>Problem Solving</h4>
+                  <p>Pendekatan analitis dalam menemukan akar masalah, debugging logika program, stabilitas 20 TPS, dan optimasi query data.</p>
+                </div>
+              </div>
+
+              <div class="about-soft-card">
+                <div class="about-soft-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.12);">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div>
+                  <h4>Ketelitian &amp; Clean Code</h4>
+                  <p>Memperhatikan struktur folder, penamaan semantik, validasi slot inventory, penanganan error asinkron, dan dokumentasi rapi.</p>
+                </div>
+              </div>
+
+              <div class="about-soft-card">
+                <div class="about-soft-icon" style="color: #ec4899; background: rgba(236, 72, 153, 0.12);">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                  <h4>Belajar Mandiri</h4>
+                  <p>Cepat menyerap framework dan konsep baru secara otodidak, membaca dokumentasi PaperMC, Nuxt, Laravel, dan beradaptasi cepat.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Technical Skills Section -->
+    <section class="classic-section" id="skills-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Keahlian Faktual</span>
+          <h2 class="section-title">Keahlian Teknis &amp; Bukti Penerapan</h2>
+          <p class="section-desc">Tidak menggunakan klaim persentase acak (90%/100%), melainkan penjabaran implementasi nyata pada proyek.</p>
+        </div>
+
+        <div class="modal-skills-grid">
+          <!-- Java -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(245, 158, 11, 0.15); border-color: #f59e0b;">
+                <i class="fa-brands fa-java" style="color: #f59e0b;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">Java (JDK 21 LTS)</h4>
+                <span class="skill-status-tag">Pengembangan Aktif &amp; Mandiri</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> Bahasa utama untuk 9 plugin suite Apexsions (PaperMC/Spigot).</p>
+            <p class="skill-project"><strong>Kaitan:</strong> ApexsionsCore, Economy, Shop, Battlepass, Fishing.</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> OOP &amp; Clean Architecture</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Event-Driven Architecture (PaperMC)</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Asynchronous CompletableFuture &amp; JDBC MySQL/SQLite</li>
+            </ul>
+          </div>
+
+          <!-- Nuxt / Vue 3 -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(16, 185, 129, 0.15); border-color: #10b981;">
+                <i class="fa-brands fa-vuejs" style="color: #10b981;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">Nuxt (Nuxt 3 &amp; 4) / Vue 3</h4>
+                <span class="skill-status-tag">Implementasi Proyek Nyata</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> Framework frontend modern reaktif untuk antarmuka kasir dan website gelato.</p>
+            <p class="skill-project"><strong>Kaitan:</strong> POS Kasir Friel v2.0 &amp; PoRoRo Ice Cream.</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Vue 3 Composition API &amp; Reactivity</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Modular Auto-imported Components</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Integrasi Tailwind CSS &amp; REST API Fetch</li>
+            </ul>
+          </div>
+
+          <!-- Laravel -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444;">
+                <i class="fa-brands fa-laravel" style="color: #ef4444;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">Laravel 11 (PHP 8.2+)</h4>
+                <span class="skill-status-tag">Implementasi Proyek Nyata</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> RESTful API backend untuk manajemen inventori dan transaksi toko retail.</p>
+            <p class="skill-project"><strong>Kaitan:</strong> Backend POS Kasir (crud-laravel di Laragon).</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Routing apiResource &amp; Controller Logic</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Operasi CRUD Database Migrations</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Validasi Request &amp; Format JSON Terstandar</li>
+            </ul>
+          </div>
+
+          <!-- C++ -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;">
+                <i class="fa-solid fa-code" style="color: #38bdf8;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">C++</h4>
+                <span class="skill-status-tag">Eksplorasi &amp; Tahap Belajar</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> Eksplorasi addon dan native module Minecraft Bedrock Edition.</p>
+            <p class="skill-project"><strong>Kaitan:</strong> Modding Bedrock &amp; pemahaman native logic.</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Memahami memory pointers dan alur kompilasi native</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Dasar sintaks C++ (bukan klaim penguasaan penuh)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Verified Projects Section -->
     <section class="classic-section" id="projects-section">
       <div class="container">
         <div class="section-head">
@@ -305,7 +581,7 @@
                   <span class="modal-badge badge-status">Aktif</span>
                 </div>
                 <h3 class="card-title">Apexsions Minecraft Server</h3>
-                <div class="card-subtitle">Ekosistem Server Game RPG/MMO Teritorial & Dynamic Economy</div>
+                <div class="card-subtitle">Ekosistem Server Game RPG/MMO Teritorial &amp; Dynamic Economy</div>
                 <p class="card-desc">
                   Server game Minecraft skala besar dengan konsep 3 faksi kerajaan berdaulat (Zenithar, Solterra, Sylvamoor), ekonomi pasar bebas dinamis fluktuatif cuaca/bioma, sistem kedaulatan wilayah polygon BlueMap 3D, dan 9 modul plugin Java kustom mandiri.
                 </p>
@@ -340,7 +616,7 @@
                   <span class="modal-badge badge-status">Selesai di Laragon</span>
                 </div>
                 <h3 class="card-title">POS Kasir Friel v2.0</h3>
-                <div class="card-subtitle">Aplikasi Kasir Digital & Inventori Modern REST API</div>
+                <div class="card-subtitle">Aplikasi Kasir Digital &amp; Inventori Modern REST API</div>
                 <p class="card-desc">
                   Sistem Point of Sale (POS) retail terpadu yang memadukan antarmuka frontend kasir cepat responsif (kasir-frontend via Nuxt 4 + Tailwind CSS) dengan backend REST API (crud-laravel via Laravel 11 di lingkungan Laragon).
                 </p>
@@ -368,19 +644,19 @@
               <div>
                 <div class="project-top-meta">
                   <span class="modal-badge badge-accent">School Project (MKK Kel 6)</span>
-                  <span class="modal-badge">Nuxt 3 & Figma</span>
+                  <span class="modal-badge">Nuxt 3 &amp; Figma</span>
                   <span class="modal-badge badge-status">Selesai</span>
                 </div>
                 <h3 class="card-title">PoRoRo Ice Cream</h3>
-                <div class="card-subtitle">Website Showcase & Masterplan UI/UX Gelato Artisan Cakung</div>
+                <div class="card-subtitle">Website Showcase &amp; Masterplan UI/UX Gelato Artisan Cakung</div>
                 <p class="card-desc">
-                  Tugas sekolah kejuruan (MKK Kelompok 6) berupa perancangan dan implementasi website gelato artisan Cakung. Dibangun dengan Nuxt 3 & Vue 3 mengacu pada token visual Figma beranda.fig, menampilkan 18 varian rasa dan alur pesanan delivery 30 menit.
+                  Tugas sekolah kejuruan (MKK Kelompok 6) berupa perancangan dan implementasi website gelato artisan Cakung. Dibangun dengan Nuxt 3 &amp; Vue 3 mengacu pada token visual Figma beranda.fig, menampilkan 18 varian rasa dan alur pesanan delivery 30 menit.
                 </p>
                 <div class="card-tags">
                   <span class="card-tag">Nuxt 3</span>
                   <span class="card-tag">Vue 3 Modular</span>
                   <span class="card-tag">Figma Tokens</span>
-                  <span class="card-tag">Fraunces & DM Sans</span>
+                  <span class="card-tag">Fraunces &amp; DM Sans</span>
                 </div>
               </div>
               <div class="card-actions">
@@ -396,7 +672,7 @@
       </div>
     </section>
 
-    <!-- Chronological Journey Section -->
+    <!-- 4. Chronological Journey Section -->
     <section class="classic-section" id="journey-section">
       <div class="container">
         <div class="section-head">
@@ -444,8 +720,8 @@
               <i class="fa-solid fa-code-compare" style="color: #10b981;"></i>
             </div>
             <div class="journey-card">
-              <div class="journey-year-tag">2023 — 2025 &bull; Modifikasi & Belajar OOP</div>
-              <h4 class="journey-title">Memahami Pola Desain & Memodifikasi Plugin</h4>
+              <div class="journey-year-tag">2023 — 2025 &bull; Modifikasi &amp; Belajar OOP</div>
+              <h4 class="journey-title">Memahami Pola Desain &amp; Memodifikasi Plugin</h4>
               <p class="journey-desc">Membaca kode sumber orang lain, dekompilasi JAR, mempelajari Paper API, dan memodifikasi fitur sesuai kebutuhan server.</p>
             </div>
           </div>
@@ -459,98 +735,6 @@
               <h4 class="journey-title">Membangun Plugin Suite Sendiri dari Nol</h4>
               <p class="journey-desc">Merancang 9 plugin mandiri, dynamic economy, 3 faksi kerajaan, dan pipeline kompilasi build.ps1 untuk Apexsions.</p>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Technical Skills Section -->
-    <section class="classic-section" id="skills-section">
-      <div class="container">
-        <div class="section-head">
-          <span class="section-tag">Keahlian Faktual</span>
-          <h2 class="section-title">Keahlian Teknis & Bukti Penerapan</h2>
-          <p class="section-desc">Tidak menggunakan klaim persentase acak (90%/100%), melainkan penjabaran implementasi nyata pada proyek.</p>
-        </div>
-
-        <div class="modal-skills-grid">
-          <!-- Java -->
-          <div class="modal-skill-card">
-            <div class="skill-card-top">
-              <div class="skill-icon-wrap" style="background: rgba(245, 158, 11, 0.15); border-color: #f59e0b;">
-                <i class="fa-brands fa-java" style="color: #f59e0b;"></i>
-              </div>
-              <div>
-                <h4 class="skill-title">Java (JDK 21 LTS)</h4>
-                <span class="skill-status-tag">Pengembangan Aktif & Mandiri</span>
-              </div>
-            </div>
-            <p class="skill-usage"><strong>Penggunaan:</strong> Bahasa utama untuk 9 plugin suite Apexsions (PaperMC/Spigot).</p>
-            <p class="skill-project"><strong>Kaitan:</strong> ApexsionsCore, Economy, Shop, Battlepass, Fishing.</p>
-            <ul class="skill-caps-list">
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> OOP & Clean Architecture</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Event-Driven Architecture (PaperMC)</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Asynchronous CompletableFuture & JDBC MySQL/SQLite</li>
-            </ul>
-          </div>
-
-          <!-- Nuxt / Vue 3 -->
-          <div class="modal-skill-card">
-            <div class="skill-card-top">
-              <div class="skill-icon-wrap" style="background: rgba(16, 185, 129, 0.15); border-color: #10b981;">
-                <i class="fa-brands fa-vuejs" style="color: #10b981;"></i>
-              </div>
-              <div>
-                <h4 class="skill-title">Nuxt (Nuxt 3 & 4) / Vue 3</h4>
-                <span class="skill-status-tag">Implementasi Proyek Nyata</span>
-              </div>
-            </div>
-            <p class="skill-usage"><strong>Penggunaan:</strong> Framework frontend modern reaktif untuk antarmuka kasir dan website gelato.</p>
-            <p class="skill-project"><strong>Kaitan:</strong> POS Kasir Friel v2.0 & PoRoRo Ice Cream.</p>
-            <ul class="skill-caps-list">
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Vue 3 Composition API & Reactivity</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Modular Auto-imported Components</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Integrasi Tailwind CSS & REST API Fetch</li>
-            </ul>
-          </div>
-
-          <!-- Laravel -->
-          <div class="modal-skill-card">
-            <div class="skill-card-top">
-              <div class="skill-icon-wrap" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444;">
-                <i class="fa-brands fa-laravel" style="color: #ef4444;"></i>
-              </div>
-              <div>
-                <h4 class="skill-title">Laravel 11 (PHP 8.2+)</h4>
-                <span class="skill-status-tag">Implementasi Proyek Nyata</span>
-              </div>
-            </div>
-            <p class="skill-usage"><strong>Penggunaan:</strong> RESTful API backend untuk manajemen inventori dan transaksi toko retail.</p>
-            <p class="skill-project"><strong>Kaitan:</strong> Backend POS Kasir (crud-laravel di Laragon).</p>
-            <ul class="skill-caps-list">
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Routing apiResource & Controller Logic</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Operasi CRUD Database Migrations</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Validasi Request & Format JSON Terstandar</li>
-            </ul>
-          </div>
-
-          <!-- C++ -->
-          <div class="modal-skill-card">
-            <div class="skill-card-top">
-              <div class="skill-icon-wrap" style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;">
-                <i class="fa-solid fa-code" style="color: #38bdf8;"></i>
-              </div>
-              <div>
-                <h4 class="skill-title">C++</h4>
-                <span class="skill-status-tag">Eksplorasi & Tahap Belajar</span>
-              </div>
-            </div>
-            <p class="skill-usage"><strong>Penggunaan:</strong> Eksplorasi addon dan native module Minecraft Bedrock Edition.</p>
-            <p class="skill-project"><strong>Kaitan:</strong> Modding Bedrock & pemahaman native logic.</p>
-            <ul class="skill-caps-list">
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Memahami memory pointers dan alur kompilasi native</li>
-              <li><i class="fa-solid fa-angle-right text-cyan"></i> Dasar sintaks C++ (bukan klaim penguasaan penuh)</li>
-            </ul>
           </div>
         </div>
       </div>
