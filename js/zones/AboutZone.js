@@ -12,8 +12,8 @@ import { profileData } from "../data/profileData.js";
 
 export class AboutZone extends BaseZone {
   constructor(scene, collisionSystem) {
-    // Diposisikan rapi di blok perkotaan (X: 95, Z: 105), aman dari badan jalan
-    super("about", "Developer Headquarters & Studio", "About Me & Soft Skills", new THREE.Vector3(95, 0, 105), 15.0, scene, collisionSystem);
+    // Diposisikan rapi di blok perkotaan (X: 105, Z: 105), aman dari badan jalan
+    super("about", "Developer Headquarters & Studio", "About Me & Soft Skills", new THREE.Vector3(105, 0, 105), 15.0, scene, collisionSystem);
     this.softSkillOrbs = [];
     this.buildStudio();
   }

@@ -2,6 +2,7 @@
  * AREA 6: CONTACT & COMMUNICATION RELAY ZONE
  * Menara transmisi satelit & stasiun komunikasi digital
  * untuk membuka dialog kontak terverifikasi (WhatsApp, GitHub, Website Server).
+ * Terletak rapi di South-West Communications Campus (X: -105, Z: 105), 35m dari jalan raya.
  */
 
 import { BaseZone } from "./BaseZone.js";
@@ -9,7 +10,8 @@ import { contactData } from "../data/contactData.js";
 
 export class ContactZone extends BaseZone {
   constructor(scene, collisionSystem) {
-    super("contact", "Satellite Relay Hub", "Communication & Contact", new THREE.Vector3(-35, 0, 75), 13.0, scene, collisionSystem);
+    // Diposisikan rapi di blok barat daya (X: -105, Z: 105), bebas dari jalan raya
+    super("contact", "Satellite Relay Hub", "Communication & Contact", new THREE.Vector3(-105, 0, 105), 15.0, scene, collisionSystem);
     this.dish = null;
     this.buildRelay();
   }
@@ -32,6 +34,15 @@ export class ContactZone extends BaseZone {
       emissive: 0x059669,
       emissiveIntensity: 2.0
     });
+
+    // 0. Observatory Compound Paved Base (24 x 24m)
+    const basePave = new THREE.Mesh(
+      new THREE.BoxGeometry(24, 0.2, 24),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })
+    );
+    basePave.position.y = 0.1;
+    basePave.receiveShadow = true;
+    this.mesh.add(basePave);
 
     // 1. Antenna Lattice Tower
     const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.8, 9.0, 4), metalMat);

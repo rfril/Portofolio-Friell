@@ -1,7 +1,8 @@
 /**
  * AREA 1: SPAWN / INTRODUCTION
- * Titik awal pemain: Archway megah, podium sambutan, papan instruksi kontrol,
- * dan ringkasan profil siswa RPL SMKN 71 Jakarta.
+ * Titik awal pemain: Bundaran jalan utama (Roundabout) yang lapang,
+ * monumen inti hologram di pulau tengah, dan paviliun panduan kontrol di tepi trotoar (off-road).
+ * Jalur kendaraan 100% BEBAS RINTANGAN ke segala arah.
  */
 
 import { BaseZone } from "./BaseZone.js";
@@ -10,14 +11,15 @@ import { profileData } from "../data/profileData.js";
 export class SpawnZone extends BaseZone {
   constructor(scene, collisionSystem) {
     super("spawn", "Spawn Sanctum", "Introduction", new THREE.Vector3(0, 0, 0), 12.0, scene, collisionSystem);
+    this.coreMesh = null;
     this.buildArchitecture();
   }
 
   buildArchitecture() {
-    const archMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a, // Slate obsidian
-      metalness: 0.7,
-      roughness: 0.25
+    const obsidianMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      metalness: 0.8,
+      roughness: 0.2
     });
 
     const neonMat = new THREE.MeshStandardMaterial({
@@ -32,60 +34,66 @@ export class SpawnZone extends BaseZone {
       roughness: 0.2
     });
 
-    // 1. Welcome Arch Pillars (X -8 and X +8)
-    const pillarGeo = new THREE.BoxGeometry(2.0, 7.5, 2.0);
-    const leftPillar = new THREE.Mesh(pillarGeo, archMat);
-    leftPillar.position.set(-8.5, 3.75, -6);
-    leftPillar.castShadow = true;
-    this.mesh.add(leftPillar);
-    this.collision.addBox(this.position.x - 8.5, this.position.z - 6, 2.2, 2.2, "spawn_pillar_left");
+    // 1. Central Island Roundabout Pedestal (Small footprint radius 3.5m in center island)
+    const centerPed = new THREE.Mesh(
+      new THREE.CylinderGeometry(3.5, 4.0, 0.4, 24),
+      obsidianMat
+    );
+    centerPed.position.y = 0.2;
+    centerPed.receiveShadow = true;
+    this.mesh.add(centerPed);
 
-    const rightPillar = leftPillar.clone();
-    rightPillar.position.x = 8.5;
-    this.mesh.add(rightPillar);
-    this.collision.addBox(this.position.x + 8.5, this.position.z - 6, 2.2, 2.2, "spawn_pillar_right");
+    const ringGeo = new THREE.RingGeometry(3.6, 4.2, 24);
+    ringGeo.rotateX(-Math.PI / 2);
+    const goldRing = new THREE.Mesh(
+      ringGeo,
+      goldMat
+    );
+    goldRing.position.y = 0.22;
+    this.mesh.add(goldRing);
 
-    // Horizontal Beam
-    const beamGeo = new THREE.BoxGeometry(19.0, 1.4, 2.2);
-    const beam = new THREE.Mesh(beamGeo, archMat);
-    beam.position.set(0, 7.8, -6);
-    beam.castShadow = true;
-    this.mesh.add(beam);
-
-    // Neon Accent Line
-    const neonLine = new THREE.Mesh(new THREE.BoxGeometry(17.5, 0.25, 2.3), neonMat);
-    neonLine.position.set(0, 8.2, -6);
-    this.mesh.add(neonLine);
-
-    // 2. Control Guideboard (Signpost)
-    const boardGroup = new THREE.Group();
-    boardGroup.position.set(7.5, 0, 5.5);
-
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.8, 8), archMat);
-    post.position.y = 1.4;
-    boardGroup.add(post);
-
-    const board = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.2, 0.2), archMat);
-    board.position.y = 2.6;
-    boardGroup.add(board);
-
-    const boardFace = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.0), new THREE.MeshBasicMaterial({ color: 0x1e293b }));
-    boardFace.position.set(0, 2.6, 0.11);
-    boardGroup.add(boardFace);
-
-    this.mesh.add(boardGroup);
-    this.collision.addCircle(this.position.x + 7.5, this.position.z + 5.5, 1.2, "control_board");
-
-    // 3. Central Hologram Core (Rotating floating icosahedron)
-    const coreGeo = new THREE.IcosahedronGeometry(1.2, 0);
+    // 2. Central Floating Hologram Core (Rotating at 4.2m height, way above car roof)
+    const coreGeo = new THREE.IcosahedronGeometry(1.4, 0);
     this.coreMesh = new THREE.Mesh(coreGeo, new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
       emissive: 0x0284c7,
-      emissiveIntensity: 1.2,
+      emissiveIntensity: 1.4,
       wireframe: true
     }));
     this.coreMesh.position.set(0, 4.2, 0);
     this.mesh.add(this.coreMesh);
+
+    // 3. Welcome & Controls Pavilion Placed ON THE ROADSIDE SIDEWALK PLAZA (X: 18, Z: -18)
+    // NEVER in the roadway!
+    const welcomeGroup = new THREE.Group();
+    welcomeGroup.position.set(18, 0, -18);
+
+    const plazaPlinth = new THREE.Mesh(
+      new THREE.BoxGeometry(8, 0.2, 8),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 })
+    );
+    plazaPlinth.position.y = 0.1;
+    welcomeGroup.add(plazaPlinth);
+
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.2, 8), obsidianMat);
+    post.position.set(0, 1.6, 0);
+    welcomeGroup.add(post);
+
+    const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.6, 0.25), obsidianMat);
+    board.position.set(0, 3.0, 0);
+    welcomeGroup.add(board);
+
+    const boardFace = new THREE.Mesh(new THREE.PlaneGeometry(3.9, 2.3), new THREE.MeshBasicMaterial({ color: 0x0f172a }));
+    boardFace.position.set(0, 3.0, 0.14);
+    welcomeGroup.add(boardFace);
+
+    // Neon frame
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(4.3, 2.7, 0.1), neonMat);
+    frame.position.set(0, 3.0, -0.05);
+    welcomeGroup.add(frame);
+
+    this.mesh.add(welcomeGroup);
+    this.collision.addBox(18, -18, 5.0, 5.0, "spawn_welcome_kiosk");
   }
 
   update(time, deltaTime) {

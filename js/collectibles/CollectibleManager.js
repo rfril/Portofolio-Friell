@@ -31,43 +31,42 @@ export class CollectibleManager {
   }
 
   spawnDiamonds() {
-    // 20 Strategically placed Diamond positions across expanded architecture
+    // 17 Strategically placed Diamond positions across destination plazas and parks (Zero in driving lanes!)
     const positions = [
-      // Spawn Plaza & Cyber Arch (3)
-      { x: -6, z: 6 },
-      { x: 6, z: -6 },
-      { x: 0, z: -14 },
+      // 1. Spawn Welcome Terrace
+      { x: 18, z: -18 },
 
-      // Canal Bridge (1)
-      { x: 0, z: -18 },
+      // 2. Central Commons Park Fountain & Lawn
+      { x: 38, z: 38 },
+      { x: 26, z: 26 },
 
-      // Journey Timeline Avenue (4)
-      { x: 0, z: -42 },
-      { x: 0, z: -62 },
-      { x: -10, z: -75 },
-      { x: 10, z: -88 },
+      // 3. Apexsions Fortress Courtyard
+      { x: 105, z: -105 },
+      { x: 92, z: -105 },
 
-      // Apexsions Fortress & Castle Realm (3)
-      { x: 65, z: -35 },
-      { x: 88, z: -45 },
-      { x: 105, z: -60 },
+      // 4. POS Kasir Commercial Plaza
+      { x: 105, z: -35 },
+      { x: 90, z: -35 },
 
-      // Kasir Commercial Plaza & Parking (2)
-      { x: 86, z: 45 },
-      { x: 101, z: 57 },
+      // 5. PoRoRo Gelato Cafe Patio
+      { x: -105, z: -105 },
+      { x: -90, z: -105 },
 
-      // PoRoRo Gelato Cafe & Sakura Park (2)
-      { x: -75, z: -25 },
-      { x: -129, z: -37 },
+      // 6. My Journey Museum Promenade
+      { x: -105, z: -35 },
+      { x: -119, z: -35 },
 
-      // Skills Lab & Tech Keycaps (2)
-      { x: -103, z: 55 },
-      { x: -115, z: 45 },
+      // 7. Developer Skills Lab
+      { x: -105, z: 35 },
+      { x: -90, z: 35 },
 
-      // South District & Satellite Observatory (3)
-      { x: 95, z: 105 },
-      { x: -25, z: 125 },
-      { x: 0, z: 140 }
+      // 8. Developer HQ Studio
+      { x: 105, z: 105 },
+      { x: 90, z: 105 },
+
+      // 9. Satellite Relay Hub
+      { x: -105, z: 105 },
+      { x: -105, z: 109 }
     ];
 
     positions.forEach((pos, idx) => {

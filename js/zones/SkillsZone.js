@@ -1,7 +1,8 @@
 /**
  * AREA 4: SKILLS LAB ZONE
  * Laboratorium rekayasa teknologi tinggi dengan pilar kristal komputasi
- * yang mewakili Java, C++, Nuxt, Laravel, HTML/CSS, dan Developer Tools.
+ * yang mewakili Java 21, C++, Nuxt, Laravel, HTML/CSS, dan Developer Tools.
+ * Terletak rapi di Mid-West Tech Lab Campus (X: -105, Z: 35), 35m dari jalan raya.
  */
 
 import { BaseZone } from "./BaseZone.js";
@@ -9,7 +10,8 @@ import { technicalSkills } from "../data/skillsData.js";
 
 export class SkillsZone extends BaseZone {
   constructor(scene, collisionSystem) {
-    super("skills", "Developer Skills Lab", "Technical Competencies", new THREE.Vector3(-80, 0, 35), 14.0, scene, collisionSystem);
+    // Diposisikan rapi di blok barat (X: -105, Z: 35), bebas dari jalan raya
+    super("skills", "Developer Skills Lab", "Technical Competencies", new THREE.Vector3(-105, 0, 35), 15.0, scene, collisionSystem);
     this.crystals = [];
     this.buildLaboratory();
   }
@@ -20,6 +22,26 @@ export class SkillsZone extends BaseZone {
       metalness: 0.8,
       roughness: 0.2
     });
+
+    // 0. High-Tech Hexagonal / Circular Podium Base (Radius 12m)
+    const podiumGeo = new THREE.CylinderGeometry(12, 13, 0.3, 16);
+    const podium = new THREE.Mesh(
+      podiumGeo,
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 })
+    );
+    podium.position.y = 0.15;
+    podium.receiveShadow = true;
+    this.mesh.add(podium);
+
+    // Cyan circuit ring on podium
+    const ringGeo = new THREE.RingGeometry(8.0, 8.4, 32);
+    ringGeo.rotateX(-Math.PI / 2);
+    const circuitRing = new THREE.Mesh(
+      ringGeo,
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide })
+    );
+    circuitRing.position.y = 0.32;
+    this.mesh.add(circuitRing);
 
     // 1. Central Server Rack Tower
     const serverRack = new THREE.Mesh(new THREE.BoxGeometry(3.5, 6.5, 3.5), labBaseMat);

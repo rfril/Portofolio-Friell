@@ -19,52 +19,52 @@ export class ProgressionManager {
       },
       journey: {
         id: "journey",
-        name: "My Journey Avenue",
+        name: "My Journey Promenade",
         category: "Linimasa Perjalanan",
         icon: "fa-solid fa-route",
-        clue: "Kendarai mobil lurus ke arah Utara (North Boulevard) melintasi gapura linimasa."
+        clue: "Kendarai mobil ke arah Barat Laut (Mid-West Block, X: -105, Z: -35) menuju Taman Linimasa Karir Siswa RPL."
       },
       apexsions: {
         id: "apexsions",
         name: "Apexsions RPG Fortress",
         category: "Proyek A (Flagship)",
         icon: "fa-solid fa-dungeon",
-        clue: "Kendarai mobil ke arah Timur Laut (East-North) menuju Benteng Kastil Obsidian bersimbol emas."
+        clue: "Kendarai mobil ke arah Timur Laut (North-East Block, X: 105, Z: -105) menuju Benteng Kastil Obsidian RPG Apexsions."
       },
       kasir: {
         id: "kasir",
         name: "POS Kasir Digital Store",
         category: "Proyek B (Fullstack Web)",
         icon: "fa-solid fa-cash-register",
-        clue: "Kendarai mobil ke arah Tenggara (East-South) menuju Supermarket Digital bernuansa ungu."
+        clue: "Kendarai mobil ke arah Timur (Mid-East Block, X: 105, Z: -35) menuju POS Kasir Digital Store (Nuxt 4 + Laravel)."
       },
       pororo: {
         id: "pororo",
         name: "PoRoRo Gelato Cafe",
         category: "Proyek C (Nuxt 3 & Figma)",
         icon: "fa-solid fa-ice-cream",
-        clue: "Kendarai mobil ke arah Barat Laut (West-North) menuju Kafe Gelato berkanopi pastel."
+        clue: "Kendarai mobil ke arah Barat Laut (Far North-West Block, X: -105, Z: -105) menuju Kedai Gelato PoRoRo berkanopi pastel."
       },
       skills: {
         id: "skills",
         name: "Developer Skills Lab",
         category: "Keahlian Teknis",
         icon: "fa-solid fa-laptop-code",
-        clue: "Kendarai mobil ke arah Barat Daya (West-South) menuju Laboratorium 6 Kristal Komputasi."
+        clue: "Kendarai mobil ke arah Barat Daya (Mid-West Block, X: -105, Z: 35) menuju Developer Skills Lab & 6 Pilar Komputasi."
       },
       about: {
         id: "about",
         name: "Developer HQ & Studio",
         category: "Tentang Saya & Karakter",
         icon: "fa-solid fa-user-astronaut",
-        clue: "Kendarai mobil ke arah Tenggara (South-East Block) menuju Gedung Developer HQ di komplek perkotaan."
+        clue: "Kendarai mobil ke arah Tenggara (South-East Block, X: 105, Z: 105) menuju Gedung Developer HQ & Studio Siswa RPL."
       },
       contact: {
         id: "contact",
         name: "Satellite Relay Hub",
         category: "Kontak & Komunikasi",
         icon: "fa-solid fa-satellite-dish",
-        clue: "Kendarai mobil ke arah Selatan Barat (South-West) menuju Menara Transmisi Antena Satelit."
+        clue: "Kendarai mobil ke arah Barat Daya (Far South-West Block, X: -105, Z: 105) menuju Menara Antena Satelit Relay Hub."
       }
     };
 
