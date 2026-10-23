@@ -213,12 +213,20 @@ export class Game {
   }
 
   startLoop() {
+    if (this.animationFrameId) return;
     const animate = () => {
       this.animationFrameId = requestAnimationFrame(animate);
       this.update();
       this.render();
     };
     animate();
+  }
+
+  stopLoop() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
   }
 
   update() {

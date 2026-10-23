@@ -16,9 +16,36 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Initialize master game instance
-  const game = new Game(canvas);
-  window.__GAME__ = game;
+  // Initialize master game instance with robust error handling
+  let game = null;
+  try {
+    game = new Game(canvas);
+    window.__GAME__ = game;
+    // Safety fallback: Ensure loader overlay is guaranteed to disappear smoothly
+    setTimeout(() => {
+      const loader = document.getElementById("gameLoader");
+      if (loader && !loader.classList.contains("hidden")) {
+        loader.classList.add("hidden");
+      }
+    }, 800);
+  } catch (err) {
+    console.error("Critical error during 3D initialization:", err);
+    const loader = document.getElementById("gameLoader");
+    if (loader) {
+      loader.innerHTML = `
+        <div style="text-align: center; color: #f43f5e; padding: 2rem; max-width: 500px;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+          <h2 style="margin-bottom: 0.5rem; color: #fff;">Gagal Memuat Mode 3D</h2>
+          <p style="color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.5;">${err.message || 'Terjadi kendala akselerasi grafis.'}</p>
+          <button class="btn btn-primary" onclick="window.location.hash='#classic'; window.location.reload();">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Buka Mode Dokumen Standar</span>
+          </button>
+        </div>
+      `;
+    }
+    return;
+  }
 
   // View Switcher: Game 3D vs Web Portofolio Biasa
   const gameViewContainer = document.getElementById("gameViewContainer");

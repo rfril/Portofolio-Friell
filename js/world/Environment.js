@@ -87,13 +87,19 @@ export class Environment {
     this.buildWaterCanalAndBridges();
     this.buildRoadNetwork();
     this.buildCentralCityPark();
-    this.buildCityArchitecture();
+    this.buildCitySkyscrapersAndBlocks();
     this.buildOffStreetParkingLots();
     this.buildStreetlightsAndTrees();
     this.buildDistrictLandmarks();
+    this.buildTimelineAvenue();
+    this.buildObservatoryAndSatellites();
     this.buildWindTurbines();
     this.buildPerimeterFence();
     this.buildClouds();
+  }
+
+  buildCityArchitecture() {
+    this.buildCitySkyscrapersAndBlocks();
   }
 
   // 1. TERRAIN & MOUNTAIN SILHOUETTES
@@ -927,7 +933,7 @@ export class Environment {
 
       const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.8, 28, 10), towerMat);
       tower.position.y = 14;
-      towerGroup.add(tower);
+      turbineGroup.add(tower);
 
       const nacelle = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.8, 4.5), towerMat);
       nacelle.position.set(0, 28, 0);

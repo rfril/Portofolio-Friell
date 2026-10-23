@@ -61,12 +61,13 @@ export class CameraController {
     // 1. Mouse Drag (Klik & Geser Layar untuk Mengubah Sudut Pandang)
     window.addEventListener("mousedown", (e) => {
       // Abaikan jika klik tombol UI, modal dialog, dsb
+      const el = e.target?.closest ? e.target : e.target?.parentElement;
       if (
-        e.target.closest("button") ||
-        e.target.closest(".hud-pill") ||
-        e.target.closest(".project-modal-backdrop") ||
-        e.target.closest(".top-hud") ||
-        e.target.closest(".zone-announcer")
+        el?.closest("button") ||
+        el?.closest(".hud-pill") ||
+        el?.closest(".project-modal-backdrop") ||
+        el?.closest(".top-hud") ||
+        el?.closest(".zone-announcer")
       ) {
         return;
       }
@@ -99,11 +100,12 @@ export class CameraController {
       (e) => {
         if (e.touches.length === 1) {
           const touch = e.touches[0];
+          const el = touch.target?.closest ? touch.target : touch.target?.parentElement;
           if (
-            touch.target.closest("button") ||
-            touch.target.closest(".touch-btn") ||
-            touch.target.closest(".hud-pill") ||
-            touch.target.closest(".project-modal-backdrop")
+            el?.closest("button") ||
+            el?.closest(".touch-btn") ||
+            el?.closest(".hud-pill") ||
+            el?.closest(".project-modal-backdrop")
           ) {
             return;
           }
