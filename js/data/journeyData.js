@@ -12,8 +12,8 @@ export const journeyTimeline = [
     badge: "Eksplorasi Awal",
     icon: "fa-solid fa-gamepad",
     color: "#38bdf8",
-    description: "Perjalanan saya bermula saat pandemi COVID-19. Menghabiskan waktu dengan sering bermain Minecraft membuka rasa penasaran saya: bagaimana dunia virtual ini bekerja di balik layar, bagaimana mekanik permainan dirancang, dan bagaimana game ini dapat dimodifikasi secara luas.",
-    keyTakeaway: "Menyadari bahwa game bukan hanya untuk dinikmati, tetapi dapat dibongkar, dimodifikasi, dan diciptakan."
+    description: "Perjalanan bermula saat pandemi COVID-19. Menghabiskan waktu luang bermain Minecraft memunculkan rasa ingin tahu yang besar: bagaimana dunia virtual ini berjalan di balik layar, bagaimana mekanik permainan dirancang, dan bagaimana fitur game dapat dimodifikasi secara luas.",
+    keyTakeaway: "Menyadari bahwa game bukan sekadar untuk dinikmati, melainkan dapat dipelajari logikanya, dimodifikasi, dan diciptakan."
   },
   {
     id: "era-bedrock",
@@ -23,8 +23,8 @@ export const journeyTimeline = [
     badge: "Otodidak",
     icon: "fa-solid fa-cubes",
     color: "#a855f7",
-    description: "Ketertarikan berkembang ke ekosistem Minecraft Bedrock Edition. Saya mulai membedah manifest, komponen behavior pack, dan resource pack secara mandiri. Mengamati cara kerja struktur addon dan eksperimen konfigurasi menjadi pintu gerbang pertama saya memahami logika komputasi secara otodidak.",
-    keyTakeaway: "Mengenal hierarki data JSON, komponen entitas, serta dasar modding game C++ & Bedrock."
+    description: "Ketertarikan berlanjut ke ekosistem Minecraft Bedrock Edition. Saya mulai membedah manifest, komponen behavior pack, dan resource pack secara mandiri. Mengamati struktur konfigurasi addon menjadi langkah awal saya dalam memahami hierarki data dan logika komputasi.",
+    keyTakeaway: "Mengenal format data JSON, komponen entitas, serta dasar modding game C++ & Bedrock."
   },
   {
     id: "era-java-2023",
@@ -34,29 +34,29 @@ export const journeyTimeline = [
     badge: "Java Exploration",
     icon: "fa-solid fa-server",
     color: "#f59e0b",
-    description: "Pada awal tahun 2023, saya mulai mencoba membuat dan mengelola server Minecraft Java Edition sendiri. Di sinilah saya pertama kali mengenal plugin server yang dibangun menggunakan bahasa pemrograman Java. Daya tarik Java langsung terasa karena mampu mengubah perilaku sistem in-game secara dinamis.",
+    description: "Pada awal tahun 2023, saya mulai mengelola server Minecraft Java Edition sendiri. Di sinilah saya pertama kali mengenal plugin server yang dibangun dengan Java. Daya tarik Java sangat kuat karena memungkinkan perubahan logika in-game secara terstruktur dan dinamis.",
     keyTakeaway: "Memahami arsitektur client-server, event handling game loop, dan struktur runtime Java."
   },
   {
     id: "era-modifikasi",
-    year: "2023 — 2025",
-    phase: "Proses Belajar & Modifikasi",
+    year: "2023 — 2024",
+    phase: "Pendalaman Java & PaperMC API",
     title: "Membedah Kode & Memodifikasi Plugin",
     badge: "Code Literacy",
     icon: "fa-solid fa-code-compare",
     color: "#10b981",
-    description: "Seiring berjalannya waktu di bangku sekolah RPL SMKN 71 Jakarta, saya mulai melangkah lebih jauh dari sekadar konfigurasi: membaca source code, melakukan dekompilasi untuk riset pola desain, memahami API Paper/Spigot, serta memodifikasi fungsionalitas plugin buatan orang lain agar sesuai dengan konsep server yang diinginkan.",
-    keyTakeaway: "Mengasah kemampuan membaca kode orang lain, mengisolasi bug, dan memahami pola OOP Java."
+    description: "Sejalan dengan pembelajaran di jurusan RPL SMKN 71 Jakarta, saya melangkah lebih jauh: membaca kode sumber, mendalami PaperMC/Spigot API, mempelajari pola desain OOP, serta menyesuaikan logika plugin buatan komunitas agar selaras dengan kebutuhan server.",
+    keyTakeaway: "Mengasah kemampuan membaca kode sumber, mengisolasi bug, dan menerapkan prinsip OOP Java."
   },
   {
     id: "era-mandiri-2026",
-    year: "Pertengahan 2026",
-    phase: "Pengembangan Mandiri",
+    year: "2025 — Sekarang",
+    phase: "Pengembangan Sistem Mandiri",
     title: "Membangun Plugin Suite Sendiri dari Nol",
     badge: "Game Developer",
     icon: "fa-solid fa-rocket",
     color: "#f43f5e",
-    description: "Memasuki pertengahan tahun 2026, saya melangkah penuh ke tahap pengembangan mandiri. Saya merancang arsitektur monorepo, sistem 3 faksi kerajaan, dynamic economy, custom enchantments, dan pipeline kompilasi otomatis untuk ekosistem server Apexsions tanpa bergantung pada paket plugin publik.",
-    keyTakeaway: "Membangun arsitektur modular, 9 plugin suite mandiri, integrasi SQLite/MySQL, dan portal web."
+    description: "Memasuki tahap pengembangan mandiri secara penuh, saya merancang ekosistem server Apexsions dari nol: suite 9 plugin Java kustom, sistem 3 faksi kerajaan, dynamic economy, custom enchantments, integrasi database, dan pipeline otomatisasi kompilasi.",
+    keyTakeaway: "Menguasai arsitektur modular, 9 suite plugin mandiri, integrasi SQLite/MySQL, dan portal web pendukung."
   }
 ];

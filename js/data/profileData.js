@@ -14,33 +14,33 @@ export const profileData = {
   
   tagline: "Dari Pemain Menjadi Kreator — Mengeksplorasi Dunia Pengembangan Game & Rekayasa Perangkat Lunak",
   
-  summary: "Saya adalah siswa SMK Negeri 71 Jakarta jurusan Rekayasa Perangkat Lunak (RPL) yang memiliki antusiasme mendalam pada pengembangan sistem game dan rekayasa perangkat lunak. Perjalanan saya dimulai dari kecintaan bermain Minecraft saat pandemi COVID-19, berkembang menjadi eksplorasi modding Bedrock dan Java, hingga merancang serta mengimplementasikan plugin server game secara mandiri menggunakan Java 21, Nuxt, dan Laravel.",
+  summary: "Saya adalah siswa SMK Negeri 71 Jakarta jurusan Rekayasa Perangkat Lunak (RPL) yang memiliki dedikasi mendalam pada pengembangan game dan rekayasa perangkat lunak. Perjalanan saya bermula dari rasa ingin tahu saat bermain Minecraft di masa pandemi, berkembang menjadi eksplorasi modding Bedrock dan Java, hingga mampu merancang plugin server game mandiri berbasis Java 21 (PaperMC API) serta membangun aplikasi web fullstack menggunakan Nuxt dan Laravel.",
   
   softSkills: [
     {
-      name: "Komunikasi yang Baik",
+      name: "Komunikasi Teknis",
       icon: "fa-solid fa-comments",
-      desc: "Mampu menjelaskan konsep teknis, alur logika sistem, dan ide perancangan game dengan bahasa yang jelas kepada rekan tim maupun komunitas."
+      desc: "Mampu menjelaskan konsep teknis, arsitektur sistem, dan alur logika game dengan bahasa yang lugas kepada rekan tim maupun komunitas."
     },
     {
       name: "Kerja Sama Tim",
       icon: "fa-solid fa-users",
-      desc: "Terbiasa berkolaborasi dalam proyek kelompok sekolah (seperti Project MKK Kelompok 6) maupun pembagian peran teknis bersama kontributor lain."
+      desc: "Terbiasa berkolaborasi aktif dalam proyek tim sekolah (seperti Project MKK Kelompok 6) maupun pembagian tanggung jawab teknis bersama kontributor lain."
     },
     {
       name: "Problem Solving",
       icon: "fa-solid fa-lightbulb",
-      desc: "Pendekatan analitis dalam menemukan akar masalah, debugging logika program, mengatasi keterbatasan performa server, dan optimasi query data."
+      desc: "Pendekatan analitis dalam menemukan akar masalah, debugging logika program, menjaga stabilitas performa 20 TPS, dan optimasi query data."
     },
     {
-      name: "Ketelitian & Standar Kode",
+      name: "Ketelitian & Clean Code",
       icon: "fa-solid fa-magnifying-glass",
-      desc: "Memperhatikan struktur folder, penamaan semantik, validasi slot inventory, penanganan error asinkron, dan dokumentasi teknis yang rapi."
+      desc: "Menerapkan struktur folder rapi, penamaan semantik, validasi slot inventori, penanganan error asinkron, dan dokumentasi teknis yang jelas."
     },
     {
       name: "Kemampuan Belajar Mandiri",
       icon: "fa-solid fa-bolt",
-      desc: "Cepat menyerap framework dan konsep baru secara otodidak, membaca dokumentasi resmi PaperMC, Nuxt, Laravel, dan terus beradaptasi dengan teknologi modern."
+      desc: "Cepat menyerap framework dan konsep baru secara otodidak, mempelajari dokumentasi resmi PaperMC, Nuxt, Laravel, dan terus beradaptasi dengan teknologi modern."
     }
   ]
 };

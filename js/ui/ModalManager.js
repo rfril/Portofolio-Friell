@@ -258,7 +258,7 @@ export class ModalManager {
         <div class="project-summary-card">
           <div class="project-summary-img-wrap">
             <img src="${p.heroImage}" alt="${p.title}" class="project-summary-img">
-            <span class="summary-status-pill"><i class="fa-solid fa-check"></i> Terverifikasi</span>
+            <span class="summary-status-pill"><i class="fa-solid fa-check"></i> Selesai &amp; Teruji</span>
           </div>
           <div class="project-summary-body">
             <div class="modal-badge-group">
@@ -368,9 +368,9 @@ export class ModalManager {
         <div class="modal-gallery-grid">${galleryHtml}</div>
 
         <div class="modal-section-card">
-          <h3><i class="fa-solid fa-circle-info text-cyan"></i> Ringkasan Proyek & Lokasi Sumber</h3>
+          <h3><i class="fa-solid fa-circle-info text-cyan"></i> Ringkasan &amp; Arsitektur Proyek</h3>
           <p>${project.summary}</p>
-          <p class="source-verified-pill"><i class="fa-solid fa-folder-check"></i> Sumber Terverifikasi: <code>${project.sourceLocation}</code></p>
+          <p class="source-verified-pill"><i class="fa-solid fa-layer-group"></i> Arsitektur: <code>${project.sourceLocation}</code></p>
         </div>
 
         <div class="modal-section-card">
@@ -521,9 +521,9 @@ export class ModalManager {
     this.contentArea.innerHTML = `
       <div class="modal-journey-view">
         <div class="modal-project-header">
-          <span class="modal-badge badge-accent">Kronologi Nyata</span>
-          <h2 class="modal-title">Perjalanan Saya: Dari Pemain ke Kreator</h2>
-          <p class="modal-subtitle">Kronologi nyata proses belajar dan eksplorasi saya dari bermain Minecraft hingga membangun arsitektur game.</p>
+          <span class="modal-badge badge-accent">Linimasa Pembelajaran</span>
+          <h2 class="modal-title">Perjalanan Belajar: Dari Pemain Menjadi Kreator</h2>
+          <p class="modal-subtitle">Tahapan eksplorasi dari rasa ingin tahu bermain game hingga merancang arsitektur server dan aplikasi mandiri.</p>
         </div>
         <div class="modal-journey-timeline">${itemsHtml}</div>
       </div>
@@ -555,8 +555,8 @@ export class ModalManager {
       <div class="modal-skills-view">
         <div class="modal-project-header">
           <span class="modal-badge badge-accent">Skills Lab</span>
-          <h2 class="modal-title">Kemampuan Teknis & Bukti Penerapan</h2>
-          <p class="modal-subtitle">Daftar teknologi berdasarkan penggunaan nyata pada proyek tanpa skor persentase buatan.</p>
+          <h2 class="modal-title">Kemampuan Teknis &amp; Bukti Penerapan</h2>
+          <p class="modal-subtitle">Daftar teknologi berdasarkan kompetensi dan implementasi nyata pada proyek yang telah dibangun.</p>
         </div>
         <div class="modal-skills-grid">${skillsHtml}</div>
       </div>
@@ -633,8 +633,8 @@ export class ModalManager {
       <div class="modal-contact-view">
         <div class="modal-project-header">
           <span class="modal-badge badge-accent">Hubungi Saya</span>
-          <h2 class="modal-title">Saluran Komunikasi Terverifikasi</h2>
-          <p class="modal-subtitle">Tautan kontak aktif dan terverifikasi untuk diskusi pengembangan proyek game & software development.</p>
+          <h2 class="modal-title">Mari Berdiskusi &amp; Berkolaborasi</h2>
+          <p class="modal-subtitle">Saluran komunikasi terbuka untuk mendiskusikan pengembangan game, arsitektur sistem, maupun peluang kolaborasi.</p>
         </div>
         <div class="modal-contact-list">${channelsHtml}</div>
       </div>

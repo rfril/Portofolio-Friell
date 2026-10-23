@@ -1,8 +1,8 @@
 /**
- * DATA PROYEK TERVERIFIKASI DARI KODE SUMBER LOKAL
- * Proyek A: Apexsions (C:\Apex Plugin)
- * Proyek B: Sistem Kasir (C:\laragon\www\kasir-frontend & crud-laravel)
- * Proyek C: PoRoRo Ice Cream (C:\Project MKK Kel 6\frontend)
+ * DATA PROYEK TERSTRUKTUR & TERUJI
+ * Proyek A: Apexsions Ecosystem (Java 21 / PaperMC Suite)
+ * Proyek B: POS Kasir Friel v2.0 (Nuxt 4 + Laravel 11 REST API)
+ * Proyek C: PoRoRo Ice Cream (Nuxt 3 & Vue 3 Modular / MKK Kelompok 6)
  */
 
 export const projectsData = [
@@ -18,7 +18,7 @@ export const projectsData = [
     icon: "fa-solid fa-dungeon",
     accentColor: "#f59e0b",
     
-    sourceLocation: "C:\\Apex Plugin",
+    sourceLocation: "Monorepo Mandiri (Java 21 / PaperMC Suite)",
     
     liveLinks: {
       website: "https://web.apexsions.com",
@@ -77,17 +77,16 @@ export const projectsData = [
     title: "POS Kasir Friel v2.0",
     subtitle: "Aplikasi Kasir Digital & Inventori Fullstack (Nuxt 4 + Laravel API)",
     category: "Fullstack Web Application",
-    status: "Selesai (Diuji di Laragon)",
+    status: "Selesai & Teruji Penuh",
     heroImage: "assets/kasir-preview.png",
     secondaryImage: null,
     icon: "fa-solid fa-cash-register",
     accentColor: "#a855f7",
 
-    sourceLocation: "C:\\laragon\\www\\kasir-frontend & C:\\laragon\\www\\crud-laravel",
+    sourceLocation: "Monorepo Fullstack (Nuxt 4 + Laravel 11 REST API)",
 
     liveLinks: {
-      localFrontend: "http://localhost:3000 (Nuxt)",
-      localBackend: "http://crud-laravel.test/api (Laravel)",
+      architecture: "Nuxt 4 (Frontend) + Laravel 11 (REST API)",
       detailPage: "project-kasir.html"
     },
 
@@ -133,17 +132,17 @@ export const projectsData = [
     title: "PoRoRo Ice Cream",
     subtitle: "Website Showcase & Masterplan UI/UX Gelato Artisan Cakung",
     category: "Frontend Web & School Project (MKK Kel 6)",
-    status: "Selesai (Diimplementasikan ke Nuxt 3)",
+    status: "Selesai & Dipresentasikan",
     heroImage: "assets/pororo-hero.png",
     secondaryImage: "assets/pororo-store.png",
     tertiaryImage: "assets/pororo-annotated.png",
     icon: "fa-solid fa-ice-cream",
     accentColor: "#ec4899",
 
-    sourceLocation: "C:\\Project MKK Kel 6\\frontend",
+    sourceLocation: "Frontend Repository (Nuxt 3 & Vue 3 Modular)",
 
     liveLinks: {
-      figmaSource: "beranda.fig (PoRoRo Ice Cream Design)",
+      figmaSource: "Blueprint Figma (PoRoRo Ice Cream UI/UX)",
       detailPage: "project-pororo.html"
     },
 

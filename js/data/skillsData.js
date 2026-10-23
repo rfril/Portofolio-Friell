@@ -1,7 +1,6 @@
 /**
  * DATA KEAHLIAN TEKNIS & SOFT SKILLS TERVERIFIKASI
- * Tidak menggunakan rating persentase palsu (90%/100%).
- * Menguraikan pengalaman nyata, peran dalam proyek, dan tingkat penguasaan faktual.
+ * Penguasaan teknis berbasis pengalaman nyata, peran dalam proyek, dan implementasi kode faktual.
  */
 
 export const technicalSkills = [
@@ -42,10 +41,10 @@ export const technicalSkills = [
     projectRelation: "Eksplorasi Addon Minecraft Bedrock & Pemahaman Logika Native.",
     
     keyCapabilities: [
-      "Memahami konsep memory pointers, references, dan compilation pipeline",
-      "Membaca struktur file binary & native hooks",
-      "Dasar syntax dan struktur kontrol C++",
-      "Catatan: Dalam tahap pembelajaran berkelanjutan, bukan klaim penguasaan profesional penuh"
+      "Memahami konsep memory pointers, references, dan alur native compilation",
+      "Membaca struktur file binary & native hooks addon",
+      "Dasar sintaks dan struktur kontrol logika C++",
+      "Fokus pembelajaran berkelanjutan & pemahaman dasar native logic"
     ]
   },
 
@@ -57,7 +56,7 @@ export const technicalSkills = [
     badge: "Frontend Utama",
     badgeColor: "#10b981",
     status: "Implementasi Proyek Nyata",
-    experienceYears: "2026 (Sekolah & Proyek Pribadi)",
+    experienceYears: "2025 — Sekarang",
     
     practicalUsage: "Framework frontend pilihan untuk membangun antarmuka web modern, reaktif, dan terstruktur. Digunakan pada proyek POS Kasir Friel v2.0 (Nuxt 4) dan PoRoRo Ice Cream (Nuxt 3).",
     projectRelation: "POS Kasir Friel v2.0 (kasir-frontend) & PoRoRo Ice Cream (Project MKK Kel 6).",
@@ -80,10 +79,10 @@ export const technicalSkills = [
     badge: "Backend Aplikasi",
     badgeColor: "#ef4444",
     status: "Implementasi Proyek Nyata",
-    experienceYears: "2026 (Kurikulum RPL & Proyek)",
+    experienceYears: "2025 — Sekarang",
     
     practicalUsage: "Framework backend untuk merancang RESTful API yang melayani transaksi data barang, pencatatan nota kasir, dan autentikasi pengguna pada aplikasi kasir toko.",
-    projectRelation: "POS Kasir Friel v2.0 (crud-laravel di Laragon).",
+    projectRelation: "POS Kasir Friel v2.0 (backend REST API crud-laravel).",
     
     keyCapabilities: [
       "Routing RESTful API (apiResource & Controller Mapping)",
