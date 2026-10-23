@@ -54,10 +54,10 @@ export class ProgressionManager {
       },
       about: {
         id: "about",
-        name: "Developer Studio",
+        name: "Developer HQ & Studio",
         category: "Tentang Saya & Karakter",
         icon: "fa-solid fa-user-astronaut",
-        clue: "Kendarai mobil ke arah Selatan Timur (South-East) menuju Studio Meja Kerja Multi-Monitor."
+        clue: "Kendarai mobil ke arah Tenggara (South-East Block) menuju Gedung Developer HQ di komplek perkotaan."
       },
       contact: {
         id: "contact",

@@ -65,7 +65,7 @@ export class CollectibleManager {
       { x: -115, z: 45 },
 
       // South District & Satellite Observatory (3)
-      { x: 35, z: 65 },
+      { x: 95, z: 105 },
       { x: -25, z: 125 },
       { x: 0, z: 140 }
     ];
