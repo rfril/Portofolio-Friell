@@ -13,6 +13,7 @@ export class MobileControls {
     this.touchRight = document.getElementById("touchRight");
     this.touchGas = document.getElementById("touchGas");
     this.touchBrake = document.getElementById("touchBrake");
+    this.touchDrift = document.getElementById("touchDrift");
     this.touchHorn = document.getElementById("touchHorn");
     this.touchInteract = document.getElementById("touchInteract");
 
@@ -65,6 +66,13 @@ export class MobileControls {
       this.touchBrake,
       () => this.input.setTouchBackward(true),
       () => this.input.setTouchBackward(false)
+    );
+
+    // Handbrake / Drift
+    bindTouchBtn(
+      this.touchDrift,
+      () => this.input.setTouchBrake(true),
+      () => this.input.setTouchBrake(false)
     );
 
     // Horn

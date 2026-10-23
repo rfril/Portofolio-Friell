@@ -11,6 +11,7 @@ export class UIManager {
 
     // Cache DOM Elements
     this.speedoVal = document.getElementById("speedoVal");
+    this.driftBadge = document.getElementById("driftBadge");
     this.diamondCount = document.getElementById("diamondCount");
     this.discoveryCount = document.getElementById("discoveryCount");
     this.zoneAnnouncer = document.getElementById("zoneAnnouncer");
@@ -142,9 +143,12 @@ export class UIManager {
     }, 4500);
   }
 
-  updateSpeedometer(speedKmh) {
+  updateSpeedometer(speedKmh, isDrifting = false) {
     if (this.speedoVal) {
       this.speedoVal.textContent = speedKmh;
+    }
+    if (this.driftBadge) {
+      this.driftBadge.style.display = isDrifting ? "inline-flex" : "none";
     }
   }
 

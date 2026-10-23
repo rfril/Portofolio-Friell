@@ -46,6 +46,12 @@
           <span><span id="speedoVal" class="speed-val">0</span> KM/H</span>
         </div>
 
+        <!-- Drift Indicator Badge -->
+        <div class="hud-pill hud-pill-drift" id="driftBadge" style="display: none; border-color: #f59e0b; color: #f59e0b; font-weight: 700; background: rgba(245, 158, 11, 0.15);">
+          <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+          <span>DRIFTING!</span>
+        </div>
+
         <!-- Diamond Counter -->
         <div class="hud-pill">
           <i class="fa-solid fa-gem" style="color: #38bdf8;"></i>
@@ -128,6 +134,8 @@
       &bull;
       <span class="ctrl-key">A</span> <span class="ctrl-key">D</span> Belok
       &bull;
+      <span class="ctrl-key">Space</span> / <span class="ctrl-key">Shift</span> Rem Tangan & Drift
+      &bull;
       <span class="ctrl-key">E</span> Interaksi
       &bull;
       <span class="ctrl-key">P</span> Portofolio
@@ -156,6 +164,9 @@
         </button>
         <button class="touch-btn touch-btn-gas" id="touchGas" aria-label="Gas / Maju">
           <i class="fa-solid fa-arrow-up"></i>
+        </button>
+        <button class="touch-btn touch-btn-drift" id="touchDrift" aria-label="Rem Tangan & Drift" title="Rem Tangan & Drift">
+          <i class="fa-solid fa-bolt"></i>
         </button>
         <button class="touch-btn touch-btn-interact" id="touchInteract" aria-label="Interaksi">
           [E]

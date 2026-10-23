@@ -19,6 +19,8 @@ export class CarController {
     this.steerAngle = 0;
     this.lateralSlip = 0;
     this.isBraking = false;
+    this.isDrifting = false;
+    this.velocity = new THREE.Vector3(0, 0, 0);
 
     // Visual references
     this.mesh = new THREE.Group();
@@ -527,6 +529,11 @@ export class CarController {
     this.speed = 0;
     this.steerAngle = 0;
     this.lateralSlip = 0;
+    this.isDrifting = false;
+    this.velocity.set(0, 0, 0);
+    if (this.audio && this.audio.updateDriftSound) {
+      this.audio.updateDriftSound(false, 0);
+    }
     if (playSound && this.audio) {
       this.audio.playResetSound();
     }
@@ -537,8 +544,14 @@ export class CarController {
     const steerInput = this.input.getSteering();
     const handbrake = this.input.isBraking();
 
-    // 1. Steering Dynamics
-    const targetSteerAngle = -steerInput * CONFIG.CAR.STEER_MAX_ANGLE;
+    // 1. Handbrake & Drift State Detection
+    const isMoving = Math.abs(this.speed) > 4.0;
+    this.isDrifting = handbrake && isMoving;
+    this.isBraking = handbrake || (this.speed > 0.5 && throttle < -0.1) || (this.speed < -0.5 && throttle > 0.1);
+
+    // 2. Steering Dynamics (Enhanced for Drift Counter-Steer)
+    const steerMultiplier = this.isDrifting ? 1.25 : 1.0;
+    const targetSteerAngle = -steerInput * CONFIG.CAR.STEER_MAX_ANGLE * steerMultiplier;
     this.steerAngle += (targetSteerAngle - this.steerAngle) * Math.min(1.0, CONFIG.CAR.STEER_SPEED * deltaTime * 6);
 
     // Front wheels visual steer rotation
@@ -547,12 +560,11 @@ export class CarController {
       this.frontRightPivot.rotation.y = this.steerAngle;
     }
 
-    // 2. Acceleration / Deceleration
-    this.isBraking = handbrake || (this.speed > 0.5 && throttle < -0.1) || (this.speed < -0.5 && throttle > 0.1);
-
+    // 3. Acceleration / Deceleration
     if (throttle > 0) {
-      // Forward gas
-      this.speed += throttle * CONFIG.CAR.ACCELERATION * deltaTime;
+      // Forward gas (hypercar punch acceleration)
+      const accelRate = this.isDrifting ? CONFIG.CAR.ACCELERATION * 0.75 : CONFIG.CAR.ACCELERATION;
+      this.speed += throttle * accelRate * deltaTime;
       if (this.speed > CONFIG.CAR.MAX_SPEED_FORWARD) {
         this.speed = CONFIG.CAR.MAX_SPEED_FORWARD;
       }
@@ -564,10 +576,14 @@ export class CarController {
         this.particles.emitExhaust(exhaustPos, forwardDir);
       }
     } else if (throttle < 0) {
-      // Reverse / Brake
-      this.speed += throttle * CONFIG.CAR.ACCELERATION * 0.7 * deltaTime;
-      if (this.speed < -CONFIG.CAR.MAX_SPEED_REVERSE) {
-        this.speed = -CONFIG.CAR.MAX_SPEED_REVERSE;
+      // Reverse / Foot Brake
+      if (this.speed > 1.0) {
+        this.speed -= CONFIG.CAR.BRAKE_FORCE * deltaTime;
+      } else {
+        this.speed += throttle * CONFIG.CAR.ACCELERATION * 0.65 * deltaTime;
+        if (this.speed < -CONFIG.CAR.MAX_SPEED_REVERSE) {
+          this.speed = -CONFIG.CAR.MAX_SPEED_REVERSE;
+        }
       }
     } else {
       // Natural rolling friction coasting
@@ -583,9 +599,9 @@ export class CarController {
       }
     }
 
-    // Handbrake application
+    // Handbrake: smoothly decelerates without stopping instantly, maintaining powerslide momentum
     if (handbrake) {
-      const brakeDecel = CONFIG.CAR.BRAKE_FORCE * deltaTime;
+      const brakeDecel = (CONFIG.CAR.HANDBRAKE_DECEL || 14.0) * deltaTime;
       if (this.speed > 0) this.speed = Math.max(0, this.speed - brakeDecel);
       else if (this.speed < 0) this.speed = Math.min(0, this.speed + brakeDecel);
     }
@@ -594,43 +610,60 @@ export class CarController {
     if (this.tailLightMat) {
       if (this.isBraking) {
         this.tailLightMat.emissive.setHex(0xef4444);
-        this.tailLightMat.emissiveIntensity = 2.2;
+        this.tailLightMat.emissiveIntensity = 2.4;
       } else {
         this.tailLightMat.emissive.setHex(0x991b1b);
         this.tailLightMat.emissiveIntensity = 0.4;
       }
     }
 
-    // 3. Vehicle Turning & Yaw Rotation
-    // Berputar HANYA ketika mobil bergerak (bukan berputar di tempat seperti gasing saat diam)
-    // Menggunakan arah bertanda (turnDirection = Math.sign(this.speed)) sehingga:
-    // - Maju + Kiri (W+A): mobil melengkung ke kiri
-    // - Mundur + Kiri (S+A): buritan mobil mundur ke kiri (konsisten & intuitif)
+    // 4. Vehicle Turning & Yaw Rotation
     if (Math.abs(this.speed) > 0.15) {
       const turnDirection = Math.sign(this.speed);
-      const speedRatio = Math.min(1.0, Math.max(0.35, Math.abs(this.speed) / 14.0));
-      const deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.2 * deltaTime;
+      const speedRatio = Math.min(1.0, Math.max(0.35, Math.abs(this.speed) / 16.0));
+      // Amplified yaw during handbrake drift!
+      const yawMultiplier = this.isDrifting ? (CONFIG.CAR.DRIFT_STEER_BOOST || 2.2) : 1.0;
+      const deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.2 * yawMultiplier * deltaTime;
       this.mesh.rotation.y += deltaYaw;
-
-      // Tire skid particles when turning sharply at high speed
-      if (this.particles && Math.abs(this.steerAngle) > 0.25 && Math.abs(this.speed) > 18) {
-        if (Math.random() < 0.5) {
-          const rearPos = this.mesh.position.clone();
-          this.particles.emitSkidDust(rearPos);
-        }
-      }
     }
 
-    // 4. Velocity Vector Displacement
-    const forwardVector = new THREE.Vector3(0, 0, 1).applyAxisAngle(
+    // 5. Velocity Vector & Lateral Drift Physics
+    const carHeading = new THREE.Vector3(0, 0, 1).applyAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      this.mesh.rotation.y
+    );
+    const carRight = new THREE.Vector3(1, 0, 0).applyAxisAngle(
       new THREE.Vector3(0, 1, 0),
       this.mesh.rotation.y
     );
 
-    const displacement = forwardVector.multiplyScalar(this.speed * deltaTime);
+    const targetHeadingVel = carHeading.clone().multiplyScalar(this.speed);
+
+    if (this.isDrifting) {
+      // High-slip physics: preserve momentum angle, slip outward
+      const driftRetention = Math.max(0, 1.0 - 0.45 * deltaTime);
+      this.velocity.multiplyScalar(driftRetention);
+      // Blend forward propulsion if pressing gas while drifting (powerslide!)
+      if (throttle > 0) {
+        this.velocity.add(carHeading.clone().multiplyScalar(this.speed * 0.45 * deltaTime));
+      }
+      // Add outward lateral slide component proportional to steer
+      const slideForce = -this.steerAngle * Math.abs(this.speed) * 0.65 * deltaTime;
+      this.velocity.add(carRight.clone().multiplyScalar(slideForce));
+    } else {
+      // Normal grip driving: quickly align velocity with car heading
+      const gripRate = Math.min(1.0, (CONFIG.CAR.DRIFT_GRIP_RECOVERY || 4.5) * deltaTime * 2.5);
+      this.velocity.lerp(targetHeadingVel, gripRate);
+    }
+
+    // Calculate lateral slip for effects
+    this.lateralSlip = carRight.dot(this.velocity);
+
+    // Apply displacement
+    const displacement = this.velocity.clone().multiplyScalar(deltaTime);
     this.mesh.position.add(displacement);
 
-    // 5. World Bounds Check (Bounce gently off boundaries, anti-spam)
+    // 6. World Bounds Check (Bounce gently off boundaries, anti-spam)
     const boundLimit = (CONFIG.WORLD.WIDTH / 2) - CONFIG.WORLD.BOUND_PADDING;
     const now = performance.now();
 
@@ -639,10 +672,12 @@ export class CarController {
       if (Math.abs(this.speed) > 2.5 && (now - this.lastBoundaryImpact > 350)) {
         this.lastBoundaryImpact = now;
         this.speed *= -0.3; // Clean recoil
+        this.velocity.x *= -0.3;
         this.audio.playBumpSound();
         if (this.particles) this.particles.emitImpact(this.mesh.position);
       } else {
-        this.speed = 0; // Hentikan gerakan masuk batas, cegah getar / nyepam
+        this.speed = 0;
+        this.velocity.x = 0;
       }
     }
 
@@ -651,17 +686,38 @@ export class CarController {
       if (Math.abs(this.speed) > 2.5 && (now - this.lastBoundaryImpact > 350)) {
         this.lastBoundaryImpact = now;
         this.speed *= -0.3;
+        this.velocity.z *= -0.3;
         this.audio.playBumpSound();
         if (this.particles) this.particles.emitImpact(this.mesh.position);
       } else {
         this.speed = 0;
+        this.velocity.z = 0;
       }
     }
 
-    // 6. Wheel Spin Rotation
-    // Jika mobil melaju, roda berputar sesuai kecepatan fisik.
-    // Jika mobil menempel rintangan dan pemain tetap menekan gas, roda tetap berputar (wheel slip)
-    // agar roda tidak membeku/diam saat menempel dinding.
+    // 7. Drift Particles & Tire Screech Audio
+    if (this.particles && (this.isDrifting || Math.abs(this.lateralSlip) > 3.0)) {
+      if (Math.random() < 0.75) {
+        const leftRear = this.mesh.position.clone().add(
+          new THREE.Vector3(-0.95, 0.25, -1.25).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y)
+        );
+        const rightRear = this.mesh.position.clone().add(
+          new THREE.Vector3(0.95, 0.25, -1.25).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y)
+        );
+        this.particles.emitSkidDust(leftRear);
+        this.particles.emitSkidDust(rightRear);
+      }
+    }
+
+    const driftIntensity = Math.min(1.0, (Math.abs(this.lateralSlip) + (this.isDrifting ? 4.5 : 0)) / 10.0);
+    if (this.audio && this.audio.updateDriftSound) {
+      this.audio.updateDriftSound(
+        (this.isDrifting || Math.abs(this.lateralSlip) > 3.5) && Math.abs(this.speed) > 4.0,
+        driftIntensity
+      );
+    }
+
+    // 8. Wheel Spin Rotation
     let effectiveSpinSpeed = this.speed;
     if (Math.abs(effectiveSpinSpeed) < 1.0 && Math.abs(throttle) > 0.1) {
       effectiveSpinSpeed = throttle * 8.0;
@@ -676,15 +732,16 @@ export class CarController {
     if (this.rearLeftWheel) this.rearLeftWheel.rotation.x += wheelRotDelta;
     if (this.rearRightWheel) this.rearRightWheel.rotation.x += wheelRotDelta;
 
-    // 7. Suspension Body Roll & Pitch
+    // 9. Suspension Body Roll & Pitch
     const speedRatio = this.speed / CONFIG.CAR.MAX_SPEED_FORWARD;
-    const targetRoll = -this.steerAngle * speedRatio * CONFIG.CAR.BODY_ROLL_FACTOR * 4.5;
+    const driftRollAdd = this.isDrifting ? -this.steerAngle * 0.08 : 0;
+    const targetRoll = (-this.steerAngle * speedRatio * CONFIG.CAR.BODY_ROLL_FACTOR * 4.5) + driftRollAdd;
     const targetPitch = throttle * CONFIG.CAR.BODY_PITCH_FACTOR * 2.5;
 
     this.bodyGroup.rotation.z += (targetRoll - this.bodyGroup.rotation.z) * 0.15;
     this.bodyGroup.rotation.x += (targetPitch - this.bodyGroup.rotation.x) * 0.15;
 
-    // 8. Update Engine Audio
+    // 10. Update Engine Audio
     this.audio.updateEngine(this.speed, CONFIG.CAR.MAX_SPEED_FORWARD);
   }
 

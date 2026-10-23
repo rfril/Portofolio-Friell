@@ -55,12 +55,12 @@ export class InputManager {
       e.preventDefault();
     }
 
-    // Movement keys
+    // Movement keys & Handbrake
     if (key === "w" || key === "arrowup") this.keys.forward = true;
     if (key === "s" || key === "arrowdown") this.keys.backward = true;
     if (key === "a" || key === "arrowleft") this.keys.left = true;
     if (key === "d" || key === "arrowright") this.keys.right = true;
-    if (key === " ") this.keys.brake = true;
+    if (key === " " || key === "shift") this.keys.brake = true;
 
     // One-shot triggers
     if (key === "e") this.triggerAction("interact");
@@ -78,7 +78,7 @@ export class InputManager {
     if (key === "s" || key === "arrowdown") this.keys.backward = false;
     if (key === "a" || key === "arrowleft") this.keys.left = false;
     if (key === "d" || key === "arrowright") this.keys.right = false;
-    if (key === " ") this.keys.brake = false;
+    if (key === " " || key === "shift") this.keys.brake = false;
   }
 
   onAction(action, callback) {
@@ -134,7 +134,7 @@ export class InputManager {
 
   isBraking() {
     if (!this.stateManager.canDrive()) return true;
-    return this.keys.brake;
+    return this.keys.brake || !!this.touchInputs.brake;
   }
 
   // Mobile virtual controls setters
@@ -142,6 +142,7 @@ export class InputManager {
   setTouchBackward(val) { this.touchInputs.backward = !!val; }
   setTouchLeft(val) { this.touchInputs.left = !!val; }
   setTouchRight(val) { this.touchInputs.right = !!val; }
+  setTouchBrake(val) { this.touchInputs.brake = !!val; }
   setTouchAxes(steer, throttle) {
     this.touchInputs.steerAxis = steer;
     this.touchInputs.throttleAxis = throttle;

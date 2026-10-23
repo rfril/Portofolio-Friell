@@ -14,6 +14,11 @@ export class AudioManager {
     this.engineFilter = null;
     this.isEngineRunning = false;
     this.isInitialized = false;
+
+    // Drift / Tire Screech Audio Nodes
+    this.driftOsc = null;
+    this.driftGain = null;
+    this.driftFilter = null;
   }
 
   init() {
@@ -94,6 +99,46 @@ export class AudioManager {
     this.engineOsc.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.08);
     this.engineFilter.frequency.setTargetAtTime(filterFreq, this.ctx.currentTime, 0.08);
     this.engineGain.gain.setTargetAtTime(targetVol, this.ctx.currentTime, 0.08);
+  }
+
+  // Efek suara decitan ban saat mobil drifting
+  updateDriftSound(isDrifting, intensity = 0.5) {
+    if (!this.ctx || !this.isInitialized || this.isMuted) return;
+
+    if (isDrifting) {
+      if (!this.driftOsc) {
+        try {
+          this.driftOsc = this.ctx.createOscillator();
+          this.driftOsc.type = "sawtooth";
+          this.driftOsc.frequency.setValueAtTime(540, this.ctx.currentTime);
+
+          this.driftFilter = this.ctx.createBiquadFilter();
+          this.driftFilter.type = "bandpass";
+          this.driftFilter.frequency.setValueAtTime(850, this.ctx.currentTime);
+          this.driftFilter.Q.setValueAtTime(4.0, this.ctx.currentTime);
+
+          this.driftGain = this.ctx.createGain();
+          this.driftGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
+
+          this.driftOsc.connect(this.driftFilter);
+          this.driftFilter.connect(this.driftGain);
+          this.driftGain.connect(this.masterGain);
+          this.driftOsc.start();
+        } catch (e) {}
+      }
+
+      if (this.driftGain && this.ctx) {
+        const targetVol = Math.min(0.14, 0.04 + intensity * 0.10);
+        this.driftGain.gain.setTargetAtTime(targetVol, this.ctx.currentTime, 0.05);
+        if (this.driftOsc) {
+          this.driftOsc.frequency.setTargetAtTime(520 + intensity * 260, this.ctx.currentTime, 0.08);
+        }
+      }
+    } else {
+      if (this.driftGain && this.ctx) {
+        this.driftGain.gain.setTargetAtTime(0.0, this.ctx.currentTime, 0.06);
+      }
+    }
   }
 
   stopEngine() {

@@ -503,17 +503,17 @@ export class Environment {
     };
 
     // Designated Commercial Parcels (Safely inside city blocks, leaving plazas completely open!)
-    // QUADRANT 1 INNER (NE): X: 35, Z: -38 to -52
-    createSkyscraper(38, -38, 15, 15, 42, matGlassHighrise, "skyscraper_ne_crown");
-    createOfficeBlock(38, -52, 15, 14, 24, matCorporateWhite, "office_ne_1");
+    // QUADRANT 1 INNER (NE): X: 42, Z: -44 to -58 (Spacious 14m buffer from canal and secondary street)
+    createSkyscraper(42, -44, 15, 15, 42, matGlassHighrise, "skyscraper_ne_crown");
+    createOfficeBlock(42, -58, 15, 14, 24, matCorporateWhite, "office_ne_1");
 
-    // QUADRANT 2 INNER (NW): X: -35, Z: -38 to -52
-    createSkyscraper(-38, -38, 15, 15, 38, matCharcoal, "skyscraper_nw_1");
-    createBrownstone(-38, -52, 15, 14, 15, "brownstone_nw_1");
+    // QUADRANT 2 INNER (NW): X: -42, Z: -44 to -58
+    createSkyscraper(-42, -44, 15, 15, 38, matCharcoal, "skyscraper_nw_1");
+    createBrownstone(-42, -58, 15, 14, 15, "brownstone_nw_1");
 
-    // QUADRANT 3 INNER (SW): X: -38, Z: 38 to 52
-    createSkyscraper(-38, 38, 15, 15, 40, matGlassHighrise, "skyscraper_sw_tech");
-    createOfficeBlock(-38, 52, 15, 14, 22, matCharcoal, "office_sw_1");
+    // QUADRANT 3 INNER (SW): X: -42, Z: 44 to 58
+    createSkyscraper(-42, 44, 15, 15, 40, matGlassHighrise, "skyscraper_sw_tech");
+    createOfficeBlock(-42, 58, 15, 14, 22, matCharcoal, "office_sw_1");
 
     // FAR OUTER SKYLINE TOWERS (Placed at ±175, safely beyond outer ring expressway ±145!)
     createOfficeBlock(175, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_ne");
@@ -632,40 +632,41 @@ export class Environment {
     };
 
     // Streetlights strictly spaced on outer sidewalk boundaries (11.5m from road center)
+    // Placed strictly in mid-block zones (never within 12m of any cross street, bridge, or driveway spur)
     const lampCoords = [
-      [11.5, -45], [-11.5, -45], [11.5, -95], [-11.5, -95],
-      [11.5, 45], [-11.5, 45], [11.5, 95], [-11.5, 95],
-      [45, 11.5], [45, -11.5], [95, 11.5], [95, -11.5],
-      [-45, 11.5], [-45, -11.5], [-95, 11.5], [-95, -11.5]
+      // North Main Avenue
+      [11.5, -44], [-11.5, -44],
+      [11.5, -120], [-11.5, -120],
+      // South Main Avenue
+      [11.5, 36], [-11.5, 36],
+      [11.5, 120], [-11.5, 120],
+      // East Boulevard
+      [36, 11.5], [36, -11.5],
+      [120, 11.5], [120, -11.5],
+      // West Boulevard
+      [-36, 11.5], [-36, -11.5],
+      [-120, 11.5], [-120, -11.5]
     ];
     lampCoords.forEach(([x, z]) => createCleanLamp(x, z));
 
-    // Sidewalk Trees
-    const createSidewalkTree = (x, z) => {
-      const tree = new THREE.Group();
-      tree.position.set(x, 0.15, z);
-
-      const grate = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.05, 1.8), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-      tree.add(grate);
-
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2.4, 6), trunkMat);
-      trunk.position.y = 1.2;
-      tree.add(trunk);
-
-      const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6, 1), foliageMat);
-      crown.position.y = 3.0;
-      crown.castShadow = true;
-      tree.add(crown);
-
-      this.scene.add(tree);
-      this.collision.addCircle(x, z, 1.0, "street_tree");
-    };
-
+    // Sidewalk Trees: alternating with lamps on safe mid-block stretches (100% clear of all intersections!)
     const treeCoords = [
-      [11.5, -30], [-11.5, -30], [11.5, -70], [-11.5, -70],
-      [11.5, 30], [-11.5, 30], [11.5, 70], [-11.5, 70],
-      [30, 11.5], [30, -11.5], [70, 11.5], [70, -11.5],
-      [-30, 11.5], [-30, -11.5], [-70, 11.5], [-70, -11.5]
+      // North Main Avenue
+      [11.5, -56], [-11.5, -56],
+      [11.5, -94], [-11.5, -94],
+      [11.5, -128], [-11.5, -128],
+      // South Main Avenue
+      [11.5, 52], [-11.5, 52],
+      [11.5, 94], [-11.5, 94],
+      [11.5, 128], [-11.5, 128],
+      // East Boulevard
+      [52, 11.5], [52, -11.5],
+      [94, 11.5], [94, -11.5],
+      [128, 11.5], [128, -11.5],
+      // West Boulevard
+      [-52, 11.5], [-52, -11.5],
+      [-94, 11.5], [-94, -11.5],
+      [-128, 11.5], [-128, -11.5]
     ];
     treeCoords.forEach(([x, z]) => createSidewalkTree(x, z));
   }

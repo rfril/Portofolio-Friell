@@ -263,7 +263,7 @@ export class Game {
     this.world.update(time, deltaTime, this.car);
 
     // Update HUD
-    this.ui.updateSpeedometer(this.car.getSpeedKmh());
+    this.ui.updateSpeedometer(this.car.getSpeedKmh(), this.car.isDrifting);
   }
 
   render() {

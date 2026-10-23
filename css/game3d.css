@@ -261,6 +261,16 @@
   border-color: var(--accent-rose);
   color: var(--accent-rose);
 }
+.touch-btn-drift {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  font-weight: 700;
+}
+.touch-btn-drift:active {
+  background: #f59e0b;
+  color: #070b14;
+}
 .touch-btn-interact {
   border-color: var(--accent-gold);
   color: var(--accent-gold);
