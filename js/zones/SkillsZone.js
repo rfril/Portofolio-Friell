@@ -48,7 +48,7 @@ export class SkillsZone extends BaseZone {
     serverRack.position.y = 3.25;
     serverRack.castShadow = true;
     this.mesh.add(serverRack);
-    this.collision.addBox(this.position.x, this.position.z, 4.0, 4.0, "skills_server_rack");
+    this.collision.addBox(this.position.x, this.position.z, 3.5, 3.5, "skills_server_rack");
 
     // Server LED strips
     const ledMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
@@ -100,7 +100,7 @@ export class SkillsZone extends BaseZone {
       this.crystals.push(crystal);
 
       this.mesh.add(pillarGroup);
-      this.collision.addCircle(this.position.x + px, this.position.z + pz, 1.5, `skill_pillar_${i}`);
+      this.collision.addCircle(this.position.x + px, this.position.z + pz, 0.9, `skill_pillar_${i}`);
     }
   }
 

@@ -49,7 +49,7 @@ export class ContactZone extends BaseZone {
     tower.position.y = 4.5;
     tower.castShadow = true;
     this.mesh.add(tower);
-    this.collision.addCircle(this.position.x, this.position.z, 2.4, "satellite_tower");
+    this.collision.addCircle(this.position.x, this.position.z, 1.4, "satellite_tower");
 
     // 2. Parabolic Satellite Dish on Top
     const dishGroup = new THREE.Group();
@@ -82,7 +82,7 @@ export class ContactZone extends BaseZone {
     mailbox.position.set(0, 1.1, 4.2);
     mailbox.castShadow = true;
     this.mesh.add(mailbox);
-    this.collision.addBox(this.position.x, this.position.z + 4.2, 2.0, 1.6, "contact_mailbox");
+    this.collision.addBox(this.position.x, this.position.z + 4.2, 1.6, 1.2, "contact_mailbox");
   }
 
   update(time, deltaTime) {

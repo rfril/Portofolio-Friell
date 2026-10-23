@@ -52,7 +52,7 @@ export class ApexsionsZone extends BaseZone {
     keep.castShadow = true;
     keep.receiveShadow = true;
     this.mesh.add(keep);
-    this.collision.addBox(this.position.x, this.position.z, 11.5, 11.5, "apexsions_keep");
+    this.collision.addBox(this.position.x, this.position.z, 11.0, 11.0, "apexsions_keep");
 
     // Gold Parapets / Battlements
     const battlement = new THREE.Mesh(new THREE.BoxGeometry(11.6, 0.8, 11.6), goldMat);
@@ -76,7 +76,7 @@ export class ApexsionsZone extends BaseZone {
       roof.castShadow = true;
       this.mesh.add(roof);
 
-      this.collision.addCircle(this.position.x + ox, this.position.z + oz, 2.2, "fortress_tower");
+      this.collision.addCircle(this.position.x + ox, this.position.z + oz, 1.8, "fortress_tower");
     });
 
     // 3. Floating BlueMap 3D Hologram Globe

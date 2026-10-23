@@ -451,7 +451,7 @@ export class Environment {
       g.add(beacon);
 
       this.scene.add(g);
-      this.collision.addBox(x, z, width + 0.5, depth + 0.5, name);
+      this.collision.addBox(x, z, width, depth, name);
     };
 
     // BUILDER 2: CORPORATE OFFICE BLOCK
@@ -477,7 +477,7 @@ export class Environment {
       g.add(ac);
 
       this.scene.add(g);
-      this.collision.addBox(x, z, width + 0.5, depth + 0.5, name);
+      this.collision.addBox(x, z, width, depth, name);
     };
 
     // BUILDER 3: URBAN BRICK BOUTIQUE
@@ -499,7 +499,7 @@ export class Environment {
       g.add(awning);
 
       this.scene.add(g);
-      this.collision.addBox(x, z, width + 0.5, depth + 0.5, name);
+      this.collision.addBox(x, z, width, depth, name);
     };
 
     // Designated Commercial Parcels (Safely inside city blocks, leaving plazas completely open!)
@@ -569,7 +569,7 @@ export class Environment {
       });
 
       this.scene.add(car);
-      this.collision.addBox(x, z, 2.4, 4.2, "parked_" + type);
+      this.collision.addBox(x, z, 2.0, 4.0, "parked_" + type);
     };
 
     // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back from driveway spur Z: -35)

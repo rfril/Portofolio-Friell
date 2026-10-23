@@ -52,7 +52,7 @@ export class KasirZone extends BaseZone {
     building.castShadow = true;
     building.receiveShadow = true;
     this.mesh.add(building);
-    this.collision.addBox(this.position.x, this.position.z, 12.5, 10.5, "kasir_building");
+    this.collision.addBox(this.position.x, this.position.z, 12.0, 10.0, "kasir_building");
 
     // Glass Display Facade
     const glassFacade = new THREE.Mesh(new THREE.BoxGeometry(9.5, 4.2, 0.4), glassMat);
@@ -95,7 +95,7 @@ export class KasirZone extends BaseZone {
     box2.castShadow = true;
     this.mesh.add(box2);
 
-    this.collision.addBox(this.position.x - 4.0, this.position.z + 6.2, 2.0, 2.0, "kasir_boxes");
+    this.collision.addBox(this.position.x - 4.0, this.position.z + 6.2, 1.5, 1.5, "kasir_boxes");
   }
 
   update(time, deltaTime) {

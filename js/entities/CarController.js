@@ -31,8 +31,8 @@ export class CarController {
     this.headLightLeft = null;
     this.headLightRight = null;
 
-    // Collision boundary radius
-    this.colliderRadius = 1.6;
+    // Collision boundary radius (accurately fitted to Bugatti Chiron body width)
+    this.colliderRadius = 1.05;
     this.lastBoundaryImpact = 0;
 
     this.buildCarModel();

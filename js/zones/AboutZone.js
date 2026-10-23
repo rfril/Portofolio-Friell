@@ -37,7 +37,7 @@ export class AboutZone extends BaseZone {
     backWall.position.set(0, 3.25, -9.0);
     backWall.castShadow = true;
     this.mesh.add(backWall);
-    this.collision.addBox(this.position.x, this.position.z - 9.0, 21, 1.2, "about_back_wall");
+    this.collision.addBox(this.position.x, this.position.z - 9.0, 20.0, 0.8, "about_back_wall");
 
     // Atap Kanopi Melayang
     const roof = new THREE.Mesh(new THREE.BoxGeometry(21, 0.6, 18), whiteMat);
@@ -55,8 +55,8 @@ export class AboutZone extends BaseZone {
     const pillarR = pillarL.clone();
     pillarR.position.x = 9.5;
     this.mesh.add(pillarR);
-    this.collision.addBox(this.position.x - 9.5, this.position.z + 7.5, 1.2, 1.2, "about_pillar_l");
-    this.collision.addBox(this.position.x + 9.5, this.position.z + 7.5, 1.2, 1.2, "about_pillar_r");
+    this.collision.addBox(this.position.x - 9.5, this.position.z + 7.5, 0.7, 0.7, "about_pillar_l");
+    this.collision.addBox(this.position.x + 9.5, this.position.z + 7.5, 0.7, 0.7, "about_pillar_r");
 
     // Papan Nama Gedung
     const signTex = this.createLocalSignTexture("RAFRIEL DEVELOPER HQ", "Studio & Karir Siswa RPL SMKN 71");
@@ -69,7 +69,7 @@ export class AboutZone extends BaseZone {
     deskTop.position.set(0, 1.8, -2.0);
     deskTop.castShadow = true;
     this.mesh.add(deskTop);
-    this.collision.addBox(this.position.x, this.position.z - 2.0, 7.5, 3.2, "developer_desk");
+    this.collision.addBox(this.position.x, this.position.z - 2.0, 7.0, 2.8, "developer_desk");
 
     // Kaki Meja
     const legGeo = new THREE.BoxGeometry(0.25, 1.8, 2.6);

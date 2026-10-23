@@ -53,7 +53,7 @@ export class PororoZone extends BaseZone {
     cafe.castShadow = true;
     cafe.receiveShadow = true;
     this.mesh.add(cafe);
-    this.collision.addBox(this.position.x, this.position.z, 12.0, 10.0, "pororo_cafe");
+    this.collision.addBox(this.position.x, this.position.z, 11.5, 9.5, "pororo_cafe");
 
     // Striped Awning (Canopy)
     const awningGroup = new THREE.Group();
@@ -111,7 +111,7 @@ export class PororoZone extends BaseZone {
     patio.add(umbrellaTop);
 
     this.mesh.add(patio);
-    this.collision.addCircle(this.position.x + 5.0, this.position.z + 6.2, 1.8, "pororo_patio");
+    this.collision.addCircle(this.position.x + 5.0, this.position.z + 6.2, 1.3, "pororo_patio");
   }
 
   update(time, deltaTime) {

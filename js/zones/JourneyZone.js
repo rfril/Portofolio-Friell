@@ -84,10 +84,10 @@ export class JourneyZone extends BaseZone {
 
       this.monuments.push(gem);
       this.mesh.add(group);
-      this.collision.addCircle(this.position.x + offset.x, this.position.z + offset.z, 1.8, `journey_monument_${idx}`);
+      this.collision.addCircle(this.position.x + offset.x, this.position.z + offset.z, 1.2, `journey_monument_${idx}`);
     });
 
-    // 3. Promenade Benches & Lampposts inside the plaza
+    // 3. Promenade Benches inside the plaza
     const bench1 = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.5, 0.8), woodMat);
     bench1.position.set(-8, 0.45, 8);
     this.mesh.add(bench1);
@@ -95,9 +95,6 @@ export class JourneyZone extends BaseZone {
     const bench2 = bench1.clone();
     bench2.position.x = 8;
     this.mesh.add(bench2);
-
-    // Plaza boundary collision (Keeps car inside plaza grounds or guided around)
-    this.collision.addBox(this.position.x, this.position.z - 13, 38, 1.0, "journey_north_edge");
   }
 
   update(time, deltaTime) {

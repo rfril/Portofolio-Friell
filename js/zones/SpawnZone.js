@@ -93,7 +93,7 @@ export class SpawnZone extends BaseZone {
     welcomeGroup.add(frame);
 
     this.mesh.add(welcomeGroup);
-    this.collision.addBox(18, -18, 5.0, 5.0, "spawn_welcome_kiosk");
+    this.collision.addBox(18, -18, 4.4, 0.8, "spawn_welcome_kiosk");
   }
 
   update(time, deltaTime) {
