@@ -649,6 +649,27 @@ export class Environment {
     ];
     lampCoords.forEach(([x, z]) => createCleanLamp(x, z));
 
+    // Sidewalk Trees
+    const createSidewalkTree = (x, z) => {
+      const tree = new THREE.Group();
+      tree.position.set(x, 0.15, z);
+
+      const grate = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.05, 1.8), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+      tree.add(grate);
+
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2.4, 6), trunkMat);
+      trunk.position.y = 1.2;
+      tree.add(trunk);
+
+      const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(1.6, 1), foliageMat);
+      crown.position.y = 3.0;
+      crown.castShadow = true;
+      tree.add(crown);
+
+      this.scene.add(tree);
+      this.collision.addCircle(x, z, 1.0, "street_tree");
+    };
+
     // Sidewalk Trees: alternating with lamps on safe mid-block stretches (100% clear of all intersections!)
     const treeCoords = [
       // North Main Avenue
