@@ -44,9 +44,9 @@ export const CONFIG = {
     DEFAULT_MODE: "chase", // "chase" | "cinematic" | "isometric" | "topdown"
     MODES: {
       chase: {
-        dist: 11.8,
-        height: 3.8,
-        lookAhead: 14.0,
+        dist: 11.2,
+        height: 3.2,
+        lookAhead: 15.0,
         fov: 58,
         damping: 0.12
       },

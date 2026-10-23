@@ -127,10 +127,10 @@ export class CameraController {
 
       // Geser kamera secara intuitif & presisi
       this.orbitYaw -= deltaX * 0.0075;
-      this.orbitPitch -= deltaY * 0.0055;
+      this.orbitPitch -= deltaY * 0.0065;
 
-      // Batasi sudut elevasi pitch agar pemandangan gedung tinggi terlihat tanpa kamera menembus aspal
-      this.orbitPitch = Math.max(-0.45, Math.min(0.70, this.orbitPitch));
+      // Batasi sudut elevasi pitch (-0.95 radian ~ -55° memungkinkan mendongak penuh ke langit dan gedung tinggi)
+      this.orbitPitch = Math.max(-0.95, Math.min(0.70, this.orbitPitch));
     });
 
     window.addEventListener("mouseup", (e) => {
@@ -180,8 +180,8 @@ export class CameraController {
         this.lastPointerY = touch.clientY;
 
         this.orbitYaw -= deltaX * 0.0085;
-        this.orbitPitch -= deltaY * 0.0065;
-        this.orbitPitch = Math.max(-0.45, Math.min(0.70, this.orbitPitch));
+        this.orbitPitch -= deltaY * 0.0075;
+        this.orbitPitch = Math.max(-0.95, Math.min(0.70, this.orbitPitch));
       },
       { passive: true }
     );
@@ -257,27 +257,48 @@ export class CameraController {
       const effectiveYaw = this.smoothedYaw + this.orbitYaw;
       const effectivePitch = this.orbitPitch;
 
+      // Vehicle target center (~0.95m above ground)
+      const targetCenterY = targetPos.y + 0.95;
+      const minCamHeight = 0.42; // Batas aman di atas aspal (0.02) dan trotoar (0.25)
+
       // Dynamic Speed Distance & FOV
       const speedRatio = Math.min(absSpeed / 42.0, 1.0);
-      const dynamicDist = baseDist + (isCinematic ? speedRatio * 3.0 : speedRatio * 2.2);
-      const groundDist = dynamicDist * Math.cos(effectivePitch);
+      const dynamicDist = baseDist + (isCinematic ? speedRatio * 3.0 : speedRatio * 2.0);
 
-      // Hitung posisi kamera di dunia 3D
-      const camY = targetPos.y + Math.max(1.8, baseHeight + Math.sin(effectivePitch) * 8.5);
+      // =======================================================================
+      // GROUND CLAMP & PROXIMITY COMPRESSION
+      // Saat pemain mendongak ke atas langit (effectivePitch < 0):
+      // Kamera semakin mendekat ke mobil dan tertahan aman di atas aspal tanpa menembus jalan!
+      // =======================================================================
+      let compressionFactor = 1.0;
+      if (effectivePitch < 0) {
+        const pitchRatio = Math.min(1.0, -effectivePitch / 0.95);
+        // Menekan jarak dari 100% turun hingga ~30% saat mendongak maksimal
+        compressionFactor = Math.max(0.28, 1.0 - pitchRatio * 0.72);
+      }
+
+      const finalDist = dynamicDist * compressionFactor;
+      const groundDist = finalDist * Math.cos(Math.max(-0.35, effectivePitch));
+
+      // Hitung ketinggian kamera di dunia 3D (terjaga presisi di atas minCamHeight)
+      const rawYOffset = (baseHeight - 0.95) + effectivePitch * 5.8;
+      const camY = Math.max(minCamHeight, targetCenterY + rawYOffset * compressionFactor);
+
       desiredPos.set(
         targetPos.x + Math.sin(effectiveYaw) * groundDist,
         camY,
         targetPos.z + Math.cos(effectiveYaw) * groundDist
       );
 
-      // Hitung titik bidik (Look-At)
-      // Melihat jauh ke depan di jalan raya pada arah hadap kamera/mobil
+      // Titik bidik (Look-At):
+      // Melihat jauh ke depan di jalan raya dan terangkat tinggi ke langit saat mendongakkan kamera
       const lookDirYaw = effectiveYaw + Math.PI;
-      const lookY = targetPos.y + 1.4 - effectivePitch * 9.0;
+      const lookY = targetCenterY + 0.45 - effectivePitch * 24.0;
+
       lookAtPos.set(
-        desiredPos.x + Math.sin(lookDirYaw) * (groundDist + lookAheadDist),
+        desiredPos.x + Math.sin(lookDirYaw) * (finalDist + lookAheadDist),
         lookY,
-        desiredPos.z + Math.cos(lookDirYaw) * (groundDist + lookAheadDist)
+        desiredPos.z + Math.cos(lookDirYaw) * (finalDist + lookAheadDist)
       );
 
       // Dynamic FOV saat melaju kencang

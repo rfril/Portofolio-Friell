@@ -1610,7 +1610,7 @@ export class Environment {
     createSuperSkyscraper(48, -48, 16, 16, 88, matGlassBlue, "skyscraper_ne_zenithar", {
       crownType: "helipad",
       billboard: bbCleanArch,
-      billboardSide: "W",
+      billboardSide: "S",
       accentMat: ledGoldAccentMat
     });
 
@@ -1640,7 +1640,7 @@ export class Environment {
     createSuperSkyscraper(-48, -48, 16, 16, 78, matGlassCyan, "skyscraper_nw_silicon", {
       crownType: "angled",
       billboard: bbDev,
-      billboardSide: "E",
+      billboardSide: "S",
       accentMat: ledAccentMat
     });
 
@@ -1673,7 +1673,7 @@ export class Environment {
 
     createMidriseBlock(-24, 56, 16, 12, 28, matCorporateWhite, "midrise_sw_dining", {
       billboard: bbCoffee,
-      billboardSide: "N",
+      billboardSide: "E",
       awningColor: 0x10b981
     });
 
@@ -1757,11 +1757,11 @@ export class Environment {
     createSuperSkyscraper(118, -56, 16, 16, 68, matGlassGold, "skyscraper_em_2", { crownType: "spire" });
     createLoftWithFireEscapes(92, -36, 14, 10, 26, matBrick, "loft_em_3");
 
-    // TIMES SQUARE TOWER 4: Facing West along East Boulevard towards POS Kasir Plaza
+    // TIMES SQUARE TOWER 4: Facing South along East Boulevard
     createTimesSquareTower(126, -36, 16, 16, 74, matGlassCyan, "ts_tower_em_boulevard", {
       mainBillboard: bbSkillCleanCode,
       verticalTicker: tickerDevTips,
-      billboardSide: "W",
+      billboardSide: "S",
       accentMat: ledAccentMat
     });
 
@@ -1780,11 +1780,11 @@ export class Environment {
 
     createSuperSkyscraper(-92, 24, 14, 14, 60, matGlassGold, "skyscraper_wm_5", { crownType: "spire" });
 
-    // TIMES SQUARE TOWER 5: Facing East along West Boulevard towards PoRoRo Cafe Plaza
+    // TIMES SQUARE TOWER 5: Facing North along West Boulevard
     createTimesSquareTower(-126, 24, 16, 16, 76, matGlassBlue, "ts_tower_wm_boulevard", {
       mainBillboard: bbSkillSelfLearning,
       verticalTicker: tickerTechSim,
-      billboardSide: "E",
+      billboardSide: "N",
       accentMat: ledPinkAccentMat
     });
 
@@ -1831,10 +1831,10 @@ export class Environment {
     createHighwayMonolithBillboard(85, 12, Math.PI / 2, bbCleanArch, "monolith_bb_cleanarch");
     createHighwayMonolithBillboard(-85, -12, Math.PI / 2, bbSkillProblemSolving, "monolith_bb_problem_solving");
 
-    createHighwayMonolithBillboard(60, -195, Math.PI / 2, bbSkillKomunikasi, "monolith_bb_komunikasi");
-    createHighwayMonolithBillboard(-60, 195, Math.PI / 2, bbSkillTeamwork, "monolith_bb_teamwork");
-    createHighwayMonolithBillboard(195, 60, 0, bbSkillCleanCode, "monolith_bb_cleancode");
-    createHighwayMonolithBillboard(-195, -60, 0, bbSkillSelfLearning, "monolith_bb_selflearning");
+    createHighwayMonolithBillboard(60, -188, Math.PI / 2, bbSkillKomunikasi, "monolith_bb_komunikasi");
+    createHighwayMonolithBillboard(-60, 188, Math.PI / 2, bbSkillTeamwork, "monolith_bb_teamwork");
+    createHighwayMonolithBillboard(188, 60, 0, bbSkillCleanCode, "monolith_bb_cleancode");
+    createHighwayMonolithBillboard(-188, -60, 0, bbSkillSelfLearning, "monolith_bb_selflearning");
 
     // =========================================================================
     // 11. UNBROKEN 360-DEGREE PERIMETER SKYLINE BACKDROP (OUTER HORIZON AT +-238m)
