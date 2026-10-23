@@ -16,19 +16,19 @@ export const CONFIG = {
     FOG_FAR: 440
   },
 
-  // Toy Vehicle Kinematics (Bruno Simon Inspired Driving Feel + Smooth Tap-to-Drift)
+  // Toy Vehicle Kinematics (Bruno Simon Inspired Driving Feel + Instant Tap-to-Drift)
   CAR: {
     MAX_SPEED_FORWARD: 48.0, // Kecepatan 106 km/h
     MAX_SPEED_REVERSE: 18.0,
     ACCELERATION: 36.0,
-    BRAKE_FORCE: 36.0,       // Rem kaki & rem tangan saat kecepatan normal
-    DRIFT_MIN_SPEED: 22.0,   // Ambang kecepatan tinggi untuk memicu drift (~48+ km/h)
-    DRIFT_EXIT_SPEED: 14.0,  // Kecepatan minimal untuk mempertahankan drift
-    DRIFT_STEER_BOOST: 1.35, // Kemudi stabil & halus saat drift (tidak terlalu cepat/liar)
-    DRIFT_GRIP_RECOVERY: 5.0,// Pemulihan traksi setelah lurus
-    HANDBRAKE_DECEL: 8.0,    // Deselerasi lembut saat powerslide
+    BRAKE_FORCE: 36.0,       // Rem kaki & rem tangan saat kecepatan rendah
+    DRIFT_MIN_SPEED: 12.0,   // Mencet rem tangan langsung ngedrift sejak kecepatan ~26+ km/h!
+    DRIFT_EXIT_SPEED: 8.0,   // Kecepatan minimal sebelum drift berakhir
+    DRIFT_STEER_BOOST: 1.40, // Kemudi stabil & responsif saat drift
+    DRIFT_GRIP_RECOVERY: 5.0,// Pemulihan traksi setelah setir lurus
+    HANDBRAKE_DECEL: 6.0,    // Meluncur mulus saat drift tanpa terhambat
     NATURAL_FRICTION: 10.0,
-    STEER_SPEED: 3.2,
+    STEER_SPEED: 3.4,
     STEER_MAX_ANGLE: 0.62,   // ~35 derajat
     STEER_RETURN_SPEED: 4.8,
     DRIFT_SLIP_FACTOR: 0.94,

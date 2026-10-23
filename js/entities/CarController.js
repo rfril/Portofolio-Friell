@@ -22,6 +22,7 @@ export class CarController {
     this.isDrifting = false;
     this.driftDirection = 0;
     this.driftStraightTimer = 0;
+    this.handbrakeTapTimer = 0;
     this.wasHandbrakePressed = false;
     this.velocity = new THREE.Vector3(0, 0, 0);
 
@@ -535,6 +536,7 @@ export class CarController {
     this.isDrifting = false;
     this.driftDirection = 0;
     this.driftStraightTimer = 0;
+    this.handbrakeTapTimer = 0;
     this.wasHandbrakePressed = false;
     this.velocity.set(0, 0, 0);
     if (this.audio && this.audio.updateDriftSound) {
@@ -550,38 +552,45 @@ export class CarController {
     const steerInput = this.input.getSteering();
     const handbrake = this.input.isBraking();
 
-    // Deteksi ketukan rem tangan (one-shot trigger / tap-to-drift)
+    // Deteksi ketukan rem tangan
     const handbrakeJustPressed = handbrake && !this.wasHandbrakePressed;
     this.wasHandbrakePressed = handbrake;
 
-    // Syarat kecepatan tinggi untuk memicu drift (~48+ km/h)
-    const minDriftSpeed = CONFIG.CAR.DRIFT_MIN_SPEED || 22.0;
-    const isHighSpeed = this.speed > minDriftSpeed;
-    const isTurning = Math.abs(steerInput) > 0.15;
+    // Buffer rem tangan: sekali tekan/klik langsung tersimpan aktif selama 550ms
+    if (handbrakeJustPressed || handbrake) {
+      this.handbrakeTapTimer = 0.55;
+    } else if (this.handbrakeTapTimer > 0) {
+      this.handbrakeTapTimer -= deltaTime;
+    }
 
-    // 1. STATE MACHINE DRIFT (TAP-TO-DRIFT ALA RIDGE RACER / NEED FOR SPEED)
+    const minDriftSpeed = CONFIG.CAR.DRIFT_MIN_SPEED || 12.0;
+    const isMovingForward = this.speed > minDriftSpeed;
+    const isSteering = Math.abs(steerInput) > 0.05 || Math.abs(this.steerAngle) > 0.05;
+
+    // 1. STATE MACHINE DRIFT (MENCET DOANG LANGSUNG DRIFT, TANPA HARUS HOLD)
     if (!this.isDrifting) {
-      // Hanya bisa memicu drift jika: KECEPATAN TINGGI + SEDANG BELOK + TAP REM TANGAN!
-      // (Tidak perlu ditahan, cukup tap 1x saat belok di kecepatan tinggi)
-      if (handbrakeJustPressed && isHighSpeed && isTurning) {
+      // Cukup mencet tombol rem tangan (Space / Shift / Sentuh) saat mobil melaju & mengarahkan setir:
+      // Langsung 100% instan mengunci mode drift!
+      if (this.handbrakeTapTimer > 0 && isMovingForward && isSteering) {
         this.isDrifting = true;
-        this.driftDirection = Math.sign(steerInput);
+        this.driftDirection = Math.sign(steerInput) || (this.steerAngle > 0 ? 1 : -1) || 1;
         this.driftStraightTimer = 0;
+        this.handbrakeTapTimer = 0; // consumed!
       }
     } else {
       // Kondisi keluar dari drift secara alami & mulus:
       // a. Kecepatan mobil turun di bawah ambang minimal drift
-      if (this.speed < (CONFIG.CAR.DRIFT_EXIT_SPEED || 14.0)) {
+      if (this.speed < (CONFIG.CAR.DRIFT_EXIT_SPEED || 8.0)) {
         this.isDrifting = false;
       }
       // b. Pemain menekan rem mundur (S / Down)
       else if (throttle < -0.1) {
         this.isDrifting = false;
       }
-      // c. Setir diluruskan atau counter-steer untuk meluruskan mobil
-      else if (Math.abs(steerInput) < 0.1 || (Math.sign(steerInput) !== 0 && Math.sign(steerInput) !== this.driftDirection)) {
+      // c. Setir diluruskan setelah menyelesaikan belokan
+      else if (Math.abs(steerInput) < 0.06 || (Math.sign(steerInput) !== 0 && Math.sign(steerInput) !== this.driftDirection)) {
         this.driftStraightTimer += deltaTime;
-        if (this.driftStraightTimer > 0.35) {
+        if (this.driftStraightTimer > 0.30) {
           this.isDrifting = false;
         }
       } else {
@@ -589,14 +598,15 @@ export class CarController {
       }
 
       // d. Tap rem tangan lagi saat lurus membatalkan drift
-      if (handbrakeJustPressed && !isTurning) {
+      if (handbrakeJustPressed && !isSteering) {
         this.isDrifting = false;
+        this.handbrakeTapTimer = 0;
       }
     }
 
-    // 2. LOGIKA PENGEREMAN
-    // Saat kecepatan biasa / tidak drift: Rem tangan berfungsi 100% seperti rem biasa (menghentikan mobil)
-    if (handbrake && !this.isDrifting) {
+    // 2. LOGIKA PENGEREMAN BIASA
+    // Saat kecepatan rendah / tidak sedang drift: rem tangan berfungsi murni sebagai rem kuat (menghentikan mobil)
+    if (handbrake && !this.isDrifting && !isMovingForward) {
       const brakeDecel = (CONFIG.CAR.BRAKE_FORCE || 36.0) * deltaTime;
       if (this.speed > 0) this.speed = Math.max(0, this.speed - brakeDecel);
       else if (this.speed < 0) this.speed = Math.min(0, this.speed + brakeDecel);
