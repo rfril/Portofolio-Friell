@@ -6,14 +6,14 @@
 export const CONFIG = {
   // World Dimensions (Expanded Metropolis Scale)
   WORLD: {
-    WIDTH: 520,
-    DEPTH: 520,
-    BOUND_PADDING: 15, // Jarak batas pagar dari tepi (Limit: +-245m)
+    WIDTH: 720,
+    DEPTH: 720,
+    BOUND_PADDING: 18, // Jarak batas pagar dari tepi (Limit: +-342m)
     GRAVITY: 9.8,
     DAY_SKY_COLOR: 0xdbeafe,
     FOG_COLOR: 0xdbeafe,
-    FOG_NEAR: 140,
-    FOG_FAR: 500
+    FOG_NEAR: 180,
+    FOG_FAR: 700
   },
 
   // Toy Vehicle Kinematics (Bruno Simon Inspired Driving Feel + Instant Tap-to-Drift)

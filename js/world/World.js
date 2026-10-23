@@ -50,7 +50,7 @@ export class World {
 
   update(time, deltaTime, carController) {
     // 1. Update Environment (Clouds)
-    this.environment.update(deltaTime);
+    this.environment.update(time, deltaTime);
 
     const carPos = carController.getPosition();
 

@@ -67,7 +67,7 @@ export class Game {
       45,
       window.innerWidth / window.innerHeight,
       0.1,
-      800
+      1000
     );
     this.camera.position.set(38, 44, 38);
 
@@ -104,9 +104,9 @@ export class Game {
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
     this.sunLight.shadow.camera.near = 10;
-    this.sunLight.shadow.camera.far = 380;
+    this.sunLight.shadow.camera.far = 480;
 
-    const d = 150;
+    const d = 220;
     this.sunLight.shadow.camera.left = -d;
     this.sunLight.shadow.camera.right = d;
     this.sunLight.shadow.camera.top = d;
