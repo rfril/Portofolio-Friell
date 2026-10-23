@@ -6,14 +6,14 @@
 export const CONFIG = {
   // World Dimensions
   WORLD: {
-    WIDTH: 360,
-    DEPTH: 360,
-    BOUND_PADDING: 12, // Jarak batas pagar dari tepi
+    WIDTH: 460,
+    DEPTH: 460,
+    BOUND_PADDING: 15, // Jarak batas pagar dari tepi
     GRAVITY: 9.8,
     DAY_SKY_COLOR: 0xdbeafe,
     FOG_COLOR: 0xdbeafe,
-    FOG_NEAR: 90,
-    FOG_FAR: 320
+    FOG_NEAR: 120,
+    FOG_FAR: 440
   },
 
   // Toy Vehicle Kinematics (Bruno Simon Inspired Driving Feel)
@@ -79,7 +79,7 @@ export const CONFIG = {
 
   // Collectibles & Gameplay
   GAMEPLAY: {
-    TOTAL_DIAMONDS: 15,
+    TOTAL_DIAMONDS: 20,
     INTERACTION_RADIUS: 9.0, // Jarak memicu prompt interaksi
     COLLECTIBLE_MAGNET_RADIUS: 4.5
   }

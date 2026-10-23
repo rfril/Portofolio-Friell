@@ -31,36 +31,43 @@ export class CollectibleManager {
   }
 
   spawnDiamonds() {
-    // 15 Strategically placed Diamond positions
+    // 20 Strategically placed Diamond positions across expanded architecture
     const positions = [
-      // Spawn Area (2)
+      // Spawn Plaza & Cyber Arch (3)
       { x: -6, z: 6 },
       { x: 6, z: -6 },
+      { x: 0, z: -14 },
 
-      // Journey Boulevard & Zone (3)
-      { x: 0, z: -35 },
-      { x: -10, z: -70 },
-      { x: 10, z: -80 },
+      // Canal Bridge (1)
+      { x: 0, z: -18 },
 
-      // Apexsions Fortress & East Road (3)
-      { x: 40, z: 0 },
-      { x: 75, z: -25 },
+      // Journey Timeline Avenue (4)
+      { x: 0, z: -42 },
+      { x: 0, z: -62 },
+      { x: -10, z: -75 },
+      { x: 10, z: -88 },
+
+      // Apexsions Fortress & Castle Realm (3)
+      { x: 65, z: -35 },
       { x: 88, z: -45 },
+      { x: 105, z: -60 },
 
-      // Kasir Digital Mart (2)
-      { x: 75, z: 25 },
+      // Kasir Commercial Plaza & Parking (2)
       { x: 86, z: 45 },
+      { x: 101, z: 57 },
 
-      // PoRoRo Gelato Cafe & West Road (2)
-      { x: -40, z: 0 },
+      // PoRoRo Gelato Cafe & Sakura Park (2)
       { x: -75, z: -25 },
+      { x: -129, z: -37 },
 
-      // Skills Lab (2)
-      { x: -75, z: 25 },
-      { x: -88, z: 45 },
+      // Skills Lab & Tech Keycaps (2)
+      { x: -103, z: 55 },
+      { x: -115, z: 45 },
 
-      // About Studio (1)
-      { x: 35, z: 65 }
+      // South District & Satellite Observatory (3)
+      { x: 35, z: 65 },
+      { x: -25, z: 125 },
+      { x: 0, z: 140 }
     ];
 
     positions.forEach((pos, idx) => {
