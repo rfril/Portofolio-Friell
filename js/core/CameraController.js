@@ -59,13 +59,7 @@ export class CameraController {
 
   bindPointerEvents() {
     // 0. Cegah Menu Konteks Klik Kanan Browser (Bebas Klik Kanan untuk Menggeser Kamera!)
-    // Catatan: Tahan Shift + Klik Kanan jika ingin memunculkan menu Inspect Element browser!
     window.addEventListener("contextmenu", (e) => {
-      // Tetap izinkan menu jika menekan tombol Shift (Shift + Klik Kanan untuk Inspect Element)
-      if (e.shiftKey) {
-        return;
-      }
-
       const el = e.target?.closest ? e.target : e.target?.parentElement;
       // Tetap izinkan menu klik kanan jika user berada di input atau textarea form
       if (el?.tagName === "INPUT" || el?.tagName === "TEXTAREA" || el?.closest("input") || el?.closest("textarea")) {
@@ -77,10 +71,6 @@ export class CameraController {
 
     // 1. Mouse Drag (Klik Kiri, Klik Tengah, maupun Klik Kanan untuk Mengubah Sudut Pandang)
     window.addEventListener("mousedown", (e) => {
-      // Jika menekan Shift + Klik Kanan, jangan mulai dragging kamera agar menu inspect muncul leluasa
-      if (e.shiftKey && e.button === 2) {
-        return;
-      }
       // Abaikan jika klik tombol UI, modal dialog, dsb
       const el = e.target?.closest ? e.target : e.target?.parentElement;
       if (
