@@ -48,8 +48,8 @@ export class Environment {
       return new THREE.CanvasTexture(canvas);
     };
 
-    // Helper Window Texture for Skyscrapers
-    this.createWindowTexture = (baseColorHex = "#0f172a", litColorHex = "#38bdf8", rows = 8, cols = 4) => {
+    // Helper Window Texture for Skyscrapers with Randomized Office Lights
+    this.createWindowTexture = (baseColorHex = "#0f172a", litColorHex = "#38bdf8", rows = 8, cols = 4, secondaryLit = "#fef08a") => {
       const canvas = document.createElement("canvas");
       canvas.width = 256;
       canvas.height = 512;
@@ -63,9 +63,15 @@ export class Environment {
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const isLit = Math.random() < 0.65;
-          ctx.fillStyle = isLit ? litColorHex : "#1e293b";
-          ctx.fillRect(c * cellW + 6, r * cellH + 8, cellW - 12, cellH - 16);
+          const rand = Math.random();
+          let color = "#1e293b"; // unlit dark window
+          if (rand < 0.55) {
+            color = litColorHex; // primary lit window
+          } else if (rand < 0.72) {
+            color = secondaryLit; // warm yellow/white suite light
+          }
+          ctx.fillStyle = color;
+          ctx.fillRect(c * cellW + 5, r * cellH + 6, cellW - 10, cellH - 12);
         }
       }
 
@@ -73,6 +79,104 @@ export class Environment {
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
       return tex;
+    };
+
+    // Helper Texture Generator for Rooftop Helipads
+    this.createHelipadTexture = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext("2d");
+
+      // Dark asphalt helipad base
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Yellow outer hazard circle
+      ctx.strokeStyle = "#eab308";
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.arc(128, 128, 102, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Inner white guidance ring
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(128, 128, 90, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Bold white "H"
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 96px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("H", 128, 128);
+
+      // Red corner beacon markers
+      ctx.fillStyle = "#ef4444";
+      [[32, 32], [224, 32], [32, 224], [224, 224]].forEach(([px, py]) => {
+        ctx.beginPath();
+        ctx.arc(px, py, 10, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      return new THREE.CanvasTexture(canvas);
+    };
+
+    // Helper Texture Generator for Electronic LED City Billboards
+    this.createBillboardTexture = (title, sub, tag, color1 = "#38bdf8", color2 = "#f59e0b", icon = "⚡") => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 512;
+      canvas.height = 256;
+      const ctx = canvas.getContext("2d");
+
+      // Deep cyber gradient background
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      grad.addColorStop(0, "#090d16");
+      grad.addColorStop(1, "#0f172a");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Glowing cyber neon border
+      ctx.strokeStyle = color1;
+      ctx.lineWidth = 8;
+      ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+
+      // Category tag pill
+      ctx.fillStyle = color1;
+      ctx.fillRect(32, 28, 150, 32);
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 15px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(tag.toUpperCase(), 107, 44);
+
+      // Icon badge
+      ctx.font = "bold 34px sans-serif";
+      ctx.fillStyle = color2;
+      ctx.textAlign = "right";
+      ctx.fillText(icon, canvas.width - 32, 52);
+
+      // Main Title
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 36px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(title, 32, 115);
+
+      // Subtitle
+      ctx.fillStyle = color1;
+      ctx.font = "600 20px sans-serif";
+      ctx.fillText(sub, 32, 160);
+
+      // Bottom separator & footer
+      ctx.fillStyle = color2;
+      ctx.fillRect(32, 195, canvas.width - 64, 4);
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "600 14px sans-serif";
+      ctx.fillText("FEATURED ON RAFRIEL METROPOLIS PORTFOLIO", 32, 222);
+
+      return new THREE.CanvasTexture(canvas);
     };
 
     this.initMetropolis();
@@ -84,6 +188,7 @@ export class Environment {
     this.buildRoadNetwork();
     this.buildCentralCityPark();
     this.buildCitySkyscrapersAndBlocks();
+    this.buildUrbanInfrastructureAndStreetFurniture();
     this.buildOffStreetParkingLots();
     this.buildStreetlightsAndTrees();
     this.buildWindTurbines();
@@ -404,123 +509,731 @@ export class Environment {
     this.collision.addCircle(38, 38, 6.0, "central_fountain");
   }
 
-  // 5. MODERN CITY BUILDINGS IN NEAT COMMERCIAL BLOCKS
+  // 5. MODERN CITY BUILDINGS & COMPREHENSIVE SKYSCRAPER ARCHITECTURE
   buildCitySkyscrapersAndBlocks() {
-    const windowTexBlue = this.createWindowTexture("#0f172a", "#38bdf8", 12, 4);
-    const windowTexCyan = this.createWindowTexture("#0b1120", "#22d3ee", 14, 5);
-    const windowTexGold = this.createWindowTexture("#1e293b", "#fde047", 10, 4);
+    // Shared Procedural Textures
+    const windowTexBlue = this.createWindowTexture("#0a1120", "#38bdf8", 14, 5, "#fef08a");
+    const windowTexCyan = this.createWindowTexture("#0b1120", "#22d3ee", 14, 5, "#67e8f9");
+    const windowTexGold = this.createWindowTexture("#0f172a", "#f59e0b", 12, 4, "#fef3c7");
+    const windowTexEmerald = this.createWindowTexture("#06120e", "#34d399", 14, 4, "#a7f3d0");
+    const windowTexDark = this.createWindowTexture("#020617", "#94a3b8", 12, 4, "#cbd5e1");
 
-    const matGlassHighrise = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.15, map: windowTexBlue });
-    const matCorporateWhite = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
-    const matCharcoal = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2, map: windowTexCyan });
-    const matBrickLoft = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
-    const matDarkTitanium = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3, map: windowTexGold });
+    const helipadTex = this.createHelipadTexture();
+    const helipadMat = new THREE.MeshStandardMaterial({ map: helipadTex, roughness: 0.6 });
 
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
-    const acMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6 });
+    // Procedural Electronic LED Billboards (Featuring Rafriel's Projects & Tech)
+    const bbApexsions = this.createBillboardTexture("APEXSIONS RPG MMO", "Java 21 • 3 Kerajaan • BlueMap 3D", "FLAGSHIP", "#f59e0b", "#ef4444", "⚔️");
+    const bbKasir = this.createBillboardTexture("POS KASIR FRIEL 2.0", "Nuxt 4 + Laravel REST API", "FULLSTACK", "#a855f7", "#06b6d4", "💻");
+    const bbPororo = this.createBillboardTexture("PORORO GELATO CAFE", "Artisan Desserts • Figma Design", "CREATIVE", "#10b981", "#f59e0b", "🍦");
+    const bbJesko = this.createBillboardTexture("KOENIGSEGG JESKO", "1600 HP Twin-Turbo • Aircore Carbon", "HYPERCAR", "#84cc16", "#38bdf8", "⚡");
+    const bbDev = this.createBillboardTexture("RAFRIEL RADITYA W.", "Game Developer & Systems Engineer", "PROFILE", "#38bdf8", "#f43f5e", "🚀");
 
-    // BUILDER 1: MULTI-TIER GLASS SKYSCRAPER
-    const createSkyscraper = (x, z, width, depth, height, mat, name = "skyscraper") => {
+    // Architectural Facade Materials
+    const matGlassBlue = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.92, roughness: 0.12, map: windowTexBlue });
+    const matGlassCyan = new THREE.MeshStandardMaterial({ color: 0x090d16, metalness: 0.90, roughness: 0.14, map: windowTexCyan });
+    const matGlassGold = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.88, roughness: 0.16, map: windowTexGold });
+    const matGlassEmerald = new THREE.MeshStandardMaterial({ color: 0x06120e, metalness: 0.90, roughness: 0.15, map: windowTexEmerald });
+    const matGlassDark = new THREE.MeshStandardMaterial({ color: 0x020617, metalness: 0.85, roughness: 0.20, map: windowTexDark });
+
+    const matCorporateWhite = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.1 });
+    const matGraniteDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.45, metalness: 0.4 });
+    const matCharcoal = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3, metalness: 0.6 });
+    const matBrick = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.75 });
+    const matSandstone = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65 });
+
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.85 });
+    const acMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.7, roughness: 0.3 });
+    const spireMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 });
+    const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    const lobbyGlassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.75 });
+    const ledAccentMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const ledGoldAccentMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+    // =========================================================================
+    // BUILDER 1: HIGH-TECH MULTI-TIER GLASS SKYSCRAPER
+    // =========================================================================
+    const createSuperSkyscraper = (x, z, width, depth, height, mat, name, opts = {}) => {
       const g = new THREE.Group();
       g.position.set(x, 0, z);
 
-      const podiumH = height * 0.3;
+      // 1. Street-Level Grand Entrance Podium (Double-height glass atrium & pillars)
+      const podiumH = Math.min(12, height * 0.22);
       const podium = new THREE.Mesh(new THREE.BoxGeometry(width, podiumH, depth), matCorporateWhite);
       podium.position.y = podiumH / 2;
       podium.castShadow = true;
+      podium.receiveShadow = true;
       g.add(podium);
 
-      const towerH = height * 0.7;
-      const towerW = width * 0.82;
-      const towerD = depth * 0.82;
-      const tower = new THREE.Mesh(new THREE.BoxGeometry(towerW, towerH, towerD), mat);
-      tower.position.y = podiumH + towerH / 2;
-      tower.castShadow = true;
-      g.add(tower);
+      // Glass Entrance Lobby
+      const lobby = new THREE.Mesh(new THREE.BoxGeometry(width * 0.75, podiumH * 0.55, depth + 0.3), lobbyGlassMat);
+      lobby.position.y = podiumH * 0.35;
+      g.add(lobby);
 
-      const crown = new THREE.Mesh(new THREE.BoxGeometry(towerW * 0.6, 2.2, towerD * 0.6), roofMat);
-      crown.position.y = height + 1.1;
+      // Entrance Pillars
+      [-width * 0.42, width * 0.42].forEach(px => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, podiumH, 8), matGraniteDark);
+        pillar.position.set(px, podiumH / 2, depth / 2 + 0.2);
+        g.add(pillar);
+      });
+
+      // 2. Mid Tower Shaft
+      const shaft1H = (height - podiumH) * 0.58;
+      const shaft1W = width * 0.84;
+      const shaft1D = depth * 0.84;
+      const shaft1 = new THREE.Mesh(new THREE.BoxGeometry(shaft1W, shaft1H, shaft1D), mat);
+      shaft1.position.y = podiumH + shaft1H / 2;
+      shaft1.castShadow = true;
+      g.add(shaft1);
+
+      // 3. Upper Tower Shaft (Architectural Setback)
+      const shaft2H = (height - podiumH) * 0.42;
+      const shaft2W = shaft1W * 0.82;
+      const shaft2D = shaft1D * 0.82;
+      const shaft2 = new THREE.Mesh(new THREE.BoxGeometry(shaft2W, shaft2H, shaft2D), mat);
+      shaft2.position.y = podiumH + shaft1H + shaft2H / 2;
+      shaft2.castShadow = true;
+      g.add(shaft2);
+
+      // 4. Rooftop Mechanical Penthouse
+      const crownW = shaft2W * 0.72;
+      const crownD = shaft2D * 0.72;
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(crownW, 2.8, crownD), roofMat);
+      crown.position.y = height + 1.4;
       crown.castShadow = true;
       g.add(crown);
 
-      const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.2, 7.5, 6), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
-      spire.position.y = height + 5.5;
-      g.add(spire);
+      // Glowing LED Crown Perimeter Trim
+      const ledTrim = new THREE.Mesh(new THREE.BoxGeometry(crownW + 0.1, 0.3, crownD + 0.1), opts.accentMat || ledAccentMat);
+      ledTrim.position.y = height + 2.7;
+      g.add(ledTrim);
 
-      const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.28, 6, 6), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-      beacon.position.y = height + 9.2;
-      g.add(beacon);
+      // Rooftop Industrial HVAC Cooling Chillers
+      [-crownW * 0.25, crownW * 0.25].forEach(cx => {
+        const acChiller = new THREE.Mesh(new THREE.BoxGeometry(crownW * 0.35, 1.6, crownD * 0.35), acMat);
+        acChiller.position.set(cx, height + 2.4, 0);
+        g.add(acChiller);
+      });
+
+      // 5. Crown Variations (Spire, Helipad, Angled, or Deco)
+      const crownType = opts.crownType || "spire";
+      if (crownType === "helipad") {
+        const padMesh = new THREE.Mesh(new THREE.BoxGeometry(crownW * 0.85, 0.3, crownD * 0.85), helipadMat);
+        padMesh.position.y = height + 2.9;
+        g.add(padMesh);
+      } else if (crownType === "angled") {
+        const wedgeGeo = new THREE.ConeGeometry(shaft2W * 0.48, 8, 4);
+        wedgeGeo.rotateY(Math.PI / 4);
+        const wedge = new THREE.Mesh(wedgeGeo, matCorporateWhite);
+        wedge.position.y = height + 5.5;
+        g.add(wedge);
+      } else if (crownType === "spire") {
+        const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.35, 12, 8), spireMat);
+        spire.position.y = height + 7.5;
+        g.add(spire);
+
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), beaconMat);
+        beacon.position.y = height + 13.5;
+        g.add(beacon);
+      }
+
+      // 6. Giant Electronic LED Billboard (if enabled)
+      if (opts.billboard) {
+        const bbMat = new THREE.MeshBasicMaterial({ map: opts.billboard });
+        const bbW = width * 0.82;
+        const bbH = bbW * 0.52;
+        const bbMesh = new THREE.Mesh(new THREE.PlaneGeometry(bbW, bbH), bbMat);
+        const side = opts.billboardSide || "W";
+
+        if (side === "W") {
+          bbMesh.position.set(-width / 2 - 0.1, podiumH + shaft1H * 0.55, 0);
+          bbMesh.rotation.y = -Math.PI / 2;
+        } else if (side === "E") {
+          bbMesh.position.set(width / 2 + 0.1, podiumH + shaft1H * 0.55, 0);
+          bbMesh.rotation.y = Math.PI / 2;
+        } else if (side === "N") {
+          bbMesh.position.set(0, podiumH + shaft1H * 0.55, -depth / 2 - 0.1);
+          bbMesh.rotation.y = Math.PI;
+        } else {
+          bbMesh.position.set(0, podiumH + shaft1H * 0.55, depth / 2 + 0.1);
+        }
+        g.add(bbMesh);
+      }
 
       this.scene.add(g);
       this.collision.addBox(x, z, width, depth, name);
     };
 
-    // BUILDER 2: CORPORATE OFFICE BLOCK
-    const createOfficeBlock = (x, z, width, depth, height, mat, name = "office_block") => {
+    // =========================================================================
+    // BUILDER 2: ICONIC METROPOLIS TWIN TOWERS WITH SKYBRIDGE
+    // =========================================================================
+    const createTwinTowers = (x, z, towerW, towerD, height, span, mat, name) => {
       const g = new THREE.Group();
       g.position.set(x, 0, z);
 
+      [-span / 2, span / 2].forEach((tx, idx) => {
+        // Individual Tower
+        const tower = new THREE.Mesh(new THREE.BoxGeometry(towerW, height, towerD), mat);
+        tower.position.set(tx, height / 2, 0);
+        tower.castShadow = true;
+        g.add(tower);
+
+        // Ground Podium Lobby
+        const lobby = new THREE.Mesh(new THREE.BoxGeometry(towerW + 1, 8, towerD + 1), matCorporateWhite);
+        lobby.position.set(tx, 4, 0);
+        g.add(lobby);
+
+        // Architectural Spire & Beacon
+        const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.4, 14, 8), spireMat);
+        spire.position.set(tx, height + 7, 0);
+        g.add(spire);
+
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), beaconMat);
+        beacon.position.set(tx, height + 14, 0);
+        g.add(beacon);
+
+        this.collision.addBox(x + tx, z, towerW, towerD, `${name}_tower_${idx}`);
+      });
+
+      // High-Altitude Enclosed Glass Skybridge Connecting Both Towers
+      const skybridgeY = height * 0.65;
+      const bridgeW = span - towerW + 1;
+      const bridge = new THREE.Mesh(new THREE.BoxGeometry(bridgeW, 5.2, towerD * 0.6), lobbyGlassMat);
+      bridge.position.set(0, skybridgeY, 0);
+      g.add(bridge);
+
+      // Skybridge Support Trusses
+      const truss = new THREE.Mesh(new THREE.BoxGeometry(bridgeW, 0.8, towerD * 0.62), matGraniteDark);
+      truss.position.set(0, skybridgeY - 2.8, 0);
+      g.add(truss);
+
+      this.scene.add(g);
+    };
+
+    // =========================================================================
+    // BUILDER 3: MID-RISE MIXED-USE COMMERCIAL & RESIDENTIAL URBAN BLOCK
+    // =========================================================================
+    const createMidriseBlock = (x, z, width, depth, height, mat, name, opts = {}) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+
+      // Main Building Body
+      const body = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), mat);
+      body.position.y = height / 2;
+      body.castShadow = true;
+      body.receiveShadow = true;
+      g.add(body);
+
+      // Ground Floor Retail Boutique Shopfronts & Colorful Awnings
+      const awningW = width * 0.88;
+      const awningColor = opts.awningColor || 0x0284c7;
+      const awningMat = new THREE.MeshStandardMaterial({ color: awningColor, roughness: 0.6 });
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(awningW, 0.35, 2.4), awningMat);
+      awning.position.set(0, 3.8, depth / 2 + 1.2);
+      awning.rotation.x = 0.22;
+      g.add(awning);
+
+      // Illuminated Glass Shopfront Display
+      const shopfront = new THREE.Mesh(new THREE.BoxGeometry(awningW, 3.4, 0.3), lobbyGlassMat);
+      shopfront.position.set(0, 1.8, depth / 2 + 0.15);
+      g.add(shopfront);
+
+      // Rooftop Parapet Wall
+      const parapet = new THREE.Mesh(new THREE.BoxGeometry(width, 0.8, depth), matCorporateWhite);
+      parapet.position.y = height + 0.4;
+      g.add(parapet);
+
+      // Rooftop AC Chiller Units
+      const ac = new THREE.Mesh(new THREE.BoxGeometry(width * 0.35, 1.8, depth * 0.35), acMat);
+      ac.position.set(-width * 0.2, height + 1.0, 0);
+      g.add(ac);
+
+      // Rooftop Access Stairwell Hut
+      const stairHut = new THREE.Mesh(new THREE.BoxGeometry(width * 0.25, 2.6, depth * 0.25), matGraniteDark);
+      stairHut.position.set(width * 0.22, height + 1.4, -depth * 0.15);
+      g.add(stairHut);
+
+      // Iconic Water Tower on Steel Stilt Legs (NYC/Tokyo Style)
+      if (opts.hasWaterTower) {
+        const wtGroup = new THREE.Group();
+        wtGroup.position.set(width * 0.15, height + 0.8, depth * 0.2);
+
+        // 4 Steel Stilt Legs
+        [-0.9, 0.9].forEach(lx => {
+          [-0.9, 0.9].forEach(lz => {
+            const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 6), matCharcoal);
+            leg.position.set(lx, 1.2, lz);
+            wtGroup.add(leg);
+          });
+        });
+
+        // Wooden Barrel Tank
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 2.2, 12), matBrick);
+        tank.position.y = 3.5;
+        wtGroup.add(tank);
+
+        // Conical Metal Cap
+        const cap = new THREE.Mesh(new THREE.ConeGeometry(1.4, 1.1, 12), matGraniteDark);
+        cap.position.y = 5.1;
+        wtGroup.add(cap);
+
+        g.add(wtGroup);
+      }
+
+      // Optional LED Billboard on Facade
+      if (opts.billboard) {
+        const bbMat = new THREE.MeshBasicMaterial({ map: opts.billboard });
+        const bbW = width * 0.82;
+        const bbH = bbW * 0.52;
+        const bbMesh = new THREE.Mesh(new THREE.PlaneGeometry(bbW, bbH), bbMat);
+        const side = opts.billboardSide || "S";
+        if (side === "S") {
+          bbMesh.position.set(0, height * 0.58, depth / 2 + 0.1);
+        } else if (side === "N") {
+          bbMesh.position.set(0, height * 0.58, -depth / 2 - 0.1);
+          bbMesh.rotation.y = Math.PI;
+        } else if (side === "E") {
+          bbMesh.position.set(width / 2 + 0.1, height * 0.58, 0);
+          bbMesh.rotation.y = Math.PI / 2;
+        } else {
+          bbMesh.position.set(-width / 2 - 0.1, height * 0.58, 0);
+          bbMesh.rotation.y = -Math.PI / 2;
+        }
+        g.add(bbMesh);
+      }
+
+      this.scene.add(g);
+      this.collision.addBox(x, z, width, depth, name);
+    };
+
+    // =========================================================================
+    // BUILDER 4: DISTANT BACKGROUND SKYLINE SKYSCRAPER (HIGH-RISE HORIZON)
+    // =========================================================================
+    const createSkylineTower = (x, z, width, depth, height, mat) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+
+      // Tower Mass
       const body = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), mat);
       body.position.y = height / 2;
       body.castShadow = true;
       g.add(body);
 
-      const lobby = new THREE.Mesh(
-        new THREE.BoxGeometry(width - 2, 4.2, 0.4),
-        new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, transparent: true, opacity: 0.65 })
-      );
-      lobby.position.set(0, 2.1, depth / 2 + 0.2);
-      g.add(lobby);
+      // Setback Crown
+      const crownH = height * 0.15;
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(width * 0.75, crownH, depth * 0.75), matCorporateWhite);
+      crown.position.y = height + crownH / 2;
+      g.add(crown);
 
-      const ac = new THREE.Mesh(new THREE.BoxGeometry(width * 0.4, 1.8, depth * 0.4), acMat);
-      ac.position.set(0, height + 0.9, 0);
-      ac.castShadow = true;
-      g.add(ac);
+      // Spire & Warning Beacon
+      const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.35, 12, 6), spireMat);
+      spire.position.y = height + crownH + 6;
+      g.add(spire);
+
+      const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 6, 6), beaconMat);
+      beacon.position.y = height + crownH + 12;
+      g.add(beacon);
 
       this.scene.add(g);
-      this.collision.addBox(x, z, width, depth, name);
     };
 
-    // BUILDER 3: URBAN BRICK BOUTIQUE
-    const createBrownstone = (x, z, width, depth, height, name = "brownstone") => {
+    // =========================================================================
+    // 1. CLUSTER DOWNTOWN FINANCIAL CORE (NORTH-EAST INNER QUADRANT)
+    // =========================================================================
+    createSuperSkyscraper(36, -50, 16, 16, 84, matGlassBlue, "skyscraper_ne_zenithar", {
+      crownType: "helipad",
+      billboard: bbApexsions,
+      billboardSide: "W",
+      accentMat: ledGoldAccentMat
+    });
+    createSuperSkyscraper(58, -50, 14, 14, 64, matGlassCyan, "skyscraper_ne_capital", {
+      crownType: "spire",
+      accentMat: ledAccentMat
+    });
+    createMidriseBlock(20, -50, 12, 14, 28, matCorporateWhite, "midrise_ne_avenue", {
+      awningColor: 0x0284c7,
+      hasWaterTower: true
+    });
+    createMidriseBlock(36, -34, 16, 10, 32, matCharcoal, "midrise_ne_waterfront", {
+      awningColor: 0x0f766e
+    });
+    createMidriseBlock(58, -34, 14, 10, 24, matBrick, "midrise_ne_lofts", {
+      awningColor: 0xb45309,
+      hasWaterTower: true
+    });
+
+    // =========================================================================
+    // 2. CLUSTER DOWNTOWN MEDIA & TECH CORE (NORTH-WEST INNER QUADRANT)
+    // =========================================================================
+    createSuperSkyscraper(-36, -50, 16, 16, 78, matGlassCyan, "skyscraper_nw_silicon", {
+      crownType: "angled",
+      billboard: bbDev,
+      billboardSide: "E",
+      accentMat: ledAccentMat
+    });
+    createSuperSkyscraper(-58, -50, 14, 14, 60, matGlassGold, "skyscraper_nw_nordic", {
+      crownType: "spire"
+    });
+    createMidriseBlock(-20, -50, 12, 14, 30, matCharcoal, "midrise_nw_media", {
+      billboard: bbJesko,
+      billboardSide: "E",
+      awningColor: 0x84cc16
+    });
+    createMidriseBlock(-36, -34, 16, 10, 28, matCorporateWhite, "midrise_nw_labs", {
+      awningColor: 0x38bdf8
+    });
+    createMidriseBlock(-58, -34, 14, 10, 22, matSandstone, "midrise_nw_apartments", {
+      hasWaterTower: true,
+      awningColor: 0xd97706
+    });
+
+    // =========================================================================
+    // 3. CLUSTER SOUTH-WEST RESIDENTIAL & TWIN TOWERS DISTRICT
+    // =========================================================================
+    createTwinTowers(-44, 44, 12, 12, 66, 20, matGlassBlue, "twintowers_sw_metropolis");
+    createSuperSkyscraper(-58, 44, 14, 14, 52, matGlassEmerald, "skyscraper_sw_grandres", {
+      crownType: "helipad"
+    });
+    createMidriseBlock(-36, 60, 16, 12, 26, matCorporateWhite, "midrise_sw_dining", {
+      billboard: bbPororo,
+      billboardSide: "N",
+      awningColor: 0x10b981
+    });
+    createMidriseBlock(-58, 60, 14, 12, 22, matBrick, "midrise_sw_lofts", {
+      hasWaterTower: true,
+      awningColor: 0x9a3412
+    });
+    createMidriseBlock(-20, 24, 12, 12, 20, matCharcoal, "midrise_sw_cornercafe", {
+      awningColor: 0xf59e0b
+    });
+
+    // =========================================================================
+    // 4. CLUSTER SOUTH-EAST PARKSIDE HIGH-RISE & HOTEL DISTRICT
+    // =========================================================================
+    createSuperSkyscraper(58, 36, 15, 15, 74, matGlassGold, "skyscraper_se_parkview", {
+      crownType: "spire",
+      billboard: bbKasir,
+      billboardSide: "W",
+      accentMat: ledGoldAccentMat
+    });
+    createSuperSkyscraper(58, 56, 15, 15, 56, matGlassBlue, "skyscraper_se_convention", {
+      crownType: "helipad"
+    });
+    createMidriseBlock(22, 56, 14, 14, 32, matCorporateWhite, "midrise_se_commercial", {
+      awningColor: 0x6366f1
+    });
+    createMidriseBlock(38, 60, 14, 10, 22, matSandstone, "midrise_se_promenade", {
+      hasWaterTower: true,
+      awningColor: 0xd97706
+    });
+
+    // =========================================================================
+    // 5. CLUSTER NORTH UPTOWN WATERFRONT CORRIDOR (Z: -86 to -136)
+    // =========================================================================
+    createSuperSkyscraper(25, -95, 16, 16, 68, matGlassBlue, "skyscraper_nu_east1", { crownType: "spire" });
+    createSuperSkyscraper(50, -95, 15, 15, 52, matGlassEmerald, "skyscraper_nu_east2", { crownType: "helipad" });
+    createSuperSkyscraper(25, -120, 16, 16, 56, matGlassCyan, "skyscraper_nu_east3", { crownType: "angled" });
+    createMidriseBlock(50, -120, 15, 15, 30, matCharcoal, "midrise_nu_east4", { hasWaterTower: true });
+
+    createSuperSkyscraper(-25, -95, 16, 16, 72, matGlassCyan, "skyscraper_nu_west1", { crownType: "angled" });
+    createSuperSkyscraper(-50, -95, 15, 15, 50, matGlassDark, "skyscraper_nu_west2", { crownType: "spire" });
+    createSuperSkyscraper(-25, -120, 16, 16, 54, matGlassBlue, "skyscraper_nu_west3", { crownType: "helipad" });
+    createMidriseBlock(-50, -120, 15, 15, 32, matCorporateWhite, "midrise_nu_west4", { hasWaterTower: true });
+
+    // =========================================================================
+    // 6. CLUSTER SOUTH METROPOLIS HIGH-RISE CANYON (Z: 86 to 136)
+    // =========================================================================
+    createSuperSkyscraper(25, 95, 16, 16, 76, matGlassGold, "skyscraper_su_east1", { crownType: "spire" });
+    createSuperSkyscraper(50, 95, 15, 15, 54, matGlassBlue, "skyscraper_su_east2", { crownType: "helipad" });
+    createSuperSkyscraper(25, 120, 16, 16, 48, matGlassEmerald, "skyscraper_su_east3", { crownType: "angled" });
+    createMidriseBlock(50, 120, 15, 15, 32, matBrick, "midrise_su_east4", { hasWaterTower: true });
+
+    createSuperSkyscraper(-25, 95, 16, 16, 74, matGlassBlue, "skyscraper_su_west1", { crownType: "helipad" });
+    createSuperSkyscraper(-50, 95, 15, 15, 56, matGlassCyan, "skyscraper_su_west2", { crownType: "spire" });
+    createSuperSkyscraper(-25, 120, 16, 16, 50, matGlassDark, "skyscraper_su_west3", { crownType: "angled" });
+    createMidriseBlock(-50, 120, 15, 15, 34, matCorporateWhite, "midrise_su_west4", { hasWaterTower: true });
+
+    // =========================================================================
+    // 7. CLUSTER EAST MIDTOWN COMMERCIAL STRIP (X: 86 to 136, Z: -68 to 68)
+    // =========================================================================
+    createSuperSkyscraper(90, -56, 14, 14, 46, matGlassCyan, "skyscraper_em_1", { crownType: "spire" });
+    createMidriseBlock(122, -56, 14, 14, 28, matCorporateWhite, "midrise_em_2", { hasWaterTower: true });
+    createSuperSkyscraper(90, -15, 14, 14, 48, matGlassBlue, "skyscraper_em_3", { crownType: "helipad" });
+    createMidriseBlock(122, -15, 14, 14, 30, matCharcoal, "midrise_em_4");
+    createMidriseBlock(90, 15, 14, 14, 32, matBrick, "midrise_em_5", { hasWaterTower: true });
+    createSuperSkyscraper(122, 15, 14, 14, 44, matGlassGold, "skyscraper_em_6", { crownType: "angled" });
+    createSuperSkyscraper(90, 56, 14, 14, 46, matGlassEmerald, "skyscraper_em_7", { crownType: "helipad" });
+    createMidriseBlock(122, 56, 14, 14, 34, matCorporateWhite, "midrise_em_8");
+
+    // =========================================================================
+    // 8. CLUSTER WEST MIDTOWN CREATIVE STRIP (X: -136 to -86, Z: -68 to 68)
+    // =========================================================================
+    createSuperSkyscraper(-90, -56, 14, 14, 48, matGlassDark, "skyscraper_wm_1", { crownType: "spire" });
+    createMidriseBlock(-122, -56, 14, 14, 30, matCharcoal, "midrise_wm_2", { hasWaterTower: true });
+    createMidriseBlock(-90, -15, 14, 14, 32, matBrick, "midrise_wm_3");
+    createSuperSkyscraper(-122, -15, 14, 14, 44, matGlassCyan, "skyscraper_wm_4", { crownType: "helipad" });
+    createSuperSkyscraper(-90, 15, 14, 14, 52, matGlassBlue, "skyscraper_wm_5", { crownType: "angled" });
+    createMidriseBlock(-122, 15, 14, 14, 30, matSandstone, "midrise_wm_6", { hasWaterTower: true });
+    createSuperSkyscraper(-90, 56, 14, 14, 46, matGlassGold, "skyscraper_wm_7", { crownType: "spire" });
+    createMidriseBlock(-122, 56, 14, 14, 34, matCorporateWhite, "midrise_wm_8");
+
+    // =========================================================================
+    // 9. UNBROKEN 360-DEGREE PERIMETER SKYLINE BACKDROP (OUTER HORIZON)
+    // =========================================================================
+    const skylineMats = [matGlassBlue, matGlassCyan, matGlassGold, matGlassEmerald, matGlassDark];
+    // North Perimeter Skyline
+    [-135, -95, -55, -20, 20, 55, 95, 135].forEach((sx, i) => {
+      const h = 55 + (i % 4) * 11 + Math.sin(i * 1.7) * 8;
+      createSkylineTower(sx, -172, 16, 16, h, skylineMats[i % skylineMats.length]);
+    });
+    // South Perimeter Skyline
+    [-135, -95, -55, -20, 20, 55, 95, 135].forEach((sx, i) => {
+      const h = 58 + ((i + 2) % 4) * 10 + Math.cos(i * 1.5) * 8;
+      createSkylineTower(sx, 172, 16, 16, h, skylineMats[(i + 1) % skylineMats.length]);
+    });
+    // East Perimeter Skyline
+    [-135, -95, -55, -20, 20, 55, 95, 135].forEach((sz, i) => {
+      const h = 54 + ((i + 1) % 4) * 11 + Math.sin(i * 2.1) * 7;
+      createSkylineTower(172, sz, 16, 16, h, skylineMats[(i + 2) % skylineMats.length]);
+    });
+    // West Perimeter Skyline
+    [-135, -95, -55, -20, 20, 55, 95, 135].forEach((sz, i) => {
+      const h = 56 + ((i + 3) % 4) * 10 + Math.cos(i * 1.9) * 8;
+      createSkylineTower(-172, sz, 16, 16, h, skylineMats[(i + 3) % skylineMats.length]);
+    });
+  }
+
+  // 6. URBAN INFRASTRUCTURE & STREET FURNITURE (AUTHENTIC METROPOLIS DETAILS)
+  buildUrbanInfrastructureAndStreetFurniture() {
+    const metalDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+    const signGreen = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.4 });
+    const glassShelterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, transparent: true, opacity: 0.65 });
+    const woodBenchMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+    const hydrantMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.6, roughness: 0.3 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
+
+    // Signal Light Lenses
+    const redLens = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    const yellowLens = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const greenLens = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+
+    // Helper: 3-Lens Traffic Signal Head
+    const createTrafficSignalHead = () => {
+      const g = new THREE.Group();
+      const box = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 0.45), metalDark);
+      g.add(box);
+
+      const red = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.1, 12), redLens);
+      red.rotation.x = Math.PI / 2;
+      red.position.set(0, 0.42, 0.22);
+      g.add(red);
+
+      const yellow = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.1, 12), yellowLens);
+      yellow.rotation.x = Math.PI / 2;
+      yellow.position.set(0, 0, 0.22);
+      g.add(yellow);
+
+      const green = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.1, 12), greenLens);
+      green.rotation.x = Math.PI / 2;
+      green.position.set(0, -0.42, 0.22);
+      g.add(green);
+
+      return g;
+    };
+
+    // BUILDER A: OVERHEAD CANTILEVER TRAFFIC LIGHT GANTRY
+    const createTrafficGantry = (x, z, rotY, streetName = "MAIN AVE") => {
       const g = new THREE.Group();
       g.position.set(x, 0, z);
+      g.rotation.y = rotY;
 
-      const body = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), matBrickLoft);
-      body.position.y = height / 2;
-      body.castShadow = true;
-      g.add(body);
+      // Vertical Support Mast on Sidewalk Edge
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.38, 7.2, 10), metalDark);
+      mast.position.set(-9.5, 3.6, 0);
+      mast.castShadow = true;
+      g.add(mast);
 
-      const awning = new THREE.Mesh(
-        new THREE.BoxGeometry(width * 0.85, 0.35, 2.2),
-        new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 })
-      );
-      awning.position.set(0, 3.2, depth / 2 + 1.1);
-      awning.rotation.x = 0.2;
-      g.add(awning);
+      // Horizontal Cantilever Arm spanning across road lanes
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(14, 0.45, 0.45), metalDark);
+      arm.position.set(-2.5, 6.8, 0);
+      g.add(arm);
+
+      // Diagonal Brace
+      const brace = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.2, 8), metalDark);
+      brace.position.set(-7.5, 5.8, 0);
+      brace.rotation.z = -0.7;
+      g.add(brace);
+
+      // 2 Overhead Traffic Signal Heads
+      [-4.5, 1.5].forEach(sx => {
+        const signal = createTrafficSignalHead();
+        signal.position.set(sx, 5.8, 0);
+        g.add(signal);
+      });
+
+      // Overhead Street Name Sign
+      const signTex = this.createSignTexture(streetName, "#0f172a", "#38bdf8", "CITY TRAFFIC");
+      const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.0), new THREE.MeshBasicMaterial({ map: signTex }));
+      signMesh.position.set(-1.5, 7.6, 0.25);
+      g.add(signMesh);
 
       this.scene.add(g);
-      this.collision.addBox(x, z, width, depth, name);
+      this.collision.addCircle(x - Math.cos(rotY) * 9.5, z + Math.sin(rotY) * 9.5, 0.7, "traffic_mast");
     };
 
-    // Designated Commercial Parcels (Safely inside city blocks, leaving plazas completely open!)
-    // QUADRANT 1 INNER (NE): X: 42, Z: -44 to -58 (Spacious 14m buffer from canal and secondary street)
-    createSkyscraper(42, -44, 15, 15, 42, matGlassHighrise, "skyscraper_ne_crown");
-    createOfficeBlock(42, -58, 15, 14, 24, matCorporateWhite, "office_ne_1");
+    // Placed at Main Boulevard Approaches to Central Roundabout
+    createTrafficGantry(0, -26, 0, "MAIN AVE NORTH");
+    createTrafficGantry(0, 26, Math.PI, "MAIN AVE SOUTH");
+    createTrafficGantry(26, 0, -Math.PI / 2, "EAST BOULEVARD");
+    createTrafficGantry(-26, 0, Math.PI / 2, "WEST BOULEVARD");
 
-    // QUADRANT 2 INNER (NW): X: -42, Z: -44 to -58
-    createSkyscraper(-42, -44, 15, 15, 38, matCharcoal, "skyscraper_nw_1");
-    createBrownstone(-42, -58, 15, 14, 15, "brownstone_nw_1");
+    // BUILDER B: OVERHEAD HIGHWAY DIRECTIONAL SIGN GANTRY
+    const createHighwayGantry = (x, z, rotY, line1, line2) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+      g.rotation.y = rotY;
 
-    // QUADRANT 3 INNER (SW): X: -42, Z: 44 to 58
-    createSkyscraper(-42, 44, 15, 15, 40, matGlassHighrise, "skyscraper_sw_tech");
-    createOfficeBlock(-42, 58, 15, 14, 22, matCharcoal, "office_sw_1");
+      // Left & Right Masts outside road lanes
+      [-9.5, 9.5].forEach(mx => {
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.32, 8.2, 8), metalDark);
+        mast.position.set(mx, 4.1, 0);
+        g.add(mast);
+      });
 
-    // FAR OUTER SKYLINE TOWERS (Placed at ±175, safely beyond outer ring expressway ±145!)
-    createOfficeBlock(175, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_ne");
-    createOfficeBlock(175, 60, 14, 16, 24, matDarkTitanium, "skyline_outer_se");
-    createOfficeBlock(-175, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_nw");
-    createOfficeBlock(-175, 60, 14, 16, 24, matCharcoal, "skyline_outer_sw");
+      // Overhead Cross Truss
+      const truss = new THREE.Mesh(new THREE.BoxGeometry(19.5, 0.9, 0.9), metalDark);
+      truss.position.set(0, 7.6, 0);
+      g.add(truss);
+
+      // Dual Green Highway Direction Signs
+      const signTex1 = this.createSignTexture(line1, "#15803d", "#ffffff", "METRO EXPRESSWAY");
+      const sign1 = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: signTex1 }));
+      sign1.position.set(-4.2, 7.6, 0.48);
+      g.add(sign1);
+
+      const signTex2 = this.createSignTexture(line2, "#15803d", "#ffffff", "EXPRESS EXIT");
+      const sign2 = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: signTex2 }));
+      sign2.position.set(4.2, 7.6, 0.48);
+      g.add(sign2);
+
+      this.scene.add(g);
+    };
+
+    createHighwayGantry(0, -135, 0, "↑ DOWNTOWN CORE", "↗ APEXSIONS REALM");
+    createHighwayGantry(0, 135, Math.PI, "↑ METROPOLIS SOUTH", "↖ DEV HQ & STUDIO");
+    createHighwayGantry(135, 0, -Math.PI / 2, "↑ EAST RING EXP", "↗ POS KASIR STORE");
+    createHighwayGantry(-135, 0, Math.PI / 2, "↑ WEST RING EXP", "↖ PORORO CAFE");
+
+    // BUILDER C: GLASS BUS STOP TRANSIT SHELTERS
+    const createBusStop = (x, z, rotY = 0) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0.15, z);
+      g.rotation.y = rotY;
+
+      // Steel Support Pillars
+      [-1.8, 1.8].forEach(px => {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.2, 6), metalDark);
+        post.position.set(px, 1.6, -0.6);
+        g.add(post);
+      });
+
+      // Glass Back Panel
+      const backGlass = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.4, 0.1), glassShelterMat);
+      backGlass.position.set(0, 1.6, -0.6);
+      g.add(backGlass);
+
+      // Curved Glass Canopy Roof
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.15, 2.2), glassShelterMat);
+      roof.position.set(0, 3.1, 0.2);
+      roof.rotation.x = 0.08;
+      g.add(roof);
+
+      // Wood Slat Passenger Bench
+      const bench = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.35, 0.6), woodBenchMat);
+      bench.position.set(0, 0.65, -0.2);
+      g.add(bench);
+
+      // Backlit Illuminated Transit Ad Poster
+      const adTex = this.createBillboardTexture("METRO TRANSIT", "Line 1 Rapid Express", "TRANSIT", "#38bdf8", "#fde047", "🚊");
+      const adPoster = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 2.0), new THREE.MeshBasicMaterial({ map: adTex }));
+      adPoster.position.set(1.6, 1.6, 0.2);
+      adPoster.rotation.y = Math.PI / 2;
+      g.add(adPoster);
+
+      this.scene.add(g);
+      this.collision.addBox(x, z, 4.4, 2.4, "bus_stop_shelter");
+    };
+
+    // Bus stops spaced along safe sidewalk spans
+    createBusStop(11.8, -36, -Math.PI / 2);
+    createBusStop(-11.8, -36, Math.PI / 2);
+    createBusStop(11.8, 36, -Math.PI / 2);
+    createBusStop(-11.8, 36, Math.PI / 2);
+    createBusStop(36, 11.8, 0);
+    createBusStop(-36, -11.8, Math.PI);
+
+    // BUILDER D: URBAN FIRE HYDRANTS
+    const createFireHydrant = (x, z) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0.15, z);
+
+      // Red barrel body
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.9, 10), hydrantMat);
+      barrel.position.y = 0.45;
+      barrel.castShadow = true;
+      g.add(barrel);
+
+      // Brass dome top
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), brassMat);
+      dome.position.y = 0.9;
+      g.add(dome);
+
+      // Dual side nozzles
+      [-0.22, 0.22].forEach(nx => {
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.18, 8), brassMat);
+        nozzle.rotation.z = Math.PI / 2;
+        nozzle.position.set(nx, 0.52, 0);
+        g.add(nozzle);
+      });
+
+      this.scene.add(g);
+    };
+
+    const hydrantCoords = [
+      [11.5, -66], [-11.5, -66],
+      [11.5, 66], [-11.5, 66],
+      [66, 11.5], [-66, 11.5],
+      [66, -11.5], [-66, -11.5]
+    ];
+    hydrantCoords.forEach(([hx, hz]) => createFireHydrant(hx, hz));
+
+    // BUILDER E: STAINLESS STEEL PEDESTRIAN BOLLARDS
+    const createBollard = (x, z) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0.15, z);
+
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.85, 10), metalDark);
+      post.position.y = 0.42;
+      g.add(post);
+
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), metalDark);
+      cap.position.y = 0.85;
+      g.add(cap);
+
+      // Yellow reflective collar ring
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.115, 0.08, 10), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+      ring.position.y = 0.72;
+      g.add(ring);
+
+      this.scene.add(g);
+    };
+
+    const bollardCoords = [
+      [10.5, -18], [-10.5, -18], [10.5, 18], [-10.5, 18],
+      [18, 10.5], [18, -10.5], [-18, 10.5], [-18, -10.5],
+      [10.5, -72], [-10.5, -72], [10.5, 72], [-10.5, 72],
+      [72, 10.5], [72, -10.5], [-72, 10.5], [-72, -10.5]
+    ];
+    bollardCoords.forEach(([bx, bz]) => createBollard(bx, bz));
   }
 
   // 6. OFF-STREET PARKING LOTS (ADJACENT TO PLAZAS, ZERO IN DRIVING LANES!)

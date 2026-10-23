@@ -7,7 +7,7 @@
 export class ProgressionManager {
   constructor() {
     this.storageKey = "rafriel_portfolio_discovered_zones";
-    this.totalZones = 7;
+    this.totalZones = 8;
 
     this.zoneInfo = {
       spawn: {
@@ -22,7 +22,7 @@ export class ProgressionManager {
         name: "My Journey Promenade",
         category: "Linimasa Perjalanan",
         icon: "fa-solid fa-route",
-        clue: "Kendarai mobil ke arah Barat Laut (Mid-West Block, X: -105, Z: -35) menuju Taman Linimasa Game Dev."
+        clue: "Kendarai mobil ke arah Barat Laut (Mid-West Block, X: -105, Z: -35) menuju Taman Linimasa Karir Siswa RPL."
       },
       apexsions: {
         id: "apexsions",
@@ -51,6 +51,13 @@ export class ProgressionManager {
         category: "Keahlian Teknis",
         icon: "fa-solid fa-laptop-code",
         clue: "Kendarai mobil ke arah Barat Daya (Mid-West Block, X: -105, Z: 35) menuju Developer Skills Lab & 6 Pilar Komputasi."
+      },
+      about: {
+        id: "about",
+        name: "Developer HQ & Studio",
+        category: "Tentang Saya & Karakter",
+        icon: "fa-solid fa-user-astronaut",
+        clue: "Kendarai mobil ke arah Tenggara (South-East Block, X: 105, Z: 105) menuju Gedung Developer HQ & Studio Siswa RPL."
       },
       contact: {
         id: "contact",
