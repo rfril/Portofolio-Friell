@@ -13,7 +13,6 @@ import { ApexsionsZone } from "../zones/ApexsionsZone.js";
 import { KasirZone } from "../zones/KasirZone.js";
 import { PororoZone } from "../zones/PororoZone.js";
 import { SkillsZone } from "../zones/SkillsZone.js";
-import { AboutZone } from "../zones/AboutZone.js";
 import { ContactZone } from "../zones/ContactZone.js";
 import { CollectibleManager } from "../collectibles/CollectibleManager.js";
 
@@ -30,7 +29,7 @@ export class World {
     // 2. Terrain & Environment
     this.environment = new Environment(this.scene, this.collision);
 
-    // 3. Interactive Zones
+    // 3. Interactive Zones (Proyek Game & Rekayasa Sistem)
     this.zones = [
       new SpawnZone(this.scene, this.collision),
       new JourneyZone(this.scene, this.collision),
@@ -38,7 +37,6 @@ export class World {
       new KasirZone(this.scene, this.collision),
       new PororoZone(this.scene, this.collision),
       new SkillsZone(this.scene, this.collision),
-      new AboutZone(this.scene, this.collision),
       new ContactZone(this.scene, this.collision)
     ];
 

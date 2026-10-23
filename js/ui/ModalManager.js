@@ -164,12 +164,11 @@ export class ModalManager {
     const stats = this.progression.getStats();
 
     const tabs = [
-      { id: "projects", icon: "fa-solid fa-folder-open text-gold", label: "Proyek Portofolio", zoneId: null },
-      { id: "journey", icon: "fa-solid fa-route text-cyan", label: "Linimasa Perjalanan", zoneId: "journey" },
+      { id: "projects", icon: "fa-solid fa-folder-open text-gold", label: "Proyek Game & Web", zoneId: null },
+      { id: "journey", icon: "fa-solid fa-route text-cyan", label: "Linimasa Dev", zoneId: "journey" },
       { id: "skills", icon: "fa-solid fa-laptop-code text-green", label: "Skills Lab", zoneId: "skills" },
-      { id: "about", icon: "fa-solid fa-user-astronaut text-indigo", label: "Tentang Saya", zoneId: "about" },
-      { id: "contact", icon: "fa-solid fa-satellite-dish text-rose", label: "Kontak", zoneId: "contact" },
-      { id: "radar", icon: "fa-solid fa-compass text-cyan", label: `Radar (${stats.discoveredCount}/8)`, zoneId: null }
+      { id: "contact", icon: "fa-solid fa-satellite-dish text-rose", label: "Link & Kontak", zoneId: "contact" },
+      { id: "radar", icon: "fa-solid fa-compass text-cyan", label: `Radar (${stats.discoveredCount}/7)`, zoneId: null }
     ];
 
     this.navTabs.innerHTML = tabs.map(t => {
@@ -205,12 +204,6 @@ export class ModalManager {
         this.renderSkillsLab();
       } else {
         this.renderLockedZoneView("skills");
-      }
-    } else if (this.activeTab === "about") {
-      if (this.progression.isUnlocked("about")) {
-        this.renderAboutMe();
-      } else {
-        this.renderLockedZoneView("about");
       }
     } else if (this.activeTab === "contact") {
       if (this.progression.isUnlocked("contact")) {
