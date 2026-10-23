@@ -45,87 +45,121 @@ export class CarController {
   buildCarModel() {
     this.mesh.add(this.bodyGroup);
 
-    // Materials
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x0284c7, // Vibrant Cyan Blue
-      metalness: 0.35,
-      roughness: 0.25
-    });
-
-    const cabinMat = new THREE.MeshStandardMaterial({
-      color: 0x0f172a, // Dark Obsidian
-      metalness: 0.8,
-      roughness: 0.15
-    });
-
-    const accentMat = new THREE.MeshStandardMaterial({
-      color: 0xf59e0b, // Gold/Amber accent
-      metalness: 0.5,
-      roughness: 0.3
-    });
-
-    const wheelRubberMat = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
-      roughness: 0.85
-    });
-
-    const rimMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      metalness: 0.8,
+    // =========================================================================
+    // BUGATTI CHIRON HYPERCAR MATERIALS (DUAL-TONE FRENCH RACING BLUE & CARBON)
+    // =========================================================================
+    const chironBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x0ea5e9, // Iconic Bugatti French Racing Blue
+      metalness: 0.55,
       roughness: 0.2
     });
 
-    const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    this.tailLightMat = new THREE.MeshStandardMaterial({
-      color: 0x7f1d1d,
-      emissive: 0x991b1b,
-      emissiveIntensity: 0.5
+    const carbonDarkMat = new THREE.MeshStandardMaterial({
+      color: 0x060b18, // Deep Midnight Carbon Fiber Finish
+      metalness: 0.85,
+      roughness: 0.25
     });
 
-    // 1. Lower Chassis
-    const chassisGeo = new THREE.BoxGeometry(2.1, 0.45, 3.8);
-    const chassis = new THREE.Mesh(chassisGeo, bodyMat);
-    chassis.position.y = 0.55;
-    chassis.castShadow = true;
-    chassis.receiveShadow = true;
-    this.bodyGroup.add(chassis);
+    const chromeTrimMat = new THREE.MeshStandardMaterial({
+      color: 0xf1f5f9, // Polished Aluminum Chrome (C-Bar & Horseshoe)
+      metalness: 0.95,
+      roughness: 0.1
+    });
 
-    // 2. Cabin / Windshield
-    const cabinGeo = new THREE.BoxGeometry(1.65, 0.65, 1.9);
-    const cabin = new THREE.Mesh(cabinGeo, cabinMat);
-    cabin.position.set(0, 1.05, -0.2);
-    cabin.castShadow = true;
-    this.bodyGroup.add(cabin);
+    const horseshoeMeshMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16, // Honeycomb grille mesh
+      roughness: 0.85
+    });
 
-    // 3. Racing Spoiler Wing (Rear)
-    const spoilerGeo = new THREE.BoxGeometry(1.8, 0.08, 0.45);
-    const spoiler = new THREE.Mesh(spoilerGeo, accentMat);
-    spoiler.position.set(0, 1.15, -1.65);
-    spoiler.castShadow = true;
-    this.bodyGroup.add(spoiler);
+    const glassCanopyMat = new THREE.MeshStandardMaterial({
+      color: 0x090f1d, // Aerodynamic dark tinted cockpit
+      metalness: 0.9,
+      roughness: 0.1,
+      transparent: true,
+      opacity: 0.82
+    });
 
-    const pillarLeft = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.45, 0.1), accentMat);
-    pillarLeft.position.set(-0.65, 0.95, -1.65);
-    this.bodyGroup.add(pillarLeft);
+    const quadLedMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const bugattiRedMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }); // Red Brembo & Logo
 
-    const pillarRight = pillarLeft.clone();
-    pillarRight.position.x = 0.65;
-    this.bodyGroup.add(pillarRight);
+    this.tailLightMat = new THREE.MeshStandardMaterial({
+      color: 0x991b1b,
+      emissive: 0xef4444,
+      emissiveIntensity: 1.8
+    });
 
-    // 4. Headlights & Spotlights
-    const headGeo = new THREE.BoxGeometry(0.35, 0.18, 0.1);
-    const headLeft = new THREE.Mesh(headGeo, lightGlowMat);
-    headLeft.position.set(-0.7, 0.6, 1.92);
-    this.bodyGroup.add(headLeft);
+    const wheelRubberMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 });
+    const caliperMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 });
 
-    const headRight = headLeft.clone();
-    headRight.position.x = 0.7;
-    this.bodyGroup.add(headRight);
+    // =========================================================================
+    // 1. FRONT HOOD & NOSE (FRENCH RACING BLUE)
+    // =========================================================================
+    const hood = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.32, 2.0), chironBlueMat);
+    hood.position.set(0, 0.55, 0.95);
+    hood.castShadow = true;
+    hood.receiveShadow = true;
+    this.bodyGroup.add(hood);
 
-    // Front Light Cones
-    const spotLeft = new THREE.SpotLight(0xfffaed, 0.85, 24, Math.PI / 6, 0.4, 1.2);
-    spotLeft.position.set(-0.7, 0.6, 1.95);
-    spotLeft.target.position.set(-0.7, 0, 12);
+    // Center longitudinal Bugatti spine crease along hood
+    const hoodSpine = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 1.7), chironBlueMat);
+    hoodSpine.position.set(0, 0.72, 0.95);
+    this.bodyGroup.add(hoodSpine);
+
+    // Front low aerodynamic carbon splitter lip
+    const frontSplitter = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.08, 0.4), carbonDarkMat);
+    frontSplitter.position.set(0, 0.28, 2.05);
+    frontSplitter.castShadow = true;
+    this.bodyGroup.add(frontSplitter);
+
+    // =========================================================================
+    // 2. ICONIC BUGATTI HORSESHOE GRILLE & SIDE INTAKES
+    // =========================================================================
+    const grilleGroup = new THREE.Group();
+    grilleGroup.position.set(0, 0.48, 1.96);
+
+    // Chrome Horseshoe Arch Rim
+    const horseshoeRim = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.44, 0.12), chromeTrimMat);
+    grilleGroup.add(horseshoeRim);
+
+    // Honeycomb Mesh Insert
+    const horseshoeMesh = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.36, 0.14), horseshoeMeshMat);
+    grilleGroup.add(horseshoeMesh);
+
+    // Bugatti Red Oval Badge
+    const badge = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.16), bugattiRedMat);
+    badge.position.set(0, 0.12, 0);
+    grilleGroup.add(badge);
+
+    // Left and Right Front Air Dam Intakes
+    [-0.72, 0.72].forEach(ix => {
+      const intake = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.26, 0.12), carbonDarkMat);
+      intake.position.set(ix, -0.05, 0);
+      grilleGroup.add(intake);
+    });
+
+    this.bodyGroup.add(grilleGroup);
+
+    // =========================================================================
+    // 3. CHIRON SIGNATURE QUAD-LED HEADLIGHTS (8-EYE STARE)
+    // =========================================================================
+    [-0.72, 0.72].forEach(hx => {
+      const pod = new THREE.Group();
+      pod.position.set(hx, 0.65, 1.88);
+
+      // 4 horizontal jewel LED cubes in a row
+      for (let i = 0; i < 4; i++) {
+        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.09, 0.08), quadLedMat);
+        eye.position.set((i - 1.5) * 0.09 * (hx > 0 ? 1 : -1), 0, 0);
+        pod.add(eye);
+      }
+      this.bodyGroup.add(pod);
+    });
+
+    // Forward Projecting Headlight Beams
+    const spotLeft = new THREE.SpotLight(0xfffaed, 0.9, 26, Math.PI / 6, 0.4, 1.2);
+    spotLeft.position.set(-0.7, 0.65, 1.95);
+    spotLeft.target.position.set(-0.7, 0, 14);
     this.bodyGroup.add(spotLeft);
     this.bodyGroup.add(spotLeft.target);
 
@@ -135,53 +169,157 @@ export class CarController {
     this.bodyGroup.add(spotRight);
     this.bodyGroup.add(spotRight.target);
 
-    // 5. Taillights (Glow red when braking)
-    const tailGeo = new THREE.BoxGeometry(0.4, 0.15, 0.08);
-    const tailLeft = new THREE.Mesh(tailGeo, this.tailLightMat);
-    tailLeft.position.set(-0.7, 0.6, -1.92);
-    this.bodyGroup.add(tailLeft);
+    // =========================================================================
+    // 4. TEARDROP COCKPIT, DORSAL FIN & W16 AIR SCOOPS
+    // =========================================================================
+    const cockpit = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.52, 1.85), glassCanopyMat);
+    cockpit.position.set(0, 0.98, -0.15);
+    cockpit.castShadow = true;
+    this.bodyGroup.add(cockpit);
 
-    const tailRight = tailLeft.clone();
-    tailRight.position.x = 0.7;
-    this.bodyGroup.add(tailRight);
+    // Central Longitudinal Spine Dorsal Fin (Aero Stabilizer)
+    const dorsalFin = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.22, 1.8), carbonDarkMat);
+    dorsalFin.position.set(0, 1.15, -0.6);
+    this.bodyGroup.add(dorsalFin);
 
-    // 6. Wheels Factory Helper
-    const createWheel = () => {
+    // Dual Roof-Mounted W16 Engine Intake Scoops
+    [-0.42, 0.42].forEach(sx => {
+      const scoop = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.6), carbonDarkMat);
+      scoop.position.set(sx, 1.05, -0.9);
+      this.bodyGroup.add(scoop);
+    });
+
+    // =========================================================================
+    // 5. THE LEGENDARY CHIRON "C-BAR" (BUGATTI C-LINE)
+    // =========================================================================
+    [-1.04, 1.04].forEach(cx => {
+      const cLine = new THREE.Group();
+      cLine.position.set(cx, 0, 0);
+
+      // Top roof sweeping trim
+      const cTop = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.4), chromeTrimMat);
+      cTop.position.set(0, 1.06, -0.2);
+      cLine.add(cTop);
+
+      // Sloping front A-pillar plunge
+      const cFront = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.48, 0.08), chromeTrimMat);
+      cFront.position.set(0, 0.82, 0.48);
+      cFront.rotation.x = -0.55;
+      cLine.add(cFront);
+
+      // Curving rear flank loop behind door
+      const cRear = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.58, 0.08), chromeTrimMat);
+      cRear.position.set(0, 0.78, -0.88);
+      cRear.rotation.x = 0.55;
+      cLine.add(cRear);
+
+      // Bottom rocker runner
+      const cBottom = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.4), chromeTrimMat);
+      cBottom.position.set(0, 0.42, -0.2);
+      cLine.add(cBottom);
+
+      this.bodyGroup.add(cLine);
+    });
+
+    // =========================================================================
+    // 6. MUSCULAR REAR HAUNCHES & CARBON REAR ENGINE DECK
+    // =========================================================================
+    const rearBody = new THREE.Mesh(new THREE.BoxGeometry(2.18, 0.48, 2.05), carbonDarkMat);
+    rearBody.position.set(0, 0.58, -1.05);
+    rearBody.castShadow = true;
+    rearBody.receiveShadow = true;
+    this.bodyGroup.add(rearBody);
+
+    // =========================================================================
+    // 7. CONTINUOUS 1.8M FULL-WIDTH REAR LED LIGHT BAR (CHIRON SIGNATURE)
+    // =========================================================================
+    const lightBar = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.08, 0.12), this.tailLightMat);
+    lightBar.position.set(0, 0.72, -2.08);
+    this.bodyGroup.add(lightBar);
+
+    // =========================================================================
+    // 8. ACTIVE HYPERCAR REAR WING / AERO SPOILER
+    // =========================================================================
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.06, 0.42), carbonDarkMat);
+    wing.position.set(0, 1.12, -1.82);
+    wing.castShadow = true;
+    this.bodyGroup.add(wing);
+
+    [-0.52, 0.52].forEach(px => {
+      const pylon = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.18), chromeTrimMat);
+      pylon.position.set(px, 0.92, -1.82);
+      this.bodyGroup.add(pylon);
+    });
+
+    // =========================================================================
+    // 9. AGGRESSIVE REAR CARBON DIFFUSER & QUAD TITANIUM EXHAUSTS
+    // =========================================================================
+    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.14, 0.4), carbonDarkMat);
+    diffuser.position.set(0, 0.28, -2.05);
+    this.bodyGroup.add(diffuser);
+
+    // Quad Central Exhaust Pipes
+    const exhaustMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.95, roughness: 0.25 });
+    [-0.18, -0.06, 0.06, 0.18].forEach(ex => {
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.18, 12), exhaustMat);
+      pipe.rotation.x = Math.PI / 2;
+      pipe.position.set(ex, 0.44, -2.12);
+      this.bodyGroup.add(pipe);
+    });
+
+    // =========================================================================
+    // 10. HIGH-PERFORMANCE DIAMOND-CUT WHEELS & BREMBO BRAKE CALIPERS
+    // =========================================================================
+    const createChironWheel = () => {
       const wheelGroup = new THREE.Group();
-      const tireGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.32, 16);
+
+      // Wide low-profile performance tire
+      const tireGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.36, 18);
       tireGeo.rotateZ(Math.PI / 2);
       const tire = new THREE.Mesh(tireGeo, wheelRubberMat);
       tire.castShadow = true;
       wheelGroup.add(tire);
 
-      const rimGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.34, 12);
+      // Diamond-cut two-tone alloy rim
+      const rimGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.38, 16);
       rimGeo.rotateZ(Math.PI / 2);
       const rim = new THREE.Mesh(rimGeo, rimMat);
       wheelGroup.add(rim);
 
+      // Center Bugatti wheel cap
+      const capGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.4, 12);
+      capGeo.rotateZ(Math.PI / 2);
+      const cap = new THREE.Mesh(capGeo, chironBlueMat);
+      wheelGroup.add(cap);
+
+      // Red Brembo Brake Caliper
+      const caliper = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.12), caliperMat);
+      caliper.position.set(0, 0.16, 0.15);
+      wheelGroup.add(caliper);
+
       return wheelGroup;
     };
 
-    // Front Wheels
+    // Front Wheels on Steering Pivots
     this.frontLeftPivot = new THREE.Group();
-    this.frontLeftPivot.position.set(-1.12, 0.42, 1.15);
-    this.frontLeftWheel = createWheel();
+    this.frontLeftPivot.position.set(-1.14, 0.42, 1.18);
+    this.frontLeftWheel = createChironWheel();
     this.frontLeftPivot.add(this.frontLeftWheel);
     this.mesh.add(this.frontLeftPivot);
 
     this.frontRightPivot = new THREE.Group();
-    this.frontRightPivot.position.set(1.12, 0.42, 1.15);
-    this.frontRightWheel = createWheel();
+    this.frontRightPivot.position.set(1.14, 0.42, 1.18);
+    this.frontRightWheel = createChironWheel();
     this.frontRightPivot.add(this.frontRightWheel);
     this.mesh.add(this.frontRightPivot);
 
-    // Rear Wheels
-    this.rearLeftWheel = createWheel();
-    this.rearLeftWheel.position.set(-1.12, 0.42, -1.15);
+    // Rear Wheels (Muscular wide track)
+    this.rearLeftWheel = createChironWheel();
+    this.rearLeftWheel.position.set(-1.16, 0.42, -1.18);
     this.mesh.add(this.rearLeftWheel);
 
-    this.rearRightWheel = createWheel();
-    this.rearRightWheel.position.set(1.12, 0.42, -1.15);
+    this.rearRightWheel = createChironWheel();
+    this.rearRightWheel.position.set(1.16, 0.42, -1.18);
     this.mesh.add(this.rearRightWheel);
   }
 

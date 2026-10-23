@@ -503,23 +503,23 @@ export class Environment {
     };
 
     // Designated Commercial Parcels (Safely inside city blocks, leaving plazas completely open!)
-    // QUADRANT 1 INNER (NE): X: 35, Z: -38 to -58
+    // QUADRANT 1 INNER (NE): X: 35, Z: -38 to -52
     createSkyscraper(38, -38, 15, 15, 42, matGlassHighrise, "skyscraper_ne_crown");
-    createOfficeBlock(38, -58, 15, 14, 24, matCorporateWhite, "office_ne_1");
+    createOfficeBlock(38, -52, 15, 14, 24, matCorporateWhite, "office_ne_1");
 
-    // QUADRANT 2 INNER (NW): X: -35, Z: -38 to -58
+    // QUADRANT 2 INNER (NW): X: -35, Z: -38 to -52
     createSkyscraper(-38, -38, 15, 15, 38, matCharcoal, "skyscraper_nw_1");
-    createBrownstone(-38, -58, 15, 14, 15, "brownstone_nw_1");
+    createBrownstone(-38, -52, 15, 14, 15, "brownstone_nw_1");
 
-    // QUADRANT 3 INNER (SW): X: -38, Z: 38 to 58
+    // QUADRANT 3 INNER (SW): X: -38, Z: 38 to 52
     createSkyscraper(-38, 38, 15, 15, 40, matGlassHighrise, "skyscraper_sw_tech");
-    createOfficeBlock(-38, 58, 15, 14, 22, matCharcoal, "office_sw_1");
+    createOfficeBlock(-38, 52, 15, 14, 22, matCharcoal, "office_sw_1");
 
-    // FAR OUTER SKYLINE TOWERS (Along perimeter beyond ±135, away from plazas)
-    createOfficeBlock(138, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_ne");
-    createOfficeBlock(138, 60, 14, 16, 24, matDarkTitanium, "skyline_outer_se");
-    createOfficeBlock(-138, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_nw");
-    createOfficeBlock(-138, 60, 14, 16, 24, matCharcoal, "skyline_outer_sw");
+    // FAR OUTER SKYLINE TOWERS (Placed at ±175, safely beyond outer ring expressway ±145!)
+    createOfficeBlock(175, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_ne");
+    createOfficeBlock(175, 60, 14, 16, 24, matDarkTitanium, "skyline_outer_se");
+    createOfficeBlock(-175, -60, 14, 16, 26, matCorporateWhite, "skyline_outer_nw");
+    createOfficeBlock(-175, 60, 14, 16, 24, matCharcoal, "skyline_outer_sw");
   }
 
   // 6. OFF-STREET PARKING LOTS (ADJACENT TO PLAZAS, ZERO IN DRIVING LANES!)
@@ -572,35 +572,35 @@ export class Environment {
       this.collision.addBox(x, z, 2.4, 4.2, "parked_" + type);
     };
 
-    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (X: 90, Z: -35)
-    const lot1 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot1.position.set(90, 0.05, -35);
+    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back from driveway spur Z: -35)
+    const lot1 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lot1.position.set(90, 0.05, -52);
     lot1.receiveShadow = true;
     this.scene.add(lot1);
 
-    createCar(88, -40, Math.PI / 2, "vanWhite");
-    createCar(88, -35, Math.PI / 2, "taxi");
-    createCar(88, -30, Math.PI / 2, "sedanBlue");
+    createCar(88, -46, Math.PI / 2, "vanWhite");
+    createCar(88, -52, Math.PI / 2, "taxi");
+    createCar(88, -58, Math.PI / 2, "sedanBlue");
 
-    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (X: -90, Z: -105)
-    const lot2 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot2.position.set(-90, 0.05, -105);
+    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (Set back from driveway spur Z: -105)
+    const lot2 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lot2.position.set(-90, 0.05, -122);
     lot2.receiveShadow = true;
     this.scene.add(lot2);
 
-    createCar(-88, -110, Math.PI / 2, "taxi");
-    createCar(-88, -105, Math.PI / 2, "sportsRed");
-    createCar(-88, -100, Math.PI / 2, "sedanSilver");
+    createCar(-88, -116, Math.PI / 2, "taxi");
+    createCar(-88, -122, Math.PI / 2, "sportsRed");
+    createCar(-88, -128, Math.PI / 2, "sedanSilver");
 
-    // Dedicated Parking Lot 3: Developer HQ Courtyard (X: 90, Z: 105)
-    const lot3 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot3.position.set(90, 0.05, 105);
+    // Dedicated Parking Lot 3: Developer HQ Courtyard (Set back from driveway spur Z: 105)
+    const lot3 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lot3.position.set(90, 0.05, 122);
     lot3.receiveShadow = true;
     this.scene.add(lot3);
 
-    createCar(88, 100, Math.PI / 2, "sedanBlue");
-    createCar(88, 105, Math.PI / 2, "sportsRed");
-    createCar(88, 110, Math.PI / 2, "sedanSilver");
+    createCar(88, 116, Math.PI / 2, "sedanBlue");
+    createCar(88, 122, Math.PI / 2, "sportsRed");
+    createCar(88, 128, Math.PI / 2, "sedanSilver");
   }
 
   // 7. STREETLIGHTS & TREES ALIGNED NEATLY ON OUTER SIDEWALKS
