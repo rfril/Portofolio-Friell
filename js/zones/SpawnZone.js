@@ -10,8 +10,8 @@ import { profileData } from "../data/profileData.js";
 
 export class SpawnZone extends BaseZone {
   constructor(scene, collisionSystem) {
-    // Diposisikan rapi di Plaza Sambutan tepi jalan (X: 25, Z: -25), off-road dan bersih dari jalur kendaraan
-    super("spawn", "Welcome Pavilion", "Introduction & Guide", new THREE.Vector3(25, 0, -25), 9.0, scene, collisionSystem);
+    // Diposisikan di Plaza Sambutan barat daya (X: -24, Z: 24), off-road dan bersih dari jalur kendaraan & kanal
+    super("spawn", "Welcome Pavilion", "Introduction & Guide", new THREE.Vector3(-24, 0, 24), 14.0, scene, collisionSystem);
     this.coreMesh = null;
     this.buildArchitecture();
   }
