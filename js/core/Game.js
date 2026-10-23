@@ -142,7 +142,13 @@ export class Game {
         this.modal.close();
       } else {
         const activeZone = this.world.getActiveZone();
-        this.modal.open(activeZone ? activeZone.id : "projects");
+        if (activeZone) {
+          this.modal.open(activeZone.id);
+        } else {
+          if (this.ui) {
+            this.ui.showDiscoveryToast("Zona Terkunci", "Kendarai mobil ke lingkaran zona informasi untuk mengakses portofolio.");
+          }
+        }
       }
     });
 
@@ -203,12 +209,23 @@ export class Game {
   }
 
   triggerInteraction() {
+    if (this.modal.isOpen()) {
+      this.modal.close();
+      return;
+    }
+
     const activeZone = this.world.getActiveZone();
     if (activeZone) {
       if (this.progression) this.progression.unlockZone(activeZone.id);
       this.modal.open(activeZone.id);
     } else {
-      this.modal.open("projects");
+      // Hanya bisa membuka jika berada di dalam zona informasi 3D
+      if (this.ui) {
+        this.ui.showDiscoveryToast(
+          "Lokasi Terbuka",
+          "Kendarai mobil ke dalam lingkaran zona informasi (kuning/biru) untuk menekan [E]."
+        );
+      }
     }
   }
 

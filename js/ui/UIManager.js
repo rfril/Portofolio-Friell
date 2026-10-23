@@ -81,14 +81,10 @@ export class UIManager {
       }
     });
 
-    // 6. Portfolio Button Click (Buka Daftar Proyek)
+    // 6. Portfolio Button Click (Buka Daftar Proyek jika ada)
     if (this.portfolioMenuBtn) {
       this.portfolioMenuBtn.addEventListener("click", () => {
-        if (this.game.modal.isOpen()) {
-          this.game.modal.close();
-        } else {
-          this.game.modal.open("projects");
-        }
+        this.game.triggerInteraction();
       });
     }
 

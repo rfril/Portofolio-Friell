@@ -31,7 +31,7 @@ export class CarController {
     this.headLightLeft = null;
     this.headLightRight = null;
 
-    // Collision boundary radius (accurately fitted to Bugatti Chiron body width)
+    // Collision boundary radius (accurately fitted to Koenigsegg Jesko body width)
     this.colliderRadius = 1.05;
     this.lastBoundaryImpact = 0;
 
@@ -46,120 +46,202 @@ export class CarController {
     this.mesh.add(this.bodyGroup);
 
     // =========================================================================
-    // BUGATTI CHIRON HYPERCAR MATERIALS (DUAL-TONE FRENCH RACING BLUE & CARBON)
+    // KOENIGSEGG JESKO ATTACK MATERIALS (ARCTIC WHITE PEARL & EXPOSED CARBON)
     // =========================================================================
-    const chironBlueMat = new THREE.MeshStandardMaterial({
-      color: 0x0ea5e9, // Iconic Bugatti French Racing Blue
-      metalness: 0.55,
-      roughness: 0.2
+    // 1. Arctic White Pearl Bodywork
+    const jeskoWhiteMat = new THREE.MeshStandardMaterial({
+      color: 0xf8fafc,
+      metalness: 0.35,
+      roughness: 0.15
     });
 
+    // 2. High-Downforce Twill Weave Carbon Fiber
     const carbonDarkMat = new THREE.MeshStandardMaterial({
-      color: 0x060b18, // Deep Midnight Carbon Fiber Finish
+      color: 0x0f172a,
       metalness: 0.85,
       roughness: 0.25
     });
 
-    const chromeTrimMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9, // Polished Aluminum Chrome (C-Bar & Horseshoe)
-      metalness: 0.95,
-      roughness: 0.1
-    });
-
-    const horseshoeMeshMat = new THREE.MeshStandardMaterial({
-      color: 0x090d16, // Honeycomb grille mesh
-      roughness: 0.85
-    });
-
-    const glassCanopyMat = new THREE.MeshStandardMaterial({
-      color: 0x090f1d, // Aerodynamic dark tinted cockpit
+    // 3. Ultra-Gloss Aero Carbon
+    const carbonGlossMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16,
       metalness: 0.9,
-      roughness: 0.1,
-      transparent: true,
-      opacity: 0.82
+      roughness: 0.12
     });
 
-    const quadLedMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const bugattiRedMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 }); // Red Brembo & Logo
+    // 4. Iconic Koenigsegg Apex Acid Lime Racing Accent
+    const apexLimeMat = new THREE.MeshStandardMaterial({
+      color: 0x84cc16,
+      emissive: 0x4d7c0f,
+      emissiveIntensity: 0.4,
+      roughness: 0.25
+    });
 
+    // 5. Koenigsegg Swedish Ängelholm Ghost Gold Crest
+    const ghostGoldMat = new THREE.MeshStandardMaterial({
+      color: 0xf59e0b,
+      metalness: 0.95,
+      roughness: 0.15
+    });
+
+    // 6. Jet-Fighter Wraparound Visor Glass Canopy
+    const glassVisorMat = new THREE.MeshStandardMaterial({
+      color: 0x070c18,
+      metalness: 0.95,
+      roughness: 0.05,
+      transparent: true,
+      opacity: 0.84
+    });
+
+    // 7. Matrix LED Headlights
+    const ledHeadlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const drlIceBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.6
+    });
+
+    // 8. Jesko Slim Blade LED Taillights (Brake Reactive)
     this.tailLightMat = new THREE.MeshStandardMaterial({
       color: 0x991b1b,
       emissive: 0xef4444,
       emissiveIntensity: 1.8
     });
 
-    const wheelRubberMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 });
-    const caliperMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 });
+    // 9. Titanium Apex Exhaust Materials
+    const titaniumExhaustMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      metalness: 0.95,
+      roughness: 0.2
+    });
+    const titaniumBurnMat = new THREE.MeshStandardMaterial({
+      color: 0x2563eb,
+      emissive: 0x1d4ed8,
+      emissiveIntensity: 0.65
+    });
+
+    // 10. Wheels & Carbon Ceramic Calipers
+    const tireRubberMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.92 });
+    const carbonRimMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.9, roughness: 0.2 });
+    const brakeRotorMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.3 });
+    const limeCaliperMat = new THREE.MeshStandardMaterial({ color: 0x84cc16, roughness: 0.2 });
 
     // =========================================================================
-    // 1. FRONT HOOD & NOSE (FRENCH RACING BLUE)
+    // 1. CARBON FIBER MONOCOQUE TUB & LOWER CHASSIS
     // =========================================================================
-    const hood = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.32, 2.0), chironBlueMat);
-    hood.position.set(0, 0.55, 0.95);
+    const chassisFloor = new THREE.Mesh(new THREE.BoxGeometry(1.86, 0.18, 4.2), carbonDarkMat);
+    chassisFloor.position.set(0, 0.28, 0.0);
+    this.bodyGroup.add(chassisFloor);
+
+    // Main Cockpit & Waist Tub
+    const centralTub = new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.34, 2.5), jeskoWhiteMat);
+    centralTub.position.set(0, 0.50, 0.05);
+    centralTub.castShadow = true;
+    centralTub.receiveShadow = true;
+    this.bodyGroup.add(centralTub);
+
+    // =========================================================================
+    // 2. SLOPING WEDGE NOSE, HOOD AERO EXTRACTOR & GHOST CREST
+    // =========================================================================
+    // Sloping Front Hood (Arctic White)
+    const hood = new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.24, 1.65), jeskoWhiteMat);
+    hood.position.set(0, 0.54, 1.15);
     hood.castShadow = true;
     hood.receiveShadow = true;
     this.bodyGroup.add(hood);
 
-    // Center longitudinal Bugatti spine crease along hood
-    const hoodSpine = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 1.7), chironBlueMat);
-    hoodSpine.position.set(0, 0.72, 0.95);
-    this.bodyGroup.add(hoodSpine);
+    // Recessed Carbon Aero Extraction Vent (Tunnel through the nose over the windshield)
+    const hoodAeroVent = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.06, 0.88), carbonDarkMat);
+    hoodAeroVent.position.set(0, 0.65, 1.22);
+    this.bodyGroup.add(hoodAeroVent);
 
-    // Front low aerodynamic carbon splitter lip
-    const frontSplitter = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.08, 0.4), carbonDarkMat);
-    frontSplitter.position.set(0, 0.28, 2.05);
+    // Apex Lime Center Racing Pinstripe along Hood
+    const hoodStripe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 1.60), apexLimeMat);
+    hoodStripe.position.set(0, 0.67, 1.15);
+    this.bodyGroup.add(hoodStripe);
+
+    // Low Nose Apex Cone
+    const noseCone = new THREE.Mesh(new THREE.BoxGeometry(1.68, 0.20, 0.48), jeskoWhiteMat);
+    noseCone.position.set(0, 0.40, 2.02);
+    noseCone.castShadow = true;
+    this.bodyGroup.add(noseCone);
+
+    // Koenigsegg Swedish Ängelholm Ghost Squadron Gold Shield Crest
+    const ghostCrest = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.14), ghostGoldMat);
+    ghostCrest.position.set(0, 0.51, 2.12);
+    this.bodyGroup.add(ghostCrest);
+
+    // =========================================================================
+    // 3. FRONT HIGH-DOWNFORCE AERO: DEEP SPLITTER & DUAL DIVE CANARDS
+    // =========================================================================
+    // Deep Front Carbon Splitter Tray
+    const frontSplitter = new THREE.Mesh(new THREE.BoxGeometry(2.18, 0.05, 0.56), carbonGlossMat);
+    frontSplitter.position.set(0, 0.22, 2.18);
     frontSplitter.castShadow = true;
     this.bodyGroup.add(frontSplitter);
 
-    // =========================================================================
-    // 2. ICONIC BUGATTI HORSESHOE GRILLE & SIDE INTAKES
-    // =========================================================================
-    const grilleGroup = new THREE.Group();
-    grilleGroup.position.set(0, 0.48, 1.96);
+    // Splitter Leading Apex Lime Accent Lip
+    const splitterLimeLip = new THREE.Mesh(new THREE.BoxGeometry(2.18, 0.03, 0.05), apexLimeMat);
+    splitterLimeLip.position.set(0, 0.22, 2.46);
+    this.bodyGroup.add(splitterLimeLip);
 
-    // Chrome Horseshoe Arch Rim
-    const horseshoeRim = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.44, 0.12), chromeTrimMat);
-    grilleGroup.add(horseshoeRim);
+    // Splitter Vertical Endplate Winglets (Left & Right)
+    [-1.09, 1.09].forEach(sx => {
+      const winglet = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.20, 0.40), carbonGlossMat);
+      winglet.position.set(sx, 0.31, 2.22);
+      this.bodyGroup.add(winglet);
 
-    // Honeycomb Mesh Insert
-    const horseshoeMesh = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.36, 0.14), horseshoeMeshMat);
-    grilleGroup.add(horseshoeMesh);
-
-    // Bugatti Red Oval Badge
-    const badge = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.16), bugattiRedMat);
-    badge.position.set(0, 0.12, 0);
-    grilleGroup.add(badge);
-
-    // Left and Right Front Air Dam Intakes
-    [-0.72, 0.72].forEach(ix => {
-      const intake = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.26, 0.12), carbonDarkMat);
-      intake.position.set(ix, -0.05, 0);
-      grilleGroup.add(intake);
+      const wingletLime = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.04, 0.40), apexLimeMat);
+      wingletLime.position.set(sx, 0.41, 2.22);
+      this.bodyGroup.add(wingletLime);
     });
 
-    this.bodyGroup.add(grilleGroup);
+    // Dual Aerodynamic Carbon Dive Canards (Attack Edition)
+    [-1.02, 1.02].forEach(cx => {
+      const isRight = cx > 0;
+      // Upper Dive Canard
+      const upperCanard = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.04, 0.18), carbonDarkMat);
+      upperCanard.position.set(cx, 0.55, 1.88);
+      upperCanard.rotation.z = isRight ? -0.22 : 0.22;
+      upperCanard.rotation.y = isRight ? -0.15 : 0.15;
+      this.bodyGroup.add(upperCanard);
+
+      // Lower Dive Canard
+      const lowerCanard = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.04, 0.20), carbonDarkMat);
+      lowerCanard.position.set(cx * 1.02, 0.42, 2.02);
+      lowerCanard.rotation.z = isRight ? -0.22 : 0.22;
+      lowerCanard.rotation.y = isRight ? -0.15 : 0.15;
+      this.bodyGroup.add(lowerCanard);
+    });
 
     // =========================================================================
-    // 3. CHIRON SIGNATURE QUAD-LED HEADLIGHTS (8-EYE STARE)
+    // 4. MATRIX LED BLADE HEADLIGHTS & ICE-BLUE DRL EYEBROWS
     // =========================================================================
     [-0.72, 0.72].forEach(hx => {
-      const pod = new THREE.Group();
-      pod.position.set(hx, 0.65, 1.88);
+      const isRight = hx > 0;
+      const headGroup = new THREE.Group();
+      headGroup.position.set(hx, 0.58, 1.94);
+      headGroup.rotation.y = isRight ? 0.12 : -0.12;
 
-      // 4 horizontal jewel LED cubes in a row
-      for (let i = 0; i < 4; i++) {
-        const eye = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.09, 0.08), quadLedMat);
-        eye.position.set((i - 1.5) * 0.09 * (hx > 0 ? 1 : -1), 0, 0);
-        pod.add(eye);
+      // Triple LED Matrix projector crystals
+      for (let i = 0; i < 3; i++) {
+        const led = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.08), ledHeadlightMat);
+        led.position.set((i - 1) * 0.11, 0, 0);
+        headGroup.add(led);
       }
-      this.bodyGroup.add(pod);
+
+      // Upper Ice-Blue DRL Eyebrow Blade
+      const drl = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.03, 0.10), drlIceBlueMat);
+      drl.position.set(0, 0.05, 0.02);
+      headGroup.add(drl);
+
+      this.bodyGroup.add(headGroup);
     });
 
-    // Forward Projecting Headlight Beams
-    const spotLeft = new THREE.SpotLight(0xfffaed, 0.9, 26, Math.PI / 6, 0.4, 1.2);
-    spotLeft.position.set(-0.7, 0.65, 1.95);
-    spotLeft.target.position.set(-0.7, 0, 14);
+    // Forward Illuminating High-Beam Projector Lights
+    const spotLeft = new THREE.SpotLight(0xfffbeb, 0.9, 28, Math.PI / 5.5, 0.4, 1.2);
+    spotLeft.position.set(-0.7, 0.60, 2.05);
+    spotLeft.target.position.set(-0.7, 0, 16);
     this.bodyGroup.add(spotLeft);
     this.bodyGroup.add(spotLeft.target);
 
@@ -170,131 +252,243 @@ export class CarController {
     this.bodyGroup.add(spotRight.target);
 
     // =========================================================================
-    // 4. TEARDROP COCKPIT, DORSAL FIN & W16 AIR SCOOPS
+    // 5. FIGHTER-JET WRAPAROUND VISOR COCKPIT & ROOF RAM-AIR SCOOP
     // =========================================================================
-    const cockpit = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.52, 1.85), glassCanopyMat);
-    cockpit.position.set(0, 0.98, -0.15);
-    cockpit.castShadow = true;
-    this.bodyGroup.add(cockpit);
+    // Teardrop Wraparound Glass Visor Dome
+    const visorDome = new THREE.Mesh(new THREE.BoxGeometry(1.50, 0.46, 1.80), glassVisorMat);
+    visorDome.position.set(0, 0.94, 0.05);
+    visorDome.castShadow = true;
+    this.bodyGroup.add(visorDome);
+
+    // Arctic White Visor Roof Deck
+    const visorRoof = new THREE.Mesh(new THREE.BoxGeometry(1.22, 0.07, 1.46), jeskoWhiteMat);
+    visorRoof.position.set(0, 1.18, 0.05);
+    this.bodyGroup.add(visorRoof);
+
+    // Roof Center Lime Accent Stripe
+    const roofStripe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 1.46), apexLimeMat);
+    roofStripe.position.set(0, 1.22, 0.05);
+    this.bodyGroup.add(roofStripe);
+
+    // Roof Ram-Air Intake Scoop (Feeding Twin-Turbo V8)
+    const roofScoop = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.16, 0.65), carbonDarkMat);
+    roofScoop.position.set(0, 1.25, -0.32);
+    this.bodyGroup.add(roofScoop);
+
+    const scoopIntakeHole = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.10, 0.06), carbonGlossMat);
+    scoopIntakeHole.position.set(0, 1.25, -0.01);
+    this.bodyGroup.add(scoopIntakeHole);
 
     // Central Longitudinal Spine Dorsal Fin (Aero Stabilizer)
-    const dorsalFin = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.22, 1.8), carbonDarkMat);
-    dorsalFin.position.set(0, 1.15, -0.6);
+    const dorsalFin = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.18, 1.60), carbonDarkMat);
+    dorsalFin.position.set(0, 1.14, -0.85);
     this.bodyGroup.add(dorsalFin);
 
-    // Dual Roof-Mounted W16 Engine Intake Scoops
-    [-0.42, 0.42].forEach(sx => {
-      const scoop = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.6), carbonDarkMat);
-      scoop.position.set(sx, 1.05, -0.9);
-      this.bodyGroup.add(scoop);
+    // =========================================================================
+    // 6. SCULPTED FLANKS, SIDE AIR SCOOPS & AERO SIDE SKIRTS
+    // =========================================================================
+    [-1.02, 1.02].forEach(sx => {
+      const isRight = sx > 0;
+      // Carbon Side Skirt Runner
+      const skirt = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.07, 2.48), carbonDarkMat);
+      skirt.position.set(sx, 0.24, 0.0);
+      this.bodyGroup.add(skirt);
+
+      // Apex Lime Pinstripe along Skirt
+      const limeSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, 2.48), apexLimeMat);
+      limeSkirt.position.set(sx + (isRight ? 0.06 : -0.06), 0.24, 0.0);
+      this.bodyGroup.add(limeSkirt);
+
+      // Aero Bargeboard / Vertical Winglet ahead of Rear Wheel
+      const rearBarge = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.22, 0.32), carbonGlossMat);
+      rearBarge.position.set(sx + (isRight ? 0.05 : -0.05), 0.35, -0.92);
+      this.bodyGroup.add(rearBarge);
+
+      // Deep Intercooler Side Air Radiator Scoop
+      const sideScoop = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.30, 0.85), carbonDarkMat);
+      sideScoop.position.set(sx * 0.90, 0.54, -0.48);
+      this.bodyGroup.add(sideScoop);
+
+      // Aerodynamic Carbon Side Mirror on Twin Stalk
+      const mirrorStalk = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.04, 0.06), carbonDarkMat);
+      mirrorStalk.position.set(sx * 0.88, 0.86, 0.52);
+      mirrorStalk.rotation.z = isRight ? -0.25 : 0.25;
+      this.bodyGroup.add(mirrorStalk);
+
+      const mirrorHousing = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.10, 0.14), carbonDarkMat);
+      mirrorHousing.position.set(sx * 1.02, 0.89, 0.52);
+      this.bodyGroup.add(mirrorHousing);
     });
 
     // =========================================================================
-    // 5. THE LEGENDARY CHIRON "C-BAR" (BUGATTI C-LINE)
+    // 7. MUSCULAR REAR DECK & ENGINE BAY HEAT EXTRACTION LOUVERS
     // =========================================================================
-    [-1.04, 1.04].forEach(cx => {
-      const cLine = new THREE.Group();
-      cLine.position.set(cx, 0, 0);
+    const rearDeck = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.44, 1.95), jeskoWhiteMat);
+    rearDeck.position.set(0, 0.58, -1.10);
+    rearDeck.castShadow = true;
+    rearDeck.receiveShadow = true;
+    this.bodyGroup.add(rearDeck);
 
-      // Top roof sweeping trim
-      const cTop = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.4), chromeTrimMat);
-      cTop.position.set(0, 1.06, -0.2);
-      cLine.add(cTop);
+    // Rear Engine Cover Glass Bay with Cooling Louvers
+    const engineBay = new THREE.Mesh(new THREE.BoxGeometry(1.08, 0.08, 1.25), carbonDarkMat);
+    engineBay.position.set(0, 0.78, -1.05);
+    this.bodyGroup.add(engineBay);
 
-      // Sloping front A-pillar plunge
-      const cFront = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.48, 0.08), chromeTrimMat);
-      cFront.position.set(0, 0.82, 0.48);
-      cFront.rotation.x = -0.55;
-      cLine.add(cFront);
+    // Cooling Louvers
+    for (let i = 0; i < 5; i++) {
+      const louver = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.03, 0.10), carbonGlossMat);
+      louver.position.set(0, 0.83, -0.75 - i * 0.18);
+      louver.rotation.x = 0.25;
+      this.bodyGroup.add(louver);
+    }
 
-      // Curving rear flank loop behind door
-      const cRear = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.58, 0.08), chromeTrimMat);
-      cRear.position.set(0, 0.78, -0.88);
-      cRear.rotation.x = 0.55;
-      cLine.add(cRear);
+    // =========================================================================
+    // 8. SIGNATURE TOP-MOUNTED INVERTED SWAN-NECK BOOMERANG WING (ATTACK)
+    // =========================================================================
+    // Twin Inverted Swan-Neck Carbon Pylons (Mounting from ABOVE the wing)
+    [-0.42, 0.42].forEach(px => {
+      const pylonGroup = new THREE.Group();
+      pylonGroup.position.set(px, 0, 0);
 
-      // Bottom rocker runner
-      const cBottom = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.4), chromeTrimMat);
-      cBottom.position.set(0, 0.42, -0.2);
-      cLine.add(cBottom);
+      // Vertical Upward Strut
+      const verticalStrut = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.50, 0.16), carbonGlossMat);
+      verticalStrut.position.set(0, 0.98, -1.60);
+      verticalStrut.rotation.x = -0.15;
+      pylonGroup.add(verticalStrut);
 
-      this.bodyGroup.add(cLine);
+      // Forward Arching Swan-Neck Hook (Curving OVER top of wing)
+      const swanNeckHook = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.12, 0.38), carbonGlossMat);
+      swanNeckHook.position.set(0, 1.28, -1.74);
+      pylonGroup.add(swanNeckHook);
+
+      this.bodyGroup.add(pylonGroup);
+    });
+
+    // Boomerang Dual-Element Carbon Wing Blade (Suspended from Swan-Necks)
+    const wingGroup = new THREE.Group();
+    wingGroup.position.set(0, 1.21, -1.82);
+
+    // Center Wing Blade Section
+    const wingCenter = new THREE.Mesh(new THREE.BoxGeometry(1.02, 0.06, 0.46), carbonGlossMat);
+    wingCenter.castShadow = true;
+    wingGroup.add(wingCenter);
+
+    // Left Swept Boomerang Blade
+    const wingLeft = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.06, 0.42), carbonGlossMat);
+    wingLeft.position.set(-0.72, 0.02, -0.08);
+    wingLeft.rotation.y = -0.14;
+    wingLeft.rotation.z = -0.04;
+    wingLeft.castShadow = true;
+    wingGroup.add(wingLeft);
+
+    // Right Swept Boomerang Blade
+    const wingRight = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.06, 0.42), carbonGlossMat);
+    wingRight.position.set(0.72, 0.02, -0.08);
+    wingRight.rotation.y = 0.14;
+    wingRight.rotation.z = 0.04;
+    wingRight.castShadow = true;
+    wingGroup.add(wingRight);
+
+    // Wing Trailing Edge Active Gurney Flap
+    const gurneyFlap = new THREE.Mesh(new THREE.BoxGeometry(1.94, 0.03, 0.04), carbonDarkMat);
+    gurneyFlap.position.set(0, 0.04, -0.24);
+    wingGroup.add(gurneyFlap);
+
+    // Colossal Vertical Endplates with Neon Apex Lime Outer Racing Stripes
+    [-1.02, 1.02].forEach(ex => {
+      const isRight = ex > 0;
+      // Carbon Endplate
+      const endplate = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.42, 0.58), carbonGlossMat);
+      endplate.position.set(ex, 0.02, -0.06);
+      wingGroup.add(endplate);
+
+      // Apex Lime Vertical Perimeter Trim
+      const endplateLime = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.42, 0.05), apexLimeMat);
+      endplateLime.position.set(ex + (isRight ? 0.01 : -0.01), 0.02, 0.22);
+      wingGroup.add(endplateLime);
+    });
+
+    this.bodyGroup.add(wingGroup);
+
+    // =========================================================================
+    // 9. REAR FASCIA, SLIM LED TAILLIGHT BLADE & APEX TITANIUM EXHAUST
+    // =========================================================================
+    // Full-Width Koenigsegg Slim Horizontal LED Taillight Blade
+    const taillightBlade = new THREE.Mesh(new THREE.BoxGeometry(1.88, 0.06, 0.10), this.tailLightMat);
+    taillightBlade.position.set(0, 0.72, -2.08);
+    this.bodyGroup.add(taillightBlade);
+
+    // Central Titanium Apex Exhaust Bezel
+    const exhaustBezel = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.14, 0.14, 0.22, 16),
+      titaniumExhaustMat
+    );
+    exhaustBezel.rotation.x = Math.PI / 2;
+    exhaustBezel.position.set(0, 0.48, -2.15);
+    this.bodyGroup.add(exhaustBezel);
+
+    // Internal Heat-Treated Blue/Purple Burnished Titanium Lip
+    const exhaustBurnLip = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.11, 0.24, 16),
+      titaniumBurnMat
+    );
+    exhaustBurnLip.rotation.x = Math.PI / 2;
+    exhaustBurnLip.position.set(0, 0.48, -2.16);
+    this.bodyGroup.add(exhaustBurnLip);
+
+    // Colossal Rear Carbon Venturi Diffuser
+    const diffuserTray = new THREE.Mesh(new THREE.BoxGeometry(2.02, 0.12, 0.54), carbonGlossMat);
+    diffuserTray.position.set(0, 0.24, -2.10);
+    this.bodyGroup.add(diffuserTray);
+
+    // 4 Underbody Vertical Diffuser Strakes
+    [-0.68, -0.23, 0.23, 0.68].forEach(dx => {
+      const strake = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.48), carbonGlossMat);
+      strake.position.set(dx, 0.20, -2.10);
+      this.bodyGroup.add(strake);
     });
 
     // =========================================================================
-    // 6. MUSCULAR REAR HAUNCHES & CARBON REAR ENGINE DECK
+    // 10. AIRCORE CARBON WHEELS & APEX LIME MONOBLOC CALIPERS
     // =========================================================================
-    const rearBody = new THREE.Mesh(new THREE.BoxGeometry(2.18, 0.48, 2.05), carbonDarkMat);
-    rearBody.position.set(0, 0.58, -1.05);
-    rearBody.castShadow = true;
-    rearBody.receiveShadow = true;
-    this.bodyGroup.add(rearBody);
-
-    // =========================================================================
-    // 7. CONTINUOUS 1.8M FULL-WIDTH REAR LED LIGHT BAR (CHIRON SIGNATURE)
-    // =========================================================================
-    const lightBar = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.08, 0.12), this.tailLightMat);
-    lightBar.position.set(0, 0.72, -2.08);
-    this.bodyGroup.add(lightBar);
-
-    // =========================================================================
-    // 8. ACTIVE HYPERCAR REAR WING / AERO SPOILER
-    // =========================================================================
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.06, 0.42), carbonDarkMat);
-    wing.position.set(0, 1.12, -1.82);
-    wing.castShadow = true;
-    this.bodyGroup.add(wing);
-
-    [-0.52, 0.52].forEach(px => {
-      const pylon = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.18), chromeTrimMat);
-      pylon.position.set(px, 0.92, -1.82);
-      this.bodyGroup.add(pylon);
-    });
-
-    // =========================================================================
-    // 9. AGGRESSIVE REAR CARBON DIFFUSER & QUAD TITANIUM EXHAUSTS
-    // =========================================================================
-    const diffuser = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.14, 0.4), carbonDarkMat);
-    diffuser.position.set(0, 0.28, -2.05);
-    this.bodyGroup.add(diffuser);
-
-    // Quad Central Exhaust Pipes
-    const exhaustMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.95, roughness: 0.25 });
-    [-0.18, -0.06, 0.06, 0.18].forEach(ex => {
-      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.18, 12), exhaustMat);
-      pipe.rotation.x = Math.PI / 2;
-      pipe.position.set(ex, 0.44, -2.12);
-      this.bodyGroup.add(pipe);
-    });
-
-    // =========================================================================
-    // 10. HIGH-PERFORMANCE DIAMOND-CUT WHEELS & BREMBO BRAKE CALIPERS
-    // =========================================================================
-    const createChironWheel = () => {
+    const createJeskoWheel = () => {
       const wheelGroup = new THREE.Group();
 
-      // Wide low-profile performance tire
-      const tireGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.36, 18);
+      // Low-Profile Michelin Pilot Sport Cup 2 R Performance Tire
+      const tireGeo = new THREE.CylinderGeometry(0.40, 0.40, 0.34, 20);
       tireGeo.rotateZ(Math.PI / 2);
-      const tire = new THREE.Mesh(tireGeo, wheelRubberMat);
+      const tire = new THREE.Mesh(tireGeo, tireRubberMat);
       tire.castShadow = true;
       wheelGroup.add(tire);
 
-      // Diamond-cut two-tone alloy rim
-      const rimGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.38, 16);
+      // Koenigsegg Aircore Hollow Carbon Rim
+      const rimGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.36, 18);
       rimGeo.rotateZ(Math.PI / 2);
-      const rim = new THREE.Mesh(rimGeo, rimMat);
+      const rim = new THREE.Mesh(rimGeo, carbonRimMat);
       wheelGroup.add(rim);
 
-      // Center Bugatti wheel cap
-      const capGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.4, 12);
-      capGeo.rotateZ(Math.PI / 2);
-      const cap = new THREE.Mesh(capGeo, chironBlueMat);
-      wheelGroup.add(cap);
+      // Lightweight 5-Spoke Pattern
+      for (let s = 0; s < 5; s++) {
+        const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.05, 0.24), carbonRimMat);
+        spoke.rotation.x = (s * Math.PI * 2) / 5;
+        wheelGroup.add(spoke);
+      }
 
-      // Red Brembo Brake Caliper
-      const caliper = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.12), caliperMat);
-      caliper.position.set(0, 0.16, 0.15);
+      // Center-Lock Wheel Nut (Anodized Aluminum)
+      const nutGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.38, 12);
+      nutGeo.rotateZ(Math.PI / 2);
+      const nut = new THREE.Mesh(nutGeo, ghostGoldMat);
+      wheelGroup.add(nut);
+
+      // Giant Cross-Drilled Carbon Ceramic Rotor
+      const rotorGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.30, 16);
+      rotorGeo.rotateZ(Math.PI / 2);
+      const rotor = new THREE.Mesh(rotorGeo, brakeRotorMat);
+      wheelGroup.add(rotor);
+
+      // High-Performance Monobloc Caliper in Koenigsegg Apex Lime
+      const caliper = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.17, 0.12), limeCaliperMat);
+      caliper.position.set(0, 0.15, 0.14);
       wheelGroup.add(caliper);
 
       return wheelGroup;
@@ -302,24 +496,24 @@ export class CarController {
 
     // Front Wheels on Steering Pivots
     this.frontLeftPivot = new THREE.Group();
-    this.frontLeftPivot.position.set(-1.14, 0.42, 1.18);
-    this.frontLeftWheel = createChironWheel();
+    this.frontLeftPivot.position.set(-1.12, 0.40, 1.25);
+    this.frontLeftWheel = createJeskoWheel();
     this.frontLeftPivot.add(this.frontLeftWheel);
     this.mesh.add(this.frontLeftPivot);
 
     this.frontRightPivot = new THREE.Group();
-    this.frontRightPivot.position.set(1.14, 0.42, 1.18);
-    this.frontRightWheel = createChironWheel();
+    this.frontRightPivot.position.set(1.12, 0.40, 1.25);
+    this.frontRightWheel = createJeskoWheel();
     this.frontRightPivot.add(this.frontRightWheel);
     this.mesh.add(this.frontRightPivot);
 
     // Rear Wheels (Muscular wide track)
-    this.rearLeftWheel = createChironWheel();
-    this.rearLeftWheel.position.set(-1.16, 0.42, -1.18);
+    this.rearLeftWheel = createJeskoWheel();
+    this.rearLeftWheel.position.set(-1.14, 0.40, -1.25);
     this.mesh.add(this.rearLeftWheel);
 
-    this.rearRightWheel = createChironWheel();
-    this.rearRightWheel.position.set(1.16, 0.42, -1.18);
+    this.rearRightWheel = createJeskoWheel();
+    this.rearRightWheel.position.set(1.14, 0.40, -1.25);
     this.mesh.add(this.rearRightWheel);
   }
 
