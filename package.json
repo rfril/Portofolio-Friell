@@ -1,0 +1,21 @@
+{
+  "name": "portofolio-pribadi-friel-3d",
+  "version": "1.0.0",
+  "description": "Portofolio Pribadi 3D Interaktif Game Developer — Rafriel Raditya Widodo (SMKN 71 Jakarta)",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "start": "npx serve -l 3000 .",
+    "serve": "python -m http.server 3000"
+  },
+  "keywords": [
+    "portfolio",
+    "threejs",
+    "3d-game",
+    "game-developer",
+    "minecraft-modder",
+    "rpl-smkn71"
+  ],
+  "author": "Rafriel Raditya Widodo",
+  "license": "MIT"
+}

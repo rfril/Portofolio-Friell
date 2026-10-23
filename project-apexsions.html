@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apexsions Minecraft Server — Deep Dive | Rafriel Raditya Widodo</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/classic.css">
+  <style>
+    .page-main { padding: 3.5rem 0 5rem 0; }
+    .back-nav { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; color: var(--accent-cyan); font-weight: 600; }
+    .hero-banner-img { width: 100%; max-height: 440px; object-fit: cover; border-radius: 18px; margin-bottom: 2rem; border: 1px solid var(--border-subtle); }
+  </style>
+</head>
+<body>
+
+  <header class="classic-navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-bracket">&lt;</span>Rafriel<span class="brand-accent">.dev</span><span class="brand-bracket">/&gt;</span>
+      </a>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="index.html#projects-section" class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Proyek
+        </a>
+        <a href="index.html" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-car-side"></i> Mode Game 3D
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="container">
+      <a href="index.html#projects-section" class="back-nav">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Portofolio
+      </a>
+
+      <div class="modal-project-header">
+        <div class="modal-badge-group">
+          <span class="modal-badge badge-accent"><i class="fa-solid fa-star"></i> Proyek Utama (Flagship)</span>
+          <span class="modal-badge">Java 21 LTS</span>
+          <span class="modal-badge">PaperMC Engine</span>
+          <span class="modal-badge badge-status">Aktif & Terverifikasi</span>
+        </div>
+        <h1 class="modal-title">Apexsions Ecosystem — Server Game Minecraft RPG/MMO</h1>
+        <p class="modal-subtitle">Ekosistem server game Minecraft berskala besar dengan konsep 3 Kerajaan teritorial, simulasi ekonomi pasar bebas fluktuatif cuaca/bioma, sistem kedaulatan tanah polygon BlueMap 3D, dan 9 suite plugin Java kustom.</p>
+
+        <div class="modal-links-row" style="margin-top: 1.25rem;">
+          <a href="https://web.apexsions.com" target="_blank" rel="noopener" class="btn btn-primary">
+            <i class="fa-solid fa-globe"></i> Kunjungi web.apexsions.com
+          </a>
+          <div class="server-ip-pill">
+            <span class="ip-label">Alamat Server:</span>
+            <code>apexsions.com:32348</code>
+            <span style="font-size: 0.75rem; color: #10b981; font-weight: 700; margin-left: 0.25rem;">Java & Bedrock Crossplay</span>
+          </div>
+        </div>
+      </div>
+
+      <img src="assets/apexsions-preview.jpg" alt="Apexsions Visual Preview" class="hero-banner-img">
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-folder-check text-cyan"></i> Sumber Kode & Lokasi Monorepo Terverifikasi</h3>
+        <p>Proyek ini dikembangkan dan dikelola secara lokal pada direktori:</p>
+        <p style="margin-top: 0.4rem;"><code>C:\Apex Plugin</code> (Terdiri dari <code>Minecraft/plugins/</code>, <code>Website/</code>, <code>build.ps1</code>, dan <code>DOKUMENTASI.md</code>).</p>
+      </div>
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-user-gear text-gold"></i> Peran & Kontribusi Mandiri Saya</h3>
+        <p>Dalam proyek ini, saya bertindak sebagai <strong>Lead Developer & Server Architect</strong> yang merancang dan menulis logika sistem dari nol:</p>
+        <ul class="skill-caps-list" style="margin-top: 0.6rem;">
+          <li><i class="fa-solid fa-check text-cyan"></i> Menulis logika kode Java 21 menggunakan PaperMC API dan Spigot engine.</li>
+          <li><i class="fa-solid fa-check text-cyan"></i> Merancang formula hitungan matematika ekonomi pasar dinamis (Dynamic Shop Price Clamping 85%-120%).</li>
+          <li><i class="fa-solid fa-check text-cyan"></i> Menyusun skrip kompilasi otomatis Smart Turbo Multi-Compiler via PowerShell (<code>build.ps1</code>).</li>
+          <li><i class="fa-solid fa-check text-cyan"></i> Mengintegrasikan visualisasi poligon kedaulatan wilayah ke web BlueMap 3D.</li>
+        </ul>
+      </div>
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-crown text-purple"></i> Sistem 3 Kerajaan Berdaulat</h3>
+        <div class="modal-features-grid">
+          <div class="modal-feature-item" style="border-left-color: #f59e0b;">
+            <strong>👑 Kerajaan Zenithar (Puncak Cakrawala & Logam Mulia)</strong>
+            <p>Penerus Dinasti Sions dengan spesialisasi Speed, Luck, reduksi damage Royal Aegis, diskon pajak lelang 30%, dan spawn ibukota timur.</p>
+          </div>
+          <div class="modal-feature-item" style="border-left-color: #ef4444;">
+            <strong>⚔️ Kerajaan Solterra (Kawah Vulkanik & Pesulap Tempur)</strong>
+            <p>Persekutuan prajurit cadas tangguh dengan mining speed tinggi, damage pukulan ekstra, dan daya tahan tempur garis depan.</p>
+          </div>
+          <div class="modal-feature-item" style="border-left-color: #10b981;">
+            <strong>🌿 Kerajaan Sylvamoor (Kanopi Rimba & Hasil Alam)</strong>
+            <p>Peradaban mandiri kaum pekerja dan pemanah rimba dengan ketahanan alami terhadap racun, bonus panen drop rate, dan pertahanan kanopi.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-cubes text-cyan"></i> Suite 9 Plugin Java Mandiri di <code>Minecraft/plugins/</code></h3>
+        <div class="modal-skills-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div class="modal-feature-item">
+            <strong>ApexsionsCore</strong>
+            <p>Otoritas wilayah faksi, kedaulatan tanah (/claim) dengan pajak upkeep harian, BlueMap polygons, sistem warp GUI 54-slot, dan integrasi kit.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsChat</strong>
+            <p>Komunikasi Kyori MiniMessage, channel Global/Kingdom/Staff, showitem pamer barang, dan sistem report staf 3 lapis.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsEconomy</strong>
+            <p>Multi-currency Rupiah & Diamond, pasar lelang (/ah) dengan escrow claim otomatis, dan transfer transaksi aman.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsBattlepass</strong>
+            <p>200 level musim berhadiah, daily/weekly quests, tingkatan Citizen/Sio/Exsio, dan visual editor admin 54-slot.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsShop</strong>
+            <p>Pasar dinamis 6 kategori dengan rasio jual dasar, formula fluktuasi cuaca in-game, dan pajak wilayah per-kerajaan.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsFishing</strong>
+            <p>Mini-game memancing interaktif berbasis ritme tarikan (Active Reel), joran kustom, 6 tingkat rarity ikan, dan virtual bait.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsCustomEnchants</strong>
+            <p>Sistem sihir kustom: gacha enchanter dual-currency, mystery dust booster, dan white/black scrolls proteksi tempa.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsCrates</strong>
+            <p>Sistem peti hadiah animasi mewah, pembagian kunci crate, dan integrasi hadiah ekonomi.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>ApexsionsMedia</strong>
+            <p>Render logo/banner gambar multi-tile asinkron dalam game dan konfirmasi URL tautan web.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+        <a href="index.html#projects-section" class="btn btn-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Kembali ke Portofolio
+        </a>
+        <a href="project-kasir.html" class="btn btn-primary">
+          <span>Lihat Proyek POS Kasir</span> <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="classic-footer">
+    <div class="container">
+      <p>&copy; 2026 Rafriel Raditya Widodo &bull; Apexsions Ecosystem Lead Developer.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

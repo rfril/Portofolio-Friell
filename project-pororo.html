@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoRoRo Ice Cream — Deep Dive | Rafriel Raditya Widodo</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/classic.css">
+  <style>
+    .page-main { padding: 3.5rem 0 5rem 0; }
+    .back-nav { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; color: var(--accent-cyan); font-weight: 600; }
+    .hero-banner-img { width: 100%; max-height: 440px; object-fit: cover; border-radius: 18px; margin-bottom: 2rem; border: 1px solid var(--border-subtle); }
+  </style>
+</head>
+<body>
+
+  <header class="classic-navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-bracket">&lt;</span>Rafriel<span class="brand-accent">.dev</span><span class="brand-bracket">/&gt;</span>
+      </a>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="index.html#projects-section" class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Proyek
+        </a>
+        <a href="index.html" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-car-side"></i> Mode Game 3D
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="container">
+      <a href="index.html#projects-section" class="back-nav">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Portofolio
+      </a>
+
+      <div class="modal-project-header">
+        <div class="modal-badge-group">
+          <span class="modal-badge badge-accent">Tugas Sekolah (MKK Kelompok 6)</span>
+          <span class="modal-badge">Nuxt 3 & Vue 3</span>
+          <span class="modal-badge">Figma Masterplan</span>
+          <span class="modal-badge badge-status">Selesai Terverifikasi</span>
+        </div>
+        <h1 class="modal-title">PoRoRo Ice Cream — Digital Product & Brand UI/UX Masterplan</h1>
+        <p class="modal-subtitle">Masterplan komprehensif produk digital dan brand gelato artisan Cakung, Jakarta Timur: perancangan design system tokens di Figma, 10 komponen modular Nuxt 3, katalog 18 varian rasa, dan alur delivery 30 menit.</p>
+      </div>
+
+      <img src="assets/pororo-hero.png" alt="PoRoRo Hero Showcase" class="hero-banner-img">
+
+      <div class="modal-gallery-grid">
+        <div class="modal-gallery-card">
+          <img src="assets/pororo-store.png" alt="Suasana Gerai Cakung" class="modal-img">
+        </div>
+        <div class="modal-gallery-card">
+          <img src="assets/pororo-annotated.png" alt="Annotated Masterplan" class="modal-img">
+        </div>
+      </div>
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-folder-check text-cyan"></i> Lokasi Proyek & Verifikasi Kode Lokal</h3>
+        <p>Proyek ini dikembangkan dan dikelola secara lokal pada:</p>
+        <p style="margin-top: 0.4rem;"><code>C:\Project MKK Kel 6\frontend</code> (Proyek Mata Pelajaran Konsentrasi Keahlian / MKK Kelompok 6 SMKN 71 Jakarta).</p>
+      </div>
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-swatchbook text-gold"></i> Design System Tokens & Tipografi Pastel</h3>
+        <p>Seluruh antarmuka dibangun dengan sistem token visual terstandarisasi:</p>
+        <ul class="skill-caps-list" style="margin-top: 0.5rem;">
+          <li><i class="fa-solid fa-check text-cyan"></i> <strong>Palet Pastel Alami:</strong> Lavender, Peach, Sky Blue, Soft Yellow, dan Mint yang mencerminkan bahan segar susu lokal Puncak dan buah asli.</li>
+          <li><i class="fa-solid fa-check text-cyan"></i> <strong>Kombinasi Tipografi:</strong> Display serif <em>Fraunces</em> untuk kehangatan artisan, dipadukan dengan sans-serif <em>DM Sans</em> untuk teks isi agar nyaman dibaca di smartphone.</li>
+          <li><i class="fa-solid fa-check text-cyan"></i> <strong>10 Komponen Modular Vue 3:</strong> Navbar kapsul melayang (blur 16px), HeroSection, FavoriteFlavors, IngredientPromise, WeekendPromotion, CraftProcess, CustomerStories, StoreLocation, OrderCta, dan SiteFooter.</li>
+        </ul>
+      </div>
+
+      <div class="modal-section-card">
+        <h3><i class="fa-solid fa-route text-purple"></i> Customer Journey & Delivery 30 Menit</h3>
+        <p>Merancang alur pelanggan dari discovery hingga pemesanan:</p>
+        <div class="modal-features-grid" style="margin-top: 0.65rem;">
+          <div class="modal-feature-item">
+            <strong>1. Discovery & Rating Sosial</strong>
+            <p>Menemukan ulasan viral di media sosial atau Google Maps dengan rating 4.9 dari 2.400+ pelanggan.</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>2. Eksplorasi 18 Rasa & Bahan</strong>
+            <p>Membaca cerita susu segar lokal Puncak dan memfilter rasa favorit (Pistachio, Strawberry Cheesecake, Matcha, Choco-Hazelnut).</p>
+          </div>
+          <div class="modal-feature-item">
+            <strong>3. Opsi Dine-in atau Delivery Cepat</strong>
+            <p>Memilih menikmati gelato di teras dine-in Cakung atau memesan pengiriman tub beku dalam <em>thermal cooler bag</em> sampai dalam 30 menit.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+        <a href="project-kasir.html" class="btn btn-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Lihat POS Kasir
+        </a>
+        <a href="index.html#projects-section" class="btn btn-primary">
+          <span>Kembali ke Portofolio Utama</span> <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="classic-footer">
+    <div class="container">
+      <p>&copy; 2026 Rafriel Raditya Widodo &bull; Project MKK Kelompok 6 SMKN 71 Jakarta.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,356 @@
+/**
+ * 3D GAMEPLAY VIEWPORT, HUD & CONTROLS STYLING
+ */
+
+.game-viewport-wrap {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+#canvas3d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+ * TOP HUD BAR
+ * -------------------------------------------------------------------------- */
+.top-hud {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.hud-left, .hud-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+
+.hud-brand {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 0.55rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.brand-bracket {
+  color: var(--text-muted);
+}
+.brand-accent {
+  color: var(--accent-cyan);
+}
+
+.hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 0.55rem 0.95rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-card);
+}
+
+.speed-val {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: var(--accent-gold);
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 0.55rem 0.95rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-card);
+}
+
+.hud-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+.hud-btn:active {
+  transform: scale(0.96);
+}
+
+.btn-classic-mode {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(168, 85, 247, 0.25));
+  border-color: var(--accent-cyan);
+}
+
+/* --------------------------------------------------------------------------
+ * ZONE PROXIMITY ANNOUNCER
+ * -------------------------------------------------------------------------- */
+.zone-announcer {
+  position: absolute;
+  top: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  padding: 0.75rem 1.75rem;
+  border-radius: 16px;
+  border: 1px solid var(--accent-gold);
+  box-shadow: 0 10px 35px rgba(245, 158, 11, 0.25);
+  cursor: pointer;
+  transition: all 0.35s var(--ease-spring);
+  z-index: 45;
+  pointer-events: auto;
+}
+
+.zone-announcer.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.zone-announcer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.zone-cat-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  letter-spacing: 0.05em;
+}
+
+.zone-announcer-hint {
+  font-size: 0.8rem;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+ * BOTTOM HELPER CONTROLS (DESKTOP)
+ * -------------------------------------------------------------------------- */
+.bottom-controls-bar {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+  z-index: 40;
+}
+
+.ctrl-key {
+  display: inline-block;
+  background: #1e293b;
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 5px;
+  border: 1px solid #475569;
+  box-shadow: 0 2px 0 #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+ * MOBILE / TOUCHSCREEN CONTROLS
+ * -------------------------------------------------------------------------- */
+.mobile-touch-controls {
+  display: none;
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1rem;
+  right: 1rem;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.touch-cluster {
+  display: flex;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
+.touch-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-card);
+  touch-action: manipulation;
+}
+
+.touch-btn:active {
+  background: var(--accent-cyan);
+  color: #070b14;
+  transform: scale(0.92);
+}
+
+.touch-btn-gas {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+.touch-btn-brake {
+  border-color: var(--accent-rose);
+  color: var(--accent-rose);
+}
+.touch-btn-interact {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  width: 66px;
+  height: 66px;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .mobile-touch-controls {
+    display: flex;
+  }
+  .bottom-controls-bar {
+    display: none;
+  }
+  .hud-btn span {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * GAME LOADING SCREEN OVERLAY
+ * -------------------------------------------------------------------------- */
+.game-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: #070b14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  z-index: 200;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.game-loader-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-spinner {
+  width: 54px;
+  height: 54px;
+  border: 4px solid #1e293b;
+  border-top-color: var(--accent-cyan);
+  border-right-color: var(--accent-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader-text {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.loader-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+ * WEBGL FALLBACK BANNER
+ * -------------------------------------------------------------------------- */
+.webgl-fallback-banner {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #070b14;
+  z-index: 250;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  gap: 1.25rem;
+}
+
+.fallback-box {
+  background: #0f172a;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 520px;
+}

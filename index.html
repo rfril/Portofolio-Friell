@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rafriel Raditya Widodo — 3D Interactive Game Developer Portfolio</title>
+  <meta name="description" content="Portofolio 3D Interaktif Rafriel Raditya Widodo, Siswa RPL SMKN 71 Jakarta & Calon Game Developer. Jelajahi ekosistem Minecraft Apexsions, POS Kasir Friel, dan PoRoRo Ice Cream.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/game3d.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/classic.css">
+
+  <!-- Bundled Local Three.js Library -->
+  <script src="js/lib/three.min.js"></script>
+</head>
+<body>
+
+  <!-- ======================================================================
+       VIEW 1: INTERACTIVE 3D GAMEPLAY VIEWPORT
+       ====================================================================== -->
+  <div id="gameViewContainer" class="game-viewport-wrap">
+    
+    <!-- WebGL Canvas -->
+    <canvas id="canvas3d"></canvas>
+
+    <!-- Top HUD Bar -->
+    <header class="top-hud">
+      <div class="hud-left">
+        <a href="#classic" id="switchToClassicBtn" class="hud-brand" title="Buka Mode Dokumen Portofolio Biasa">
+          <span class="brand-bracket">&lt;</span>Rafriel<span class="brand-accent">.3D</span><span class="brand-bracket">/&gt;</span>
+        </a>
+
+        <!-- Speedometer -->
+        <div class="hud-pill">
+          <i class="fa-solid fa-gauge-high text-gold"></i>
+          <span><span id="speedoVal" class="speed-val">0</span> KM/H</span>
+        </div>
+
+        <!-- Diamond Counter -->
+        <div class="hud-pill">
+          <i class="fa-solid fa-gem" style="color: #38bdf8;"></i>
+          <span><span id="diamondCount" style="color: #38bdf8; font-weight: 700;">0</span> / 15 Diamond</span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <!-- Portfolio Guidebook Button [P] -->
+        <button class="hud-btn" id="portfolioMenuBtn" title="Buka Panduan Portofolio (P)">
+          <i class="fa-solid fa-book-open" style="color: #f59e0b;"></i>
+          <span>Portofolio (P)</span>
+        </button>
+
+        <!-- Camera Angle Toggle [C] -->
+        <button class="hud-btn" id="camViewBtn" title="Ganti Sudut Pandang Kamera (C)">
+          <i class="fa-solid fa-video"></i>
+          <span>Kamera: Isometrik</span>
+        </button>
+
+        <!-- Klakson Horn [H] -->
+        <button class="hud-btn" id="hornBtn" title="Bunyikan Klakson (H)">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>Klakson (H)</span>
+        </button>
+
+        <!-- Reset Car Position [R] -->
+        <button class="hud-btn" id="resetCarBtn" title="Kembalikan Mobil ke Spawn (R)">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>Reset (R)</span>
+        </button>
+
+        <!-- Sound Toggle -->
+        <button class="hud-btn" id="soundToggleBtn" title="Aktif/Nonaktifkan Suara" aria-label="Toggle Sound">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Return to Classic Web Mode Button -->
+        <button class="hud-btn btn-classic-mode" id="switchToClassicBtnNav" onclick="document.getElementById('switchToClassicBtn').click();" title="Buka Tampilan Portofolio Web Standar">
+          <i class="fa-solid fa-file-lines"></i>
+          <span>Mode Dokumen</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Zone Proximity Announcer Pill -->
+    <div class="zone-announcer" id="zoneAnnouncer" title="Klik atau tekan [E] untuk membuka">
+      <div class="zone-announcer-header">
+        <i class="fa-solid fa-location-dot" style="color: #f59e0b;"></i>
+        <span id="zoneAnnouncerText">Zona: Apexsions</span>
+      </div>
+      <span class="zone-cat-badge" id="zoneAnnouncerCat">Flagship Minecraft Server</span>
+      <span class="zone-announcer-hint">
+        <i class="fa-solid fa-hand-pointer"></i> Tekan [E] atau Klik untuk Buka Detail
+      </span>
+    </div>
+
+    <!-- Desktop Keybinding Bar Helper -->
+    <div class="bottom-controls-bar">
+      <span>Kontrol Mobil:</span>
+      <span class="ctrl-key">W</span> <span class="ctrl-key">S</span> Maju/Mundur
+      &bull;
+      <span class="ctrl-key">A</span> <span class="ctrl-key">D</span> Belok
+      &bull;
+      <span class="ctrl-key">E</span> Interaksi
+      &bull;
+      <span class="ctrl-key">P</span> Portofolio
+      &bull;
+      <span class="ctrl-key">H</span> Klakson
+      &bull;
+      <span class="ctrl-key">C</span> Kamera
+      &bull;
+      <span class="ctrl-key">R</span> Reset
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div class="mobile-touch-controls">
+      <div class="touch-cluster">
+        <button class="touch-btn" id="touchLeft" aria-label="Belok Kiri">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <button class="touch-btn" id="touchRight" aria-label="Belok Kanan">
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div class="touch-cluster">
+        <button class="touch-btn touch-btn-brake" id="touchBrake" aria-label="Rem atau Mundur">
+          <i class="fa-solid fa-arrow-down"></i>
+        </button>
+        <button class="touch-btn touch-btn-gas" id="touchGas" aria-label="Gas / Maju">
+          <i class="fa-solid fa-arrow-up"></i>
+        </button>
+        <button class="touch-btn touch-btn-interact" id="touchInteract" aria-label="Interaksi">
+          [E]
+        </button>
+        <button class="touch-btn" id="touchHorn" aria-label="Klakson">
+          <i class="fa-solid fa-bullhorn"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive In-Game Exhibit Modal Dialog -->
+    <div class="project-modal-backdrop" id="projectModalBackdrop">
+      <div class="project-modal-card">
+        <button class="modal-close-btn" id="modalCloseBtn" aria-label="Tutup Dialog (ESC)">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <!-- In-Game Tab Navigation Bar -->
+        <nav class="modal-nav-tabs" id="modalNavTabs"></nav>
+
+        <!-- Modal Dynamic Content Body -->
+        <div class="modal-content-area" id="modalContentArea"></div>
+      </div>
+    </div>
+
+    <!-- Game Loading Screen Overlay -->
+    <div class="game-loader-overlay" id="gameLoader">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">MEMUAT DUNIA 3D RAFRIEL</div>
+      <div class="loader-sub">Menyiapkan aset dunia, pencahayaan, dan mesin fisika kendaraan...</div>
+    </div>
+
+    <!-- WebGL Fallback Banner -->
+    <div class="webgl-fallback-banner" id="webglFallbackBanner">
+      <div class="fallback-box">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #f43f5e; margin-bottom: 1rem;"></i>
+        <h2 style="margin-bottom: 0.5rem;">WebGL Tidak Didukung atau Dinonaktifkan</h2>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.5;">Perangkat atau browser Anda tidak dapat menginisialisasi akselerasi 3D WebGL. Anda tetap dapat membaca seluruh portofolio melalui Mode Dokumen Biasa.</p>
+        <button class="btn btn-primary" onclick="document.getElementById('switchToClassicBtn').click();">
+          <i class="fa-solid fa-file-lines"></i>
+          <span>Buka Mode Dokumen Standar</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================================================================
+       VIEW 2: ACCESSIBLE CLASSIC PORTFOLIO VIEW (NON-GAMEPLAY MODE)
+       ====================================================================== -->
+  <div id="classicViewContainer" class="classic-view-container">
+
+    <!-- Classic Sticky Navbar -->
+    <header class="classic-navbar">
+      <div class="container nav-wrap">
+        <a href="#home" class="nav-brand">
+          <span class="brand-bracket">&lt;</span>Rafriel<span class="brand-accent">.dev</span><span class="brand-bracket">/&gt;</span>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#about-section">Tentang</a></li>
+          <li><a href="#projects-section">Proyek</a></li>
+          <li><a href="#journey-section">Perjalanan</a></li>
+          <li><a href="#skills-section">Keahlian</a></li>
+          <li><a href="#contact-section">Kontak</a></li>
+        </ul>
+
+        <button class="btn-game-toggle" id="switchToGameBtn">
+          <i class="fa-solid fa-car-side"></i>
+          <span>Masuk Mode Game 3D</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="classic-hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-text-block">
+          <div class="hero-pill-badge">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Siswa RPL &bull; SMK Negeri 71 Jakarta</span>
+          </div>
+
+          <h1 class="hero-name">Rafriel Raditya Widodo</h1>
+          <div class="hero-goal">
+            <i class="fa-solid fa-gamepad" style="color: #f59e0b;"></i> Calon Game Developer & Server Systems Engineer
+          </div>
+
+          <p class="hero-bio">
+            Siswa SMK Negeri 71 Jakarta jurusan Rekayasa Perangkat Lunak (RPL) yang berfokus pada pengembangan sistem game dan software development. Bermula dari rasa penasaran bermain Minecraft saat pandemi COVID-19, saya belajar modding secara otodidak, hingga kini mengembangkan plugin server Minecraft secara mandiri menggunakan Java 21, Nuxt, dan Laravel.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="document.getElementById('switchToGameBtn').click();">
+              <i class="fa-solid fa-gamepad"></i>
+              <span>Mainkan Mode Game 3D</span>
+            </button>
+            <a href="#projects-section" class="btn btn-secondary">
+              <i class="fa-solid fa-folder-open"></i>
+              <span>Lihat Daftar Proyek</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-avatar-card">
+          <img src="assets/avatar-friel.jpg" alt="Rafriel Raditya Widodo" class="hero-avatar-img">
+          <div class="hero-avatar-overlay">
+            <div class="avatar-badge-text">
+              <i class="fa-solid fa-shield-check"></i> Profil Terverifikasi
+            </div>
+            <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.2rem;">SMKN 71 Jakarta &bull; RPL 2026</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verified Projects Section -->
+    <section class="classic-section" id="projects-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Portofolio Unggulan</span>
+          <h2 class="section-title">Proyek Terverifikasi</h2>
+          <p class="section-desc">Setiap proyek diperiksa langsung dari basis kode lokal komputer, mencerminkan implementasi nyata dan fungsi yang telah selesai.</p>
+        </div>
+
+        <div class="projects-showcase-grid">
+
+          <!-- Project A: Apexsions -->
+          <article class="project-card-full">
+            <img src="assets/apexsions-preview.jpg" alt="Apexsions Minecraft Server" class="project-img-cover">
+            <div class="project-info-body">
+              <div>
+                <div class="project-top-meta">
+                  <span class="modal-badge badge-accent">Flagship</span>
+                  <span class="modal-badge">Java 21 LTS</span>
+                  <span class="modal-badge badge-status">Aktif</span>
+                </div>
+                <h3 class="card-title">Apexsions Minecraft Server</h3>
+                <div class="card-subtitle">Ekosistem Server Game RPG/MMO Teritorial & Dynamic Economy</div>
+                <p class="card-desc">
+                  Server game Minecraft skala besar dengan konsep 3 faksi kerajaan berdaulat (Zenithar, Solterra, Sylvamoor), ekonomi pasar bebas dinamis fluktuatif cuaca/bioma, sistem kedaulatan wilayah polygon BlueMap 3D, dan 9 modul plugin Java kustom mandiri.
+                </p>
+                <div class="card-tags">
+                  <span class="card-tag">PaperMC API</span>
+                  <span class="card-tag">Java 21</span>
+                  <span class="card-tag">BlueMap 3D</span>
+                  <span class="card-tag">MySQL/SQLite</span>
+                  <span class="card-tag">PowerShell Automation</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <a href="project-apexsions.html" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-circle-info"></i> Baca Detail Lengkap
+                </a>
+                <a href="https://web.apexsions.com" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+                  <i class="fa-solid fa-globe"></i> web.apexsions.com
+                </a>
+                <span class="server-ip-pill"><i class="fa-solid fa-server" style="color: #38bdf8;"></i> <code>apexsions.com:32348</code></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project B: Sistem Kasir -->
+          <article class="project-card-full">
+            <img src="assets/kasir-preview.png" alt="POS Kasir Friel v2.0" class="project-img-cover">
+            <div class="project-info-body">
+              <div>
+                <div class="project-top-meta">
+                  <span class="modal-badge badge-accent">Fullstack Web</span>
+                  <span class="modal-badge">Nuxt 4 + Laravel</span>
+                  <span class="modal-badge badge-status">Selesai di Laragon</span>
+                </div>
+                <h3 class="card-title">POS Kasir Friel v2.0</h3>
+                <div class="card-subtitle">Aplikasi Kasir Digital & Inventori Modern REST API</div>
+                <p class="card-desc">
+                  Sistem Point of Sale (POS) retail terpadu yang memadukan antarmuka frontend kasir cepat responsif (kasir-frontend via Nuxt 4 + Tailwind CSS) dengan backend REST API (crud-laravel via Laravel 11 di lingkungan Laragon).
+                </p>
+                <div class="card-tags">
+                  <span class="card-tag">Nuxt 4</span>
+                  <span class="card-tag">Vue 3 Composition API</span>
+                  <span class="card-tag">Tailwind CSS</span>
+                  <span class="card-tag">Laravel 11</span>
+                  <span class="card-tag">RESTful API</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <a href="project-kasir.html" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-circle-info"></i> Baca Detail Lengkap
+                </a>
+                <span class="source-verified-pill"><i class="fa-solid fa-check"></i> Diverifikasi di C:\laragon\www</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project C: PoRoRo Ice Cream -->
+          <article class="project-card-full">
+            <img src="assets/pororo-hero.png" alt="PoRoRo Ice Cream Masterplan" class="project-img-cover">
+            <div class="project-info-body">
+              <div>
+                <div class="project-top-meta">
+                  <span class="modal-badge badge-accent">School Project (MKK Kel 6)</span>
+                  <span class="modal-badge">Nuxt 3 & Figma</span>
+                  <span class="modal-badge badge-status">Selesai</span>
+                </div>
+                <h3 class="card-title">PoRoRo Ice Cream</h3>
+                <div class="card-subtitle">Website Showcase & Masterplan UI/UX Gelato Artisan Cakung</div>
+                <p class="card-desc">
+                  Tugas sekolah kejuruan (MKK Kelompok 6) berupa perancangan dan implementasi website gelato artisan Cakung. Dibangun dengan Nuxt 3 & Vue 3 mengacu pada token visual Figma beranda.fig, menampilkan 18 varian rasa dan alur pesanan delivery 30 menit.
+                </p>
+                <div class="card-tags">
+                  <span class="card-tag">Nuxt 3</span>
+                  <span class="card-tag">Vue 3 Modular</span>
+                  <span class="card-tag">Figma Tokens</span>
+                  <span class="card-tag">Fraunces & DM Sans</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <a href="project-pororo.html" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-circle-info"></i> Baca Detail Lengkap
+                </a>
+                <span class="source-verified-pill"><i class="fa-solid fa-check"></i> Diverifikasi di C:\Project MKK Kel 6</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Chronological Journey Section -->
+    <section class="classic-section" id="journey-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Kronologi Nyata</span>
+          <h2 class="section-title">Perjalanan Belajar (Timeline)</h2>
+          <p class="section-desc">Tahapan eksplorasi dari rasa penasaran bermain game hingga merancang arsitektur sistem sendiri.</p>
+        </div>
+
+        <div class="classic-timeline">
+          <div class="modal-journey-item">
+            <div class="journey-node" style="border-color: #38bdf8;">
+              <i class="fa-solid fa-gamepad" style="color: #38bdf8;"></i>
+            </div>
+            <div class="journey-card">
+              <div class="journey-year-tag">2020 — 2021 &bull; Era Pandemi COVID-19</div>
+              <h4 class="journey-title">Awal Ketertarikan Dunia Game</h4>
+              <p class="journey-desc">Menghabiskan waktu bermain Minecraft membuka rasa ingin tahu bagaimana game dapat dimodifikasi dan bagaimana mekanik di balik layar bekerja.</p>
+            </div>
+          </div>
+
+          <div class="modal-journey-item">
+            <div class="journey-node" style="border-color: #a855f7;">
+              <i class="fa-solid fa-cubes" style="color: #a855f7;"></i>
+            </div>
+            <div class="journey-card">
+              <div class="journey-year-tag">2021 — 2022 &bull; Otodidak Bedrock</div>
+              <h4 class="journey-title">Mempelajari Addon Minecraft Bedrock</h4>
+              <p class="journey-desc">Mengeksplorasi behavior pack dan resource pack secara mandiri. Mengamati cara kerja komponen JSON dan dasar logika C++.</p>
+            </div>
+          </div>
+
+          <div class="modal-journey-item">
+            <div class="journey-node" style="border-color: #f59e0b;">
+              <i class="fa-solid fa-server" style="color: #f59e0b;"></i>
+            </div>
+            <div class="journey-card">
+              <div class="journey-year-tag">Awal 2023 &bull; Eksperimen Server</div>
+              <h4 class="journey-title">Membuat Server Minecraft Java</h4>
+              <p class="journey-desc">Mulai mencoba mengelola server Java dan mengeksplorasi plugin. Tertarik pada Java karena mampu mengubah logika program in-game secara terstruktur.</p>
+            </div>
+          </div>
+
+          <div class="modal-journey-item">
+            <div class="journey-node" style="border-color: #10b981;">
+              <i class="fa-solid fa-code-compare" style="color: #10b981;"></i>
+            </div>
+            <div class="journey-card">
+              <div class="journey-year-tag">2023 — 2025 &bull; Modifikasi & Belajar OOP</div>
+              <h4 class="journey-title">Memahami Pola Desain & Memodifikasi Plugin</h4>
+              <p class="journey-desc">Membaca kode sumber orang lain, dekompilasi JAR, mempelajari Paper API, dan memodifikasi fitur sesuai kebutuhan server.</p>
+            </div>
+          </div>
+
+          <div class="modal-journey-item">
+            <div class="journey-node" style="border-color: #f43f5e;">
+              <i class="fa-solid fa-rocket" style="color: #f43f5e;"></i>
+            </div>
+            <div class="journey-card">
+              <div class="journey-year-tag">Pertengahan 2026 &bull; Pengembangan Mandiri</div>
+              <h4 class="journey-title">Membangun Plugin Suite Sendiri dari Nol</h4>
+              <p class="journey-desc">Merancang 9 plugin mandiri, dynamic economy, 3 faksi kerajaan, dan pipeline kompilasi build.ps1 untuk Apexsions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Skills Section -->
+    <section class="classic-section" id="skills-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Keahlian Faktual</span>
+          <h2 class="section-title">Keahlian Teknis & Bukti Penerapan</h2>
+          <p class="section-desc">Tidak menggunakan klaim persentase acak (90%/100%), melainkan penjabaran implementasi nyata pada proyek.</p>
+        </div>
+
+        <div class="modal-skills-grid">
+          <!-- Java -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(245, 158, 11, 0.15); border-color: #f59e0b;">
+                <i class="fa-brands fa-java" style="color: #f59e0b;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">Java (JDK 21 LTS)</h4>
+                <span class="skill-status-tag">Pengembangan Aktif & Mandiri</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> Bahasa utama untuk 9 plugin suite Apexsions (PaperMC/Spigot).</p>
+            <p class="skill-project"><strong>Kaitan:</strong> ApexsionsCore, Economy, Shop, Battlepass, Fishing.</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> OOP & Clean Architecture</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Event-Driven Architecture (PaperMC)</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Asynchronous CompletableFuture & JDBC MySQL/SQLite</li>
+            </ul>
+          </div>
+
+          <!-- Nuxt / Vue 3 -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(16, 185, 129, 0.15); border-color: #10b981;">
+                <i class="fa-brands fa-vuejs" style="color: #10b981;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">Nuxt (Nuxt 3 & 4) / Vue 3</h4>
+                <span class="skill-status-tag">Implementasi Proyek Nyata</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> Framework frontend modern reaktif untuk antarmuka kasir dan website gelato.</p>
+            <p class="skill-project"><strong>Kaitan:</strong> POS Kasir Friel v2.0 & PoRoRo Ice Cream.</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Vue 3 Composition API & Reactivity</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Modular Auto-imported Components</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Integrasi Tailwind CSS & REST API Fetch</li>
+            </ul>
+          </div>
+
+          <!-- Laravel -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444;">
+                <i class="fa-brands fa-laravel" style="color: #ef4444;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">Laravel 11 (PHP 8.2+)</h4>
+                <span class="skill-status-tag">Implementasi Proyek Nyata</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> RESTful API backend untuk manajemen inventori dan transaksi toko retail.</p>
+            <p class="skill-project"><strong>Kaitan:</strong> Backend POS Kasir (crud-laravel di Laragon).</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Routing apiResource & Controller Logic</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Operasi CRUD Database Migrations</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Validasi Request & Format JSON Terstandar</li>
+            </ul>
+          </div>
+
+          <!-- C++ -->
+          <div class="modal-skill-card">
+            <div class="skill-card-top">
+              <div class="skill-icon-wrap" style="background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;">
+                <i class="fa-solid fa-code" style="color: #38bdf8;"></i>
+              </div>
+              <div>
+                <h4 class="skill-title">C++</h4>
+                <span class="skill-status-tag">Eksplorasi & Tahap Belajar</span>
+              </div>
+            </div>
+            <p class="skill-usage"><strong>Penggunaan:</strong> Eksplorasi addon dan native module Minecraft Bedrock Edition.</p>
+            <p class="skill-project"><strong>Kaitan:</strong> Modding Bedrock & pemahaman native logic.</p>
+            <ul class="skill-caps-list">
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Memahami memory pointers dan alur kompilasi native</li>
+              <li><i class="fa-solid fa-angle-right text-cyan"></i> Dasar sintaks C++ (bukan klaim penguasaan penuh)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="classic-section" id="contact-section">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Terhubung</span>
+          <h2 class="section-title">Mari Berdiskusi & Berkolaborasi</h2>
+          <p class="section-desc">Saluran komunikasi aktif dan terverifikasi untuk membahas game development, server systems, atau peluang magang.</p>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-card-box">
+            <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-address-book" style="color: #38bdf8;"></i> Kontak Resmi Terverifikasi</h3>
+            
+            <div class="modal-contact-list">
+              <a href="https://wa.me/6285883161047" target="_blank" rel="noopener" class="modal-contact-row" style="border-left-color: #25D366;">
+                <div class="contact-icon-box" style="color: #25D366;"><i class="fa-brands fa-whatsapp"></i></div>
+                <div class="contact-text-box">
+                  <span class="contact-platform">WhatsApp (Respon Cepat)</span>
+                  <strong class="contact-value">+62 858-8316-1047</strong>
+                  <small class="contact-source"><i class="fa-solid fa-shield-check"></i> Biodata SMKN 71 Jakarta</small>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square contact-arrow"></i>
+              </a>
+
+              <a href="https://web.apexsions.com" target="_blank" rel="noopener" class="modal-contact-row" style="border-left-color: #f59e0b;">
+                <div class="contact-icon-box" style="color: #f59e0b;"><i class="fa-solid fa-globe"></i></div>
+                <div class="contact-text-box">
+                  <span class="contact-platform">Website Portal</span>
+                  <strong class="contact-value">web.apexsions.com</strong>
+                  <small class="contact-source"><i class="fa-solid fa-shield-check"></i> Portal Resmi</small>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square contact-arrow"></i>
+              </a>
+
+              <a href="https://github.com/Rafriel" target="_blank" rel="noopener" class="modal-contact-row" style="border-left-color: #e2e8f0;">
+                <div class="contact-icon-box" style="color: #e2e8f0;"><i class="fa-brands fa-github"></i></div>
+                <div class="contact-text-box">
+                  <span class="contact-platform">GitHub</span>
+                  <strong class="contact-value">github.com/Rafriel</strong>
+                  <small class="contact-source"><i class="fa-solid fa-shield-check"></i> Repositori & Kode</small>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square contact-arrow"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Form Demo -->
+          <div class="contact-card-box">
+            <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-paper-plane" style="color: #a855f7;"></i> Kirim Pesan Cepat</h3>
+            <form class="contact-form" id="classicContactForm">
+              <div class="form-group">
+                <label for="cName">Nama Anda</label>
+                <input type="text" id="cName" class="form-input" placeholder="Masukkan nama Anda..." required>
+              </div>
+              <div class="form-group">
+                <label for="cEmail">Email atau Nomor WhatsApp</label>
+                <input type="text" id="cEmail" class="form-input" placeholder="email@contoh.com / 08..." required>
+              </div>
+              <div class="form-group">
+                <label for="cMsg">Pesan / Diskusi</label>
+                <textarea id="cMsg" rows="4" class="form-input" placeholder="Topik diskusi server game, modding, atau kolaborasi..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Kirim Pesan (Mode Demo)</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="classic-footer">
+      <div class="container">
+        <p>&copy; 2026 Rafriel Raditya Widodo &bull; Siswa RPL SMK Negeri 71 Jakarta &bull; Aspiring Game Developer.</p>
+        <p style="margin-top: 0.35rem; font-size: 0.78rem;">Dibuat dengan standar kode bersih, modularitas Three.js, dan verifikasi data proyek lokal.</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Main ES Module Script -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
