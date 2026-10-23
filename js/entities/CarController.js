@@ -635,7 +635,7 @@ export class CarController {
       // Emit exhaust smoke when accelerating forward
       if (this.particles && Math.random() < 0.4) {
         const exhaustPos = this.mesh.position.clone();
-        exhaustPos.y += 0.35;
+        exhaustPos.y += 0.48;
         const forwardDir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y);
         this.particles.emitExhaust(exhaustPos, forwardDir);
       }
@@ -726,9 +726,10 @@ export class CarController {
     // Hitung lateral slip
     this.lateralSlip = carRight.dot(this.velocity);
 
-    // Apply displacement
+    // Apply displacement & pastikan roda selalu menempel presisi di jalan
     const displacement = this.velocity.clone().multiplyScalar(deltaTime);
     this.mesh.position.add(displacement);
+    this.mesh.position.y = CONFIG.CAR.RESPAWN_POSITION.y;
 
     // 6. World Bounds Check (Bounce gently off boundaries, anti-spam)
     const boundLimit = (CONFIG.WORLD.WIDTH / 2) - CONFIG.WORLD.BOUND_PADDING;
@@ -766,10 +767,10 @@ export class CarController {
     if (this.particles && (this.isDrifting || Math.abs(this.lateralSlip) > 3.0)) {
       if (Math.random() < 0.75) {
         const leftRear = this.mesh.position.clone().add(
-          new THREE.Vector3(-0.95, 0.25, -1.25).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y)
+          new THREE.Vector3(-0.95, 0.05, -1.25).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y)
         );
         const rightRear = this.mesh.position.clone().add(
-          new THREE.Vector3(0.95, 0.25, -1.25).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y)
+          new THREE.Vector3(0.95, 0.05, -1.25).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.mesh.rotation.y)
         );
         this.particles.emitSkidDust(leftRear);
         this.particles.emitSkidDust(rightRear);

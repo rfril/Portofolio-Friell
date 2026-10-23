@@ -156,15 +156,16 @@ export class Environment {
       const bridgeGroup = new THREE.Group();
       bridgeGroup.position.set(x, 0, z);
 
+      // Deck penopang jembatan di bawah aspal kanal (rata dengan permukaan jalan y = 0.02)
       const deck = new THREE.Mesh(new THREE.BoxGeometry(18, 0.35, 20), stoneMat);
-      deck.position.y = 0.18;
+      deck.position.y = -0.155;
       deck.receiveShadow = true;
       deck.castShadow = true;
       bridgeGroup.add(deck);
 
       const railGeo = new THREE.BoxGeometry(0.8, 1.2, 20);
       const railL = new THREE.Mesh(railGeo, stoneMat);
-      railL.position.set(-8.6, 0.8, 0);
+      railL.position.set(-8.6, 0.62, 0);
       railL.castShadow = true;
       bridgeGroup.add(railL);
 

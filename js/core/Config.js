@@ -34,8 +34,8 @@ export const CONFIG = {
     DRIFT_SLIP_FACTOR: 0.94,
     BODY_ROLL_FACTOR: 0.10,  // Kemiringan bodi saat drift
     BODY_PITCH_FACTOR: 0.05,
-    WHEEL_RADIUS: 0.65,
-    RESPAWN_POSITION: { x: 0, y: 0.45, z: 0 },
+    WHEEL_RADIUS: 0.40,      // Diameter roda Jesko sesungguhnya (radius 0.40m)
+    RESPAWN_POSITION: { x: 0, y: 0.02, z: 0 }, // Menempel pas di atas permukaan aspal jalan (y = 0.02)
     RESPAWN_ROTATION: 0
   },
 
