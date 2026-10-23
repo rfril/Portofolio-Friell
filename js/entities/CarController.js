@@ -278,9 +278,8 @@ export class CarController {
       const turnMultiplier = 1.35;
       const speedRatio = isMoving ? (Math.abs(this.speed) / CONFIG.CAR.MAX_SPEED_FORWARD) : 0.45;
       
-      // Saat mundur (speed < -0.1), balik arah putaran yaw agar belok kiri tetap bergerak ke kiri (arcade / intuitive reverse)
-      const reverseFactor = this.speed < -0.1 ? -1 : 1;
-      const deltaYaw = this.steerAngle * speedRatio * turnMultiplier * reverseFactor * deltaTime;
+      // Saat belok kiri (A), mobil berputar ke kiri baik saat maju maupun mundur (konsisten & intuitif)
+      const deltaYaw = this.steerAngle * speedRatio * turnMultiplier * deltaTime;
       this.mesh.rotation.y += deltaYaw;
 
       // Tire skid particles when turning sharply at high speed
@@ -330,7 +329,18 @@ export class CarController {
     }
 
     // 6. Wheel Spin Rotation
-    const wheelRotDelta = (this.speed * deltaTime) / CONFIG.CAR.WHEEL_RADIUS;
+    // Jika mobil melaju, roda berputar sesuai kecepatan fisik.
+    // Jika mobil menempel rintangan dan pemain tetap menekan gas, roda tetap berputar (wheel slip)
+    // agar roda tidak membeku/diam saat menempel dinding.
+    let effectiveSpinSpeed = this.speed;
+    if (Math.abs(effectiveSpinSpeed) < 1.0 && Math.abs(throttle) > 0.1) {
+      effectiveSpinSpeed = throttle * 8.0;
+      if (this.particles && Math.random() < 0.2) {
+        const rearPos = this.mesh.position.clone();
+        this.particles.emitSkidDust(rearPos);
+      }
+    }
+    const wheelRotDelta = (effectiveSpinSpeed * deltaTime) / CONFIG.CAR.WHEEL_RADIUS;
     if (this.frontLeftWheel) this.frontLeftWheel.rotation.x += wheelRotDelta;
     if (this.frontRightWheel) this.frontRightWheel.rotation.x += wheelRotDelta;
     if (this.rearLeftWheel) this.rearLeftWheel.rotation.x += wheelRotDelta;

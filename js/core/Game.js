@@ -7,6 +7,7 @@
 import { CONFIG } from "./Config.js";
 import { StateManager, GameStates } from "./StateManager.js";
 import { AudioManager } from "./AudioManager.js";
+import { ProgressionManager } from "./ProgressionManager.js";
 import { InputManager } from "./InputManager.js";
 import { CameraController } from "./CameraController.js";
 import { ParticleSystem } from "../entities/ParticleSystem.js";
@@ -21,6 +22,7 @@ export class Game {
     this.canvas = canvasElement;
     this.state = new StateManager(GameStates.LOADING);
     this.audio = new AudioManager();
+    this.progression = new ProgressionManager();
     this.input = new InputManager(this.state);
 
     this.clock = new THREE.Clock();
@@ -35,7 +37,7 @@ export class Game {
     this.world = new World(this.scene, this.audio, this.particles, this.cameraController);
 
     this.ui = new UIManager(this);
-    this.modal = new ModalManager(this.state, this.audio);
+    this.modal = new ModalManager(this.state, this.audio, this.progression);
     this.mobileControls = new MobileControls(this.input, this);
 
     this.bindActionEvents();
@@ -140,7 +142,7 @@ export class Game {
         this.modal.close();
       } else {
         const activeZone = this.world.getActiveZone();
-        this.modal.open(activeZone ? activeZone.id : "apexsions");
+        this.modal.open(activeZone ? activeZone.id : "projects");
       }
     });
 
@@ -154,6 +156,17 @@ export class Game {
 
   bindWindowEvents() {
     window.addEventListener("resize", () => this.onResize());
+
+    // Progression: listen to zoneVisited from BaseZone
+    window.addEventListener("zoneVisited", (e) => {
+      const zoneId = e.detail?.zoneId;
+      if (zoneId && this.progression) {
+        const isNew = this.progression.unlockZone(zoneId);
+        if (isNew) {
+          this.audio.playDiscoverySound();
+        }
+      }
+    });
 
     // AudioContext activation on first user interaction
     const unlockAudio = () => {
@@ -192,10 +205,10 @@ export class Game {
   triggerInteraction() {
     const activeZone = this.world.getActiveZone();
     if (activeZone) {
+      if (this.progression) this.progression.unlockZone(activeZone.id);
       this.modal.open(activeZone.id);
     } else {
-      // Default to opening apexsions if not near specific zone
-      this.modal.open("apexsions");
+      this.modal.open("projects");
     }
   }
 

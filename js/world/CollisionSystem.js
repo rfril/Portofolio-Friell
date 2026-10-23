@@ -77,28 +77,38 @@ export class CollisionSystem {
 
       if (collided) {
         // Dorong mobil keluar dari rintangan dengan aman
-        carPos.x += normalX * (overlap + 0.06);
-        carPos.z += normalZ * (overlap + 0.06);
+        carPos.x += normalX * (overlap + 0.08);
+        carPos.z += normalZ * (overlap + 0.08);
 
         // Dot product antara kecepatan mobil dengan normal dinding (normal mengarah keluar dari dinding)
         const dot = velX * normalX + velZ * normalZ;
 
-        // Jika mobil bergerak MENJAUHI rintangan (dot >= 0, misal mundur setelah nabrak depan),
-        // JANGAN batalkan kecepatan! Izinkan mobil langsung bergerak bebas!
+        // Hanya tangani jika mobil bergerak MENEMBUS rintangan (dot < 0).
+        // Jika mobil bergerak MENJAUHI rintangan (dot >= 0, misal mundur setelah tabrakan),
+        // JANGAN batalkan kecepatan! Izinkan mobil langsung mundur/bergerak bebas tanpa hambatan!
         if (dot < 0) {
           const speedAbs = Math.abs(carController.speed);
 
-          // Tumbukan berkecepatan cukup tinggi (> 2.5 m/s) dan jeda minimal 300ms untuk mencegah spam suara & partikel
-          if (speedAbs > 2.5 && (now - this.lastImpactTime > 300)) {
+          // Tumbukan berkecepatan cukup tinggi (> 2.8 m/s) dan jeda minimal 350ms untuk mencegah spam suara & partikel
+          if (speedAbs > 2.8 && (now - this.lastImpactTime > 350)) {
             this.lastImpactTime = now;
             this.triggerImpact(carPos);
 
             // Pantulan lembut (recoil) sekali saja
-            carController.speed = -Math.sign(carController.speed) * Math.min(3.2, speedAbs * 0.3);
+            carController.speed = -Math.sign(carController.speed) * Math.min(3.0, speedAbs * 0.3);
           } else {
-            // Jika menempel dinding dan menekan maju terus (nyepam maju):
-            // Redam kecepatan menjadi 0 agar mobil berhenti tenang di permukaan dinding tanpa getar/spam
-            carController.speed = 0;
+            // Hilangkan komponen kecepatan yang menembus dinding,
+            // tetapi pertahankan komponen tangensial agar mobil bisa meluncur di sepanjang permukaan dinding
+            // tanpa getar (anti-spam) dan tidak membeku kaku!
+            const tanX = velX - dot * normalX;
+            const tanZ = velZ - dot * normalZ;
+            const tanSpeed = Math.sqrt(tanX * tanX + tanZ * tanZ);
+
+            if (tanSpeed > 0.3) {
+              carController.speed = Math.sign(carController.speed) * tanSpeed * 0.9;
+            } else {
+              carController.speed = 0;
+            }
           }
         }
       }

@@ -97,6 +97,9 @@ export class BaseZone {
     if (!wasInside && this.isPlayerInside) {
       this.isVisited = true;
       this.onEnter();
+      window.dispatchEvent(new CustomEvent("zoneVisited", {
+        detail: { zoneId: this.id, zone: this }
+      }));
     } else if (wasInside && !this.isPlayerInside) {
       this.onLeave();
     }

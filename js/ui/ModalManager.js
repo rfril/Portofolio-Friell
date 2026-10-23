@@ -1,9 +1,8 @@
 /**
- * IN-GAME MODAL & EXHIBIT MANAGER
- * Mengelola panel informasi portofolio interaktif:
- * - Tab switcher dinamis berdasarkan zona tempat pemain berdiri
- * - Rendering data proyek, timeline perjalanan, skills lab, profil, dan kontak
- * - Transisi game state (INTERACTING <-> PLAYING)
+ * IN-GAME MODAL & EXHIBIT MANAGER (PROGRESSION & EXPLORATION ENABLED)
+ * - Proyek disatukan ke dalam 1 halaman overview.
+ * - Informasi lengkap proyek terbuka saat tombol "Buka Info Lengkap" ditekan.
+ * - Sistem penguncian eksplorasi: Pengguna harus menjelajahi dunia 3D untuk membuka informasi.
  */
 
 import { GameStates } from "../core/StateManager.js";
@@ -14,16 +13,18 @@ import { technicalSkills } from "../data/skillsData.js";
 import { contactData } from "../data/contactData.js";
 
 export class ModalManager {
-  constructor(stateManager, audioManager) {
+  constructor(stateManager, audioManager, progressionManager) {
     this.state = stateManager;
     this.audio = audioManager;
+    this.progression = progressionManager;
 
     this.backdrop = document.getElementById("projectModalBackdrop");
     this.closeBtn = document.getElementById("modalCloseBtn");
     this.navTabs = document.getElementById("modalNavTabs");
     this.contentArea = document.getElementById("modalContentArea");
 
-    this.activeTab = "apexsions";
+    this.activeTab = "projects";
+    this.selectedProjectId = null; // Ketika memilih 1 proyek untuk dibuka lengkap
 
     this.bindEvents();
   }
@@ -50,23 +51,81 @@ export class ModalManager {
         }
       });
     }
+
+    // Event delegation di content area untuk tombol proyek & aksi
+    if (this.contentArea) {
+      this.contentArea.addEventListener("click", (e) => {
+        // Klik "Buka Info Lengkap" pada kartu proyek
+        const openProjBtn = e.target.closest(".btn-open-project");
+        if (openProjBtn && openProjBtn.dataset.projectId) {
+          this.selectedProjectId = openProjBtn.dataset.projectId;
+          this.renderContent();
+          if (this.audio) this.audio.playInteractSound();
+          return;
+        }
+
+        // Klik "Kembali ke Daftar Proyek"
+        const backProjBtn = e.target.closest(".btn-back-to-projects");
+        if (backProjBtn) {
+          this.selectedProjectId = null;
+          this.renderContent();
+          if (this.audio) this.audio.playInteractSound();
+          return;
+        }
+
+        // Buka Semua Area (Mode Aksesibilitas / Evaluator)
+        const unlockAllBtn = e.target.closest(".btn-unlock-all-evaluator");
+        if (unlockAllBtn) {
+          this.progression.unlockAll();
+          this.renderTabs();
+          this.renderContent();
+          if (this.audio) this.audio.playDiscoverySound();
+          return;
+        }
+
+        // Reset Progres
+        const resetProgBtn = e.target.closest(".btn-reset-progression");
+        if (resetProgBtn) {
+          this.progression.resetProgress();
+          this.selectedProjectId = null;
+          this.renderTabs();
+          this.renderContent();
+          if (this.audio) this.audio.playResetSound();
+          return;
+        }
+      });
+    }
+
+    // Listen to progression changes
+    window.addEventListener("zoneDiscovered", () => {
+      this.renderTabs();
+      if (this.isOpen()) {
+        this.renderContent();
+      }
+    });
+
+    window.addEventListener("allZonesUnlocked", () => {
+      this.renderTabs();
+      if (this.isOpen()) {
+        this.renderContent();
+      }
+    });
   }
 
-  open(preferredTab = "apexsions") {
-    // Map zone id to tab id
-    const zoneToTab = {
-      spawn: "about",
-      journey: "journey",
-      apexsions: "apexsions",
-      kasir: "kasir",
-      pororo: "pororo",
-      skills: "skills",
-      about: "about",
-      contact: "contact"
-    };
-
-    const targetTab = zoneToTab[preferredTab] || preferredTab || "apexsions";
-    this.activeTab = targetTab;
+  open(preferredZoneOrTab = "projects") {
+    // Jika pemain berinteraksi langsung di zona proyek 3D tertentu,
+    // langsung buka proyek tersebut secara mendalam!
+    if (["apexsions", "kasir", "pororo"].includes(preferredZoneOrTab)) {
+      this.activeTab = "projects";
+      this.selectedProjectId = preferredZoneOrTab;
+      this.progression.unlockZone(preferredZoneOrTab);
+    } else if (preferredZoneOrTab === "spawn") {
+      this.activeTab = "projects";
+      this.selectedProjectId = null;
+    } else {
+      this.activeTab = preferredZoneOrTab || "projects";
+      this.selectedProjectId = null;
+    }
 
     this.renderTabs();
     this.renderContent();
@@ -83,6 +142,7 @@ export class ModalManager {
     if (this.backdrop) {
       this.backdrop.classList.remove("visible");
     }
+    this.selectedProjectId = null;
     this.state.setState(GameStates.PLAYING);
   }
 
@@ -92,6 +152,7 @@ export class ModalManager {
 
   switchTab(tabId) {
     this.activeTab = tabId;
+    this.selectedProjectId = null; // Reset pilihan proyek jika pindah tab
     this.renderTabs();
     this.renderContent();
     if (this.audio) this.audio.playInteractSound();
@@ -99,43 +160,143 @@ export class ModalManager {
 
   renderTabs() {
     if (!this.navTabs) return;
+
+    const stats = this.progression.getStats();
+
     const tabs = [
-      { id: "apexsions", icon: "fa-solid fa-dungeon text-gold", label: "Apexsions RPG" },
-      { id: "kasir", icon: "fa-solid fa-cash-register text-purple", label: "POS Kasir Friel" },
-      { id: "pororo", icon: "fa-solid fa-ice-cream text-pink", label: "PoRoRo Gelato" },
-      { id: "journey", icon: "fa-solid fa-route text-cyan", label: "Perjalanan" },
-      { id: "skills", icon: "fa-solid fa-laptop-code text-green", label: "Skills Lab" },
-      { id: "about", icon: "fa-solid fa-user-astronaut text-indigo", label: "Tentang Saya" },
-      { id: "contact", icon: "fa-solid fa-satellite-dish text-rose", label: "Kontak" }
+      { id: "projects", icon: "fa-solid fa-folder-open text-gold", label: "Proyek Portofolio", zoneId: null },
+      { id: "journey", icon: "fa-solid fa-route text-cyan", label: "Linimasa Perjalanan", zoneId: "journey" },
+      { id: "skills", icon: "fa-solid fa-laptop-code text-green", label: "Skills Lab", zoneId: "skills" },
+      { id: "about", icon: "fa-solid fa-user-astronaut text-indigo", label: "Tentang Saya", zoneId: "about" },
+      { id: "contact", icon: "fa-solid fa-satellite-dish text-rose", label: "Kontak", zoneId: "contact" },
+      { id: "radar", icon: "fa-solid fa-compass text-cyan", label: `Radar (${stats.discoveredCount}/8)`, zoneId: null }
     ];
 
-    this.navTabs.innerHTML = tabs.map(t => `
-      <button class="modal-tab-btn ${this.activeTab === t.id ? 'active' : ''}" data-tab-id="${t.id}">
-        <i class="${t.icon}"></i>
-        <span>${t.label}</span>
-      </button>
-    `).join("");
+    this.navTabs.innerHTML = tabs.map(t => {
+      const isLocked = t.zoneId ? !this.progression.isUnlocked(t.zoneId) : false;
+      const lockIcon = isLocked ? `<i class="fa-solid fa-lock text-muted" style="font-size: 0.72rem; margin-left: 0.25rem;"></i>` : "";
+      return `
+        <button class="modal-tab-btn ${this.activeTab === t.id ? 'active' : ''} ${isLocked ? 'tab-locked' : ''}" data-tab-id="${t.id}">
+          <i class="${t.icon}"></i>
+          <span>${t.label}</span>
+          ${lockIcon}
+        </button>
+      `;
+    }).join("");
   }
 
   renderContent() {
     if (!this.contentArea) return;
 
-    if (this.activeTab === "apexsions" || this.activeTab === "kasir" || this.activeTab === "pororo") {
-      this.renderProjectDetail(this.activeTab);
+    if (this.activeTab === "projects") {
+      if (this.selectedProjectId) {
+        this.renderSingleProjectDetail(this.selectedProjectId);
+      } else {
+        this.renderUnifiedProjectsList();
+      }
     } else if (this.activeTab === "journey") {
-      this.renderJourneyTimeline();
+      if (this.progression.isUnlocked("journey")) {
+        this.renderJourneyTimeline();
+      } else {
+        this.renderLockedZoneView("journey");
+      }
     } else if (this.activeTab === "skills") {
-      this.renderSkillsLab();
+      if (this.progression.isUnlocked("skills")) {
+        this.renderSkillsLab();
+      } else {
+        this.renderLockedZoneView("skills");
+      }
     } else if (this.activeTab === "about") {
-      this.renderAboutMe();
+      if (this.progression.isUnlocked("about")) {
+        this.renderAboutMe();
+      } else {
+        this.renderLockedZoneView("about");
+      }
     } else if (this.activeTab === "contact") {
-      this.renderContact();
+      if (this.progression.isUnlocked("contact")) {
+        this.renderContact();
+      } else {
+        this.renderLockedZoneView("contact");
+      }
+    } else if (this.activeTab === "radar") {
+      this.renderExplorationRadar();
     } else {
-      this.renderProjectDetail("apexsions");
+      this.renderUnifiedProjectsList();
     }
   }
 
-  renderProjectDetail(projectId) {
+  // 1. TAMPILAN PROYEK TERPADU (SEMUA 3 PROYEK DALAM 1 HALAMAN)
+  renderUnifiedProjectsList() {
+    const cardsHtml = projectsData.map(p => {
+      const isUnlocked = this.progression.isUnlocked(p.id);
+
+      if (!isUnlocked) {
+        const zoneInfo = this.progression.getZoneInfo(p.id);
+        return `
+          <div class="project-summary-card card-locked">
+            <div class="lock-overlay-content">
+              <div class="lock-icon-badge"><i class="fa-solid fa-lock"></i></div>
+              <div class="lock-card-info">
+                <span class="modal-badge badge-locked">🔒 Belum Ditemukan</span>
+                <h3 class="lock-title">${p.title}</h3>
+                <p class="lock-category">${p.category}</p>
+                <div class="lock-clue-box">
+                  <i class="fa-solid fa-location-arrow text-gold"></i>
+                  <span><strong>Petunjuk Eksplorasi:</strong> ${zoneInfo ? zoneInfo.clue : 'Jelajahi dunia 3D untuk menemukan zona ini.'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Proyek Terbuka
+      const techBadges = p.techStack.slice(0, 4).map(t => `<span class="modal-tech-badge">${t}</span>`).join("");
+
+      return `
+        <div class="project-summary-card">
+          <div class="project-summary-img-wrap">
+            <img src="${p.heroImage}" alt="${p.title}" class="project-summary-img">
+            <span class="summary-status-pill"><i class="fa-solid fa-check"></i> Terverifikasi</span>
+          </div>
+          <div class="project-summary-body">
+            <div class="modal-badge-group">
+              <span class="modal-badge">${p.code}</span>
+              <span class="modal-badge badge-accent">${p.category}</span>
+            </div>
+            <h3 class="summary-project-title">${p.title}</h3>
+            <p class="summary-project-subtitle">${p.subtitle}</p>
+            <p class="summary-project-desc">${p.summary}</p>
+            <div class="modal-tech-cloud" style="margin-bottom: 1.25rem;">${techBadges}</div>
+            
+            <div class="summary-actions-bar">
+              <button class="btn btn-primary btn-open-project" data-project-id="${p.id}">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Buka Info Lengkap</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              ${p.liveLinks.website ? `<a href="${p.liveLinks.website}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fa-solid fa-globe"></i> Website</a>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    this.contentArea.innerHTML = `
+      <div class="modal-projects-unified-view">
+        <div class="modal-project-header">
+          <span class="modal-badge badge-accent">Koleksi Portofolio</span>
+          <h2 class="modal-title">Daftar Proyek Unggulan</h2>
+          <p class="modal-subtitle">Seluruh proyek utama dikelompokkan di sini. Kunjungi bangunan 3D di peta untuk membuka arsip proyek yang terkunci, lalu klik <strong>"Buka Info Lengkap"</strong> untuk rincian mendalam.</p>
+        </div>
+
+        <div class="projects-unified-grid">${cardsHtml}</div>
+      </div>
+    `;
+  }
+
+  // 2. TAMPILAN DETAIL LENGKAP SATU PROYEK (DENGAN TOMBOL KEMBALI)
+  renderSingleProjectDetail(projectId) {
     const project = projectsData.find(p => p.id === projectId);
     if (!project) return;
 
@@ -151,6 +312,13 @@ export class ModalManager {
       galleryHtml += `
         <div class="modal-gallery-card">
           <img src="${project.secondaryImage}" alt="${project.title} Preview" class="modal-img">
+        </div>
+      `;
+    }
+    if (project.tertiaryImage) {
+      galleryHtml += `
+        <div class="modal-gallery-card">
+          <img src="${project.tertiaryImage}" alt="${project.title} Dokumentasi" class="modal-img">
         </div>
       `;
     }
@@ -172,11 +340,19 @@ export class ModalManager {
       linksHtml += `<div class="server-ip-pill"><span class="ip-label">IP:</span> <code>${project.liveLinks.serverIp}</code></div>`;
     }
     if (project.liveLinks.detailPage) {
-      linksHtml += `<a href="${project.liveLinks.detailPage}" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-file-lines"></i> Baca Halaman Lengkap</a>`;
+      linksHtml += `<a href="${project.liveLinks.detailPage}" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-file-lines"></i> Buka di Tab Baru</a>`;
     }
 
     this.contentArea.innerHTML = `
-      <div class="modal-project-view">
+      <div class="modal-project-detail-view">
+        <!-- Tombol Kembali ke Daftar Proyek -->
+        <div style="margin-bottom: 1.25rem;">
+          <button class="btn btn-secondary btn-sm btn-back-to-projects">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Kembali ke Daftar Seluruh Proyek</span>
+          </button>
+        </div>
+
         <div class="modal-project-header">
           <div class="modal-badge-group">
             <span class="modal-badge">${project.code}</span>
@@ -215,10 +391,115 @@ export class ModalManager {
           <h3><i class="fa-solid fa-triangle-exclamation text-rose"></i> Tantangan Teknis</h3>
           <p>${project.technicalChallenges}</p>
         </div>
+
+        <!-- Tombol Kembali Bawah -->
+        <div style="margin-top: 1.5rem; text-align: right;">
+          <button class="btn btn-secondary btn-back-to-projects">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Kembali ke Daftar Proyek</span>
+          </button>
+        </div>
       </div>
     `;
   }
 
+  // 3. TAMPILAN AREA YANG MASIH TERKUNCI (BELUM DIEKSPLORASI)
+  renderLockedZoneView(zoneId) {
+    const info = this.progression.getZoneInfo(zoneId);
+
+    this.contentArea.innerHTML = `
+      <div class="modal-locked-zone-view">
+        <div class="locked-zone-box">
+          <div class="lock-badge-circle">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h2 class="locked-view-title">${info ? info.name : 'Area Terkunci'}</h2>
+          <span class="modal-badge badge-locked" style="margin-bottom: 1rem;">🔒 Informasi Belum Terbuka</span>
+          
+          <p class="locked-view-desc">
+            Informasi pada bagian ini belum dapat diakses. Anda harus mengendarai mobil dan menjelajahi dunia 3D untuk menemukan lokasi fisiknya.
+          </p>
+
+          <div class="locked-clue-card">
+            <i class="fa-solid fa-compass text-gold" style="font-size: 1.5rem;"></i>
+            <div>
+              <strong>Petunjuk Arah Penjelajahan:</strong>
+              <p>${info ? info.clue : 'Cari landmark di dunia 3D.'}</p>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem;">
+            <button class="btn btn-primary" onclick="document.getElementById('modalCloseBtn').click();">
+              <i class="fa-solid fa-car-side"></i>
+              <span>Kembali & Jelajahi Sekarang</span>
+            </button>
+            <button class="btn btn-secondary btn-unlock-all-evaluator" title="Buka seluruh informasi tanpa eksplorasi">
+              <i class="fa-solid fa-unlock-keyhole"></i>
+              <span>Buka Semua (Mode Evaluator)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 4. RADAR & STATUS EKSPLORASI DUNIA
+  renderExplorationRadar() {
+    const stats = this.progression.getStats();
+
+    const zonesListHtml = Object.values(this.progression.zoneInfo).map(z => {
+      const isFound = this.progression.isUnlocked(z.id);
+      return `
+        <div class="radar-zone-item ${isFound ? 'found' : 'not-found'}">
+          <div class="radar-zone-icon"><i class="${z.icon}"></i></div>
+          <div class="radar-zone-details">
+            <div class="radar-zone-name">${z.name}</div>
+            <div class="radar-zone-cat">${z.category}</div>
+            <div class="radar-zone-clue">${isFound ? '✅ Telah Ditemukan' : '🔒 ' + z.clue}</div>
+          </div>
+          <span class="radar-status-badge ${isFound ? 'badge-found' : 'badge-not-found'}">
+            ${isFound ? 'Ditemukan' : 'Terkunci'}
+          </span>
+        </div>
+      `;
+    }).join("");
+
+    this.contentArea.innerHTML = `
+      <div class="modal-radar-view">
+        <div class="modal-project-header">
+          <span class="modal-badge badge-accent">Radar Eksplorasi</span>
+          <h2 class="modal-title">Status Penjelajahan Dunia</h2>
+          <p class="modal-subtitle">Jelajahi seluruh area di Developer's World untuk membuka arsip portofolio secara lengkap.</p>
+        </div>
+
+        <div class="radar-progress-bar-wrap">
+          <div class="radar-progress-bar-fill" style="width: ${stats.percent}%;"></div>
+          <span class="radar-progress-text">${stats.discoveredCount} dari ${stats.totalCount} Area Ditemukan (${stats.percent}%)</span>
+        </div>
+
+        <div class="radar-zones-list">${zonesListHtml}</div>
+
+        <div class="radar-evaluator-card">
+          <div>
+            <h4><i class="fa-solid fa-key text-gold"></i> Mode Aksesibilitas Langsung (Evaluator / Guru)</h4>
+            <p>Ingin memeriksa seluruh informasi portofolio langsung tanpa harus bermain game?</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm btn-unlock-all-evaluator">
+              <i class="fa-solid fa-unlock-keyhole"></i>
+              <span>Buka Semua Area</span>
+            </button>
+            <button class="btn btn-secondary btn-sm btn-reset-progression">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Reset Progres</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 5. TIMELINE
   renderJourneyTimeline() {
     const itemsHtml = journeyTimeline.map(j => `
       <div class="modal-journey-item">
@@ -248,6 +529,7 @@ export class ModalManager {
     `;
   }
 
+  // 6. SKILLS
   renderSkillsLab() {
     const skillsHtml = technicalSkills.map(s => `
       <div class="modal-skill-card">
@@ -280,6 +562,7 @@ export class ModalManager {
     `;
   }
 
+  // 7. ABOUT ME
   renderAboutMe() {
     const softSkillsHtml = profileData.softSkills.map(s => `
       <div class="modal-soft-card">
@@ -316,6 +599,7 @@ export class ModalManager {
     `;
   }
 
+  // 8. CONTACT
   renderContact() {
     const channelsHtml = contactData.verifiedChannels.map(c => `
       <a href="${c.link}" target="_blank" rel="noopener" class="modal-contact-row" style="border-left-color: ${c.color};">

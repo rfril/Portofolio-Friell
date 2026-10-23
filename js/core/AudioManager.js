@@ -145,6 +145,29 @@ export class AudioManager {
     } catch (e) {}
   }
 
+  // Discovery Fanfare Sound (When finding a new zone for the first time)
+  playDiscoverySound() {
+    this.ensureContext();
+    if (!this.ctx || this.isMuted) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+      notes.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + i * 0.09);
+        gain.gain.setValueAtTime(0.28, now + i * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.09 + 0.32);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(now + i * 0.09);
+        osc.stop(now + i * 0.09 + 0.35);
+      });
+    } catch (e) {}
+  }
+
   // Sparkling Diamond Collectible Chime
   playDiamondCollect(index = 0) {
     this.ensureContext();
