@@ -238,7 +238,7 @@ export class Environment {
     createMountain(half - 30, half - 30, 36, 48);
   }
 
-  // 2. WATER CANAL & 5 ROAD BRIDGES (ALL 18M WIDE)
+  // 2. WATER CANAL & 5 DEDICATED ROAD BRIDGES (ZERO OVERLAPPING DECKS)
   buildWaterCanalAndBridges() {
     const waterMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
@@ -247,60 +247,156 @@ export class Environment {
       transparent: true,
       opacity: 0.85
     });
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
 
-    // Water channel at Z = -22 across the city
-    const canalGeo = new THREE.PlaneGeometry(CONFIG.WORLD.WIDTH - 50, 16);
+    // Water channel at Z = -28 across the entire city (width: 10m, Z: -33 to -23)
+    // Berada tepat di antara Bundaran Tengah (Z: -16) dan Persimpangan Sekunder (Z: -75)
+    const canalGeo = new THREE.PlaneGeometry(CONFIG.WORLD.WIDTH - 40, 10);
     canalGeo.rotateX(-Math.PI / 2);
     const canal = new THREE.Mesh(canalGeo, waterMat);
-    canal.position.set(0, -0.02, -22);
+    canal.position.set(0, -0.015, -28);
     this.scene.add(canal);
 
-    // Bridges (Width 18m so driving is 100% wide and spacious!)
-    const createBridge = (x, z) => {
+    // Stone embankment canal riverbanks (North bank Z: -33, South bank Z: -23)
+    [-33, -23].forEach(bz => {
+      const bankGeo = new THREE.BoxGeometry(CONFIG.WORLD.WIDTH - 40, 0.15, 0.6);
+      const bank = new THREE.Mesh(bankGeo, stoneMat);
+      bank.position.set(0, 0.05, bz);
+      bank.receiveShadow = true;
+      this.scene.add(bank);
+    });
+
+    // Dedicated Bridge Builder: Menghubungkan jalan melintasi kanal Z: -33 s/d -23 tanpa tumpang tindih
+    const createBridge = (x, width, name) => {
       const bridgeGroup = new THREE.Group();
-      bridgeGroup.position.set(x, 0, z);
+      bridgeGroup.position.set(x, 0, -28);
 
-      // Deck penopang jembatan di bawah aspal kanal (rata dengan permukaan jalan y = 0.02)
-      const deck = new THREE.Mesh(new THREE.BoxGeometry(18, 0.35, 20), stoneMat);
-      deck.position.y = -0.155;
-      deck.receiveShadow = true;
-      deck.castShadow = true;
-      bridgeGroup.add(deck);
+      // 1. Solid Stone Substructure Foundation underneath canal
+      const deckBase = new THREE.Mesh(new THREE.BoxGeometry(width + 0.8, 0.45, 10.2), stoneMat);
+      deckBase.position.y = -0.22;
+      deckBase.receiveShadow = true;
+      deckBase.castShadow = true;
+      bridgeGroup.add(deckBase);
 
-      const railGeo = new THREE.BoxGeometry(0.8, 1.2, 20);
+      // 2. Flush Asphalt Driving Surface (Tepat di y = 0.02, menyatu sempurna dengan aspal jalan)
+      const roadDeck = new THREE.Mesh(new THREE.PlaneGeometry(width, 10), asphaltMat);
+      roadDeck.rotateX(-Math.PI / 2);
+      roadDeck.position.y = 0.02;
+      roadDeck.receiveShadow = true;
+      bridgeGroup.add(roadDeck);
+
+      // 3. Sturdy Stone/Steel Parapet Bridge Guardrails (Left & Right)
+      const railW = 0.6;
+      const railH = 1.1;
+      const railGeo = new THREE.BoxGeometry(railW, railH, 10.2);
+
       const railL = new THREE.Mesh(railGeo, stoneMat);
-      railL.position.set(-8.6, 0.62, 0);
+      railL.position.set(-width / 2 - railW / 2, railH / 2, 0);
       railL.castShadow = true;
       bridgeGroup.add(railL);
 
       const railR = railL.clone();
-      railR.position.x = 8.6;
+      railR.position.x = width / 2 + railW / 2;
       bridgeGroup.add(railR);
 
       this.scene.add(bridgeGroup);
-      this.collision.addBox(x - 8.6, z, 1.0, 20, "bridge_rail_l");
-      this.collision.addBox(x + 8.6, z, 1.0, 20, "bridge_rail_r");
+      this.collision.addBox(x - width / 2 - railW / 2, -28, railW + 0.2, 10.2, `${name}_rail_l`);
+      this.collision.addBox(x + width / 2 + railW / 2, -28, railW + 0.2, 10.2, `${name}_rail_r`);
     };
 
-    createBridge(0, -22);    // Main Avenue Bridge
-    createBridge(75, -22);   // East Secondary Street Bridge
-    createBridge(-75, -22);  // West Secondary Street Bridge
-    createBridge(145, -22);  // East Expressway Bridge
-    createBridge(-145, -22); // West Expressway Bridge
+    createBridge(0, 16, "bridge_main_ave");        // Main Avenue Bridge (Width 16m)
+    createBridge(75, 12, "bridge_east_secondary"); // East Secondary Street Bridge (Width 12m)
+    createBridge(-75, 12, "bridge_west_secondary");// West Secondary Street Bridge (Width 12m)
+    createBridge(145, 14, "bridge_east_express");  // East Expressway Bridge (Width 14m)
+    createBridge(-145, 14, "bridge_west_express"); // West Expressway Bridge (Width 14m)
   }
 
-  // 3. ROAD NETWORK (100% CLEAR BOULEVARDS WITH CONNECTING DRIVEWAY SPURS)
+  // 3. MODULAR ROAD NETWORK & SEAMLESS INTERSECTIONS (ZERO CLIPPING / TIMPA)
   buildRoadNetwork() {
     const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
     const curbMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.6 });
     const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const yellowMat = new THREE.MeshBasicMaterial({ color: 0xfde047 });
 
-    const createCleanRoad = (x, z, width, length, rotY = 0) => {
-      const roadGroup = new THREE.Group();
-      roadGroup.position.set(x, 0, z);
-      roadGroup.rotation.y = rotY;
+    // =========================================================================
+    // HELPER 1: SEAMLESS INTERSECTION JUNCTION (BEBAS TROTOAR DI TENGAH PERSIMPANGAN)
+    // =========================================================================
+    const createJunction = (x, z, widthX, widthZ) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+
+      // Clean flat intersection asphalt box (y = 0.02)
+      const junctionGeo = new THREE.PlaneGeometry(widthX, widthZ);
+      junctionGeo.rotateX(-Math.PI / 2);
+      const junction = new THREE.Mesh(junctionGeo, roadMat);
+      junction.position.y = 0.02;
+      junction.receiveShadow = true;
+      g.add(junction);
+
+      // 4 Corner Curb Caps (Menyambungkan trotoar dari tiap sudut luar tanpa memotong jalan)
+      const curbW = 3.5;
+      const curbH = 0.15;
+      const curbGeo = new THREE.BoxGeometry(curbW, curbH, curbW);
+
+      // NW, NE, SW, SE corner sidewalk caps
+      const offsets = [
+        [-widthX / 2 - curbW / 2, -widthZ / 2 - curbW / 2],
+        [widthX / 2 + curbW / 2, -widthZ / 2 - curbW / 2],
+        [-widthX / 2 - curbW / 2, widthZ / 2 + curbW / 2],
+        [widthX / 2 + curbW / 2, widthZ / 2 + curbW / 2]
+      ];
+      offsets.forEach(([cx, cz]) => {
+        const curb = new THREE.Mesh(curbGeo, curbMat);
+        curb.position.set(cx, curbH / 2, cz);
+        curb.receiveShadow = true;
+        g.add(curb);
+      });
+
+      // Stop Lines & Zebra Crossings at all 4 approaches
+      const createZebraStrip = (px, pz, length, isHoriz) => {
+        const bars = Math.floor(length / 1.4);
+        const sGeo = new THREE.PlaneGeometry(0.7, 2.6);
+        sGeo.rotateX(-Math.PI / 2);
+        if (isHoriz) sGeo.rotateY(Math.PI / 2);
+
+        for (let i = 0; i < bars; i++) {
+          const stripe = new THREE.Mesh(sGeo, whiteMat);
+          if (!isHoriz) {
+            stripe.position.set(px - length / 2 + (i + 0.5) * 1.4, 0.026, pz);
+          } else {
+            stripe.position.set(px, 0.026, pz - length / 2 + (i + 0.5) * 1.4);
+          }
+          g.add(stripe);
+        }
+      };
+
+      // North & South Crosswalks
+      createZebraStrip(0, -widthZ / 2 - 1.8, widthX, false);
+      createZebraStrip(0, widthZ / 2 + 1.8, widthX, false);
+      // West & East Crosswalks
+      createZebraStrip(-widthX / 2 - 1.8, 0, widthZ, true);
+      createZebraStrip(widthX / 2 + 1.8, 0, widthZ, true);
+
+      this.scene.add(g);
+    };
+
+    // =========================================================================
+    // HELPER 2: INDEPENDENT ROAD SEGMENT (TROTOAR BERHENTI TEPAT DI UJUNG PERSIMPANGAN)
+    // =========================================================================
+    const createRoadSegment = (x1, z1, x2, z2, width) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const length = Math.hypot(dx, dz);
+      if (length < 0.5) return;
+
+      const angle = Math.atan2(dx, dz);
+      const midX = (x1 + x2) / 2;
+      const midZ = (z1 + z2) / 2;
+
+      const segGroup = new THREE.Group();
+      segGroup.position.set(midX, 0, midZ);
+      segGroup.rotation.y = angle;
 
       // Asphalt Road Surface
       const roadGeo = new THREE.PlaneGeometry(width, length);
@@ -308,81 +404,218 @@ export class Environment {
       const road = new THREE.Mesh(roadGeo, roadMat);
       road.position.y = 0.02;
       road.receiveShadow = true;
-      roadGroup.add(road);
+      segGroup.add(road);
 
-      // Center Dashed Yellow Divider Lines
-      const lineCount = Math.floor(length / 8);
-      const lineGeo = new THREE.PlaneGeometry(0.35, 3.5);
-      lineGeo.rotateX(-Math.PI / 2);
+      // Center Dashed Yellow Divider Lines (Hanya di tengah segmen jalan, berhenti sebelum persimpangan)
+      const lineSpacing = 7.5;
+      const margin = 4.0;
+      const usableLength = length - margin * 2;
+      if (usableLength > 6) {
+        const lineCount = Math.floor(usableLength / lineSpacing);
+        const lineGeo = new THREE.PlaneGeometry(0.35, 3.2);
+        lineGeo.rotateX(-Math.PI / 2);
 
-      for (let i = 0; i < lineCount; i++) {
-        const line = new THREE.Mesh(lineGeo, yellowMat);
-        line.position.set(0, 0.03, -length / 2 + (i + 0.5) * 8);
-        roadGroup.add(line);
+        for (let i = 0; i < lineCount; i++) {
+          const line = new THREE.Mesh(lineGeo, yellowMat);
+          line.position.set(0, 0.025, -usableLength / 2 + (i + 0.5) * lineSpacing);
+          segGroup.add(line);
+        }
       }
 
-      // White Edge Lines
-      const edgeGeo = new THREE.PlaneGeometry(0.25, length);
+      // Continuous White Edge Lines
+      const edgeGeo = new THREE.PlaneGeometry(0.22, length);
       edgeGeo.rotateX(-Math.PI / 2);
 
       const edgeL = new THREE.Mesh(edgeGeo, whiteMat);
-      edgeL.position.set(-width / 2 + 0.35, 0.025, 0);
-      roadGroup.add(edgeL);
+      edgeL.position.set(-width / 2 + 0.35, 0.024, 0);
+      segGroup.add(edgeL);
 
       const edgeR = edgeL.clone();
       edgeR.position.x = width / 2 - 0.35;
-      roadGroup.add(edgeR);
+      segGroup.add(edgeR);
 
-      // Granite Sidewalks (Elevated 0.15m, 3.5m wide)
-      const walkGeo = new THREE.BoxGeometry(3.5, 0.15, length);
+      // Granite Sidewalks (Tinggi 0.15m, Lebar 3.5m)
+      const walkW = 3.5;
+      const walkH = 0.15;
+      const walkGeo = new THREE.BoxGeometry(walkW, walkH, length);
+
       const walkL = new THREE.Mesh(walkGeo, curbMat);
-      walkL.position.set(-width / 2 - 1.75, 0.075, 0);
+      walkL.position.set(-width / 2 - walkW / 2, walkH / 2, 0);
       walkL.receiveShadow = true;
-      roadGroup.add(walkL);
+      segGroup.add(walkL);
 
       const walkR = walkL.clone();
-      walkR.position.x = width / 2 + 1.75;
-      roadGroup.add(walkR);
+      walkR.position.x = width / 2 + walkW / 2;
+      segGroup.add(walkR);
 
-      this.scene.add(roadGroup);
+      this.scene.add(segGroup);
     };
 
-    // Central Roundabout at Spawn (Radius 20m, 100% open drivable ring!)
-    const circleGeo = new THREE.RingGeometry(0, 20, 36);
-    circleGeo.rotateX(-Math.PI / 2);
-    const roundAbout = new THREE.Mesh(circleGeo, roadMat);
+    // =========================================================================
+    // 1. CENTRAL ROUNDABOUT AT (0, 0) (RADIUS 16M, BERHENTI TEPAT DI SEBELUM KANAL Z: -23)
+    // =========================================================================
+    const roundAboutGeo = new THREE.RingGeometry(0, 16, 36);
+    roundAboutGeo.rotateX(-Math.PI / 2);
+    const roundAbout = new THREE.Mesh(roundAboutGeo, roadMat);
     roundAbout.position.set(0, 0.02, 0);
     roundAbout.receiveShadow = true;
     this.scene.add(roundAbout);
 
     // Decorative inner spawn plaza ring
-    const plazaRingGeo = new THREE.RingGeometry(5.5, 7.0, 32);
+    const plazaRingGeo = new THREE.RingGeometry(4.5, 5.8, 32);
     plazaRingGeo.rotateX(-Math.PI / 2);
     const plazaRing = new THREE.Mesh(plazaRingGeo, new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 }));
-    plazaRing.position.set(0, 0.03, 0);
+    plazaRing.position.set(0, 0.025, 0);
     this.scene.add(plazaRing);
 
-    // 1. Central North-South Main Avenue (Width: 16m, Runs from -160 to +160)
-    createCleanRoad(0, -95, 16, 150, 0);
-    createCleanRoad(0, 95, 16, 150, 0);
+    // Crosswalks around Roundabout Entrances
+    const createZebra = (x, z, width, rotY) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0.026, z);
+      g.rotation.y = rotY;
+      const bars = Math.floor(width / 1.4);
+      const sGeo = new THREE.PlaneGeometry(0.7, 2.6);
+      sGeo.rotateX(-Math.PI / 2);
+      for (let i = 0; i < bars; i++) {
+        const stripe = new THREE.Mesh(sGeo, whiteMat);
+        stripe.position.set(-width / 2 + (i + 0.5) * 1.4, 0, 0);
+        g.add(stripe);
+      }
+      this.scene.add(g);
+    };
 
-    // 2. Central East-West Boulevard (Width: 16m, Runs from -160 to +160)
-    createCleanRoad(95, 0, 16, 150, Math.PI / 2);
-    createCleanRoad(-95, 0, 16, 150, Math.PI / 2);
+    createZebra(0, -17.5, 16, 0);
+    createZebra(0, 17.5, 16, 0);
+    createZebra(-17.5, 0, 16, Math.PI / 2);
+    createZebra(17.5, 0, 16, Math.PI / 2);
 
-    // 3. Secondary Cross Streets (Width: 12m)
-    createCleanRoad(0, -75, 12, 280, Math.PI / 2);
-    createCleanRoad(0, 75, 12, 280, Math.PI / 2);
-    createCleanRoad(75, 0, 12, 280, 0);
-    createCleanRoad(-75, 0, 12, 280, 0);
+    // =========================================================================
+    // 2. BUILD ALL INDEPENDENT GRID INTERSECTIONS (ZERO OVERLAP!)
+    // =========================================================================
+    // Inner & Mid Intersections
+    createJunction(0, -75, 16, 12);   // Main Ave x North Secondary Street
+    createJunction(0, 75, 16, 12);    // Main Ave x South Secondary Street
+    createJunction(75, 0, 12, 16);    // East Secondary Street x East Boulevard
+    createJunction(-75, 0, 12, 16);   // West Secondary Street x West Boulevard
+    createJunction(75, -75, 12, 12);  // East Secondary x North Secondary
+    createJunction(-75, -75, 12, 12); // West Secondary x North Secondary
+    createJunction(75, 75, 12, 12);   // East Secondary x South Secondary
+    createJunction(-75, 75, 12, 12);  // West Secondary x South Secondary
 
-    // 4. Outer Ring Expressway (Width: 14m)
-    createCleanRoad(145, 0, 14, 300, 0);
-    createCleanRoad(-145, 0, 14, 300, 0);
-    createCleanRoad(0, -145, 14, 300, Math.PI / 2);
-    createCleanRoad(0, 145, 14, 300, Math.PI / 2);
+    // Outer Expressway Intersections
+    createJunction(0, -145, 16, 14);  // Main Ave x North Outer Expressway
+    createJunction(0, 145, 16, 14);   // Main Ave x South Outer Expressway
+    createJunction(145, 0, 14, 16);   // East Outer Expressway x Boulevard
+    createJunction(-145, 0, 14, 16);  // West Outer Expressway x Boulevard
 
-    // 5. Connecting Driveway Spurs (Direct 10m-wide asphalt roads into each plaza)
+    createJunction(75, -145, 12, 14);
+    createJunction(-75, -145, 12, 14);
+    createJunction(75, 145, 12, 14);
+    createJunction(-75, 145, 12, 14);
+    createJunction(145, -75, 14, 12);
+    createJunction(-145, -75, 14, 12);
+    createJunction(145, 75, 14, 12);
+    createJunction(-145, 75, 14, 12);
+
+    // 4 Outer Ring Expressway Corners
+    createJunction(145, -145, 14, 14);
+    createJunction(-145, -145, 14, 14);
+    createJunction(145, 145, 14, 14);
+    createJunction(-145, 145, 14, 14);
+
+    // =========================================================================
+    // 3. BUILD ALL CLEAN ROAD SEGMENTS BETWEEN JUNCTIONS & BRIDGES
+    // =========================================================================
+    // MAIN NORTH-SOUTH AVENUE (X = 0, Width = 16m)
+    createRoadSegment(0, -16, 0, -23, 16);    // Roundabout to Bridge South Abutment
+    // Bridge at Z: -33 to -23
+    createRoadSegment(0, -33, 0, -69, 16);    // Bridge North Abutment to Junction (0, -75)
+    createRoadSegment(0, -81, 0, -138, 16);   // Junction (0, -75) to Junction (0, -145)
+    createRoadSegment(0, -152, 0, -168, 16);  // Outer North Stub to Boundary
+
+    createRoadSegment(0, 16, 0, 69, 16);      // Roundabout to Junction (0, 75)
+    createRoadSegment(0, 81, 0, 138, 16);     // Junction (0, 75) to Junction (0, 145)
+    createRoadSegment(0, 152, 0, 168, 16);    // Outer South Stub to Boundary
+
+    // MAIN EAST-WEST BOULEVARD (Z = 0, Width = 16m)
+    createRoadSegment(16, 0, 69, 0, 16);      // Roundabout to Junction (75, 0)
+    createRoadSegment(81, 0, 138, 0, 16);     // Junction (75, 0) to Junction (145, 0)
+    createRoadSegment(152, 0, 168, 0, 16);    // Outer East Stub to Boundary
+
+    createRoadSegment(-16, 0, -69, 0, 16);    // Roundabout to Junction (-75, 0)
+    createRoadSegment(-81, 0, -138, 0, 16);   // Junction (-75, 0) to Junction (-145, 0)
+    createRoadSegment(-152, 0, -168, 0, 16);  // Outer West Stub to Boundary
+
+    // EAST SECONDARY STREET (X = 75, Width = 12m)
+    createRoadSegment(75, -8, 75, -23, 12);   // Junction (75, 0) to Bridge South Abutment
+    // Bridge at Z: -33 to -23
+    createRoadSegment(75, -33, 75, -69, 12);  // Bridge North Abutment to Junction (75, -75)
+    createRoadSegment(75, -81, 75, -138, 12); // Junction (75, -75) to Junction (75, -145)
+    createRoadSegment(75, -152, 75, -168, 12);
+
+    createRoadSegment(75, 8, 75, 69, 12);     // Junction (75, 0) to Junction (75, 75)
+    createRoadSegment(75, 81, 75, 138, 12);   // Junction (75, 75) to Junction (75, 145)
+    createRoadSegment(75, 152, 75, 168, 12);
+
+    // WEST SECONDARY STREET (X = -75, Width = 12m)
+    createRoadSegment(-75, -8, -75, -23, 12); // Junction (-75, 0) to Bridge South Abutment
+    // Bridge at Z: -33 to -23
+    createRoadSegment(-75, -33, -75, -69, 12);// Bridge North Abutment to Junction (-75, -75)
+    createRoadSegment(-75, -81, -75, -138, 12);
+    createRoadSegment(-75, -152, -75, -168, 12);
+
+    createRoadSegment(-75, 8, -75, 69, 12);   // Junction (-75, 0) to Junction (-75, 75)
+    createRoadSegment(-75, 81, -75, 138, 12); // Junction (-75, 75) to Junction (-75, 145)
+    createRoadSegment(-75, 152, -75, 168, 12);
+
+    // NORTH SECONDARY CROSS STREET (Z = -75, Width = 12m)
+    createRoadSegment(-168, -75, -152, -75, 12);
+    createRoadSegment(-138, -75, -81, -75, 12);
+    createRoadSegment(-69, -75, -8, -75, 12);
+    createRoadSegment(8, -75, 69, -75, 12);
+    createRoadSegment(81, -75, 138, -75, 12);
+    createRoadSegment(152, -75, 168, -75, 12);
+
+    // SOUTH SECONDARY CROSS STREET (Z = 75, Width = 12m)
+    createRoadSegment(-168, 75, -152, 75, 12);
+    createRoadSegment(-138, 75, -81, 75, 12);
+    createRoadSegment(-69, 75, -8, 75, 12);
+    createRoadSegment(8, 75, 69, 75, 12);
+    createRoadSegment(81, 75, 138, 75, 12);
+    createRoadSegment(152, 75, 168, 75, 12);
+
+    // OUTER RING EXPRESSWAYS (Width = 14m)
+    // North Expressway (Z = -145)
+    createRoadSegment(-138, -145, -81, -145, 14);
+    createRoadSegment(-69, -145, -8, -145, 14);
+    createRoadSegment(8, -145, 69, -145, 14);
+    createRoadSegment(81, -145, 138, -145, 14);
+
+    // South Expressway (Z = 145)
+    createRoadSegment(-138, 145, -81, 145, 14);
+    createRoadSegment(-69, 145, -8, 145, 14);
+    createRoadSegment(8, 145, 69, 145, 14);
+    createRoadSegment(81, 145, 138, 145, 14);
+
+    // East Expressway (X = 145)
+    createRoadSegment(145, -138, 145, -81, 14);
+    createRoadSegment(145, -69, 145, -33, 14);
+    // Bridge at Z: -33 to -23
+    createRoadSegment(145, -23, 145, -8, 14);
+    createRoadSegment(145, 8, 145, 69, 14);
+    createRoadSegment(145, 81, 145, 138, 14);
+
+    // West Expressway (X = -145)
+    createRoadSegment(-145, -138, -145, -81, 14);
+    createRoadSegment(-145, -69, -145, -33, 14);
+    // Bridge at Z: -33 to -23
+    createRoadSegment(-145, -23, -145, -8, 14);
+    createRoadSegment(-145, 8, -145, 69, 14);
+    createRoadSegment(-145, 81, -145, 138, 14);
+
+    // =========================================================================
+    // 4. DRIVEWAY SPURS TO PORTFOLIO PLAZAS (10M ASPHALT CONNECTORS)
+    // =========================================================================
     const createSpur = (startX, startZ, endX, endZ) => {
       const dx = endX - startX;
       const dz = endZ - startZ;
@@ -395,39 +628,18 @@ export class Environment {
       spurGeo.rotateX(-Math.PI / 2);
       const spur = new THREE.Mesh(spurGeo, roadMat);
       spur.rotation.y = -angle;
-      spur.position.set(midX, 0.025, midZ);
+      spur.position.set(midX, 0.022, midZ);
       spur.receiveShadow = true;
       this.scene.add(spur);
     };
 
-    createSpur(75, -105, 95, -105); // Spur into Apexsions Fortress
-    createSpur(75, -35, 95, -35);   // Spur into POS Kasir Plaza
-    createSpur(75, 105, 95, 105);   // Spur into Developer HQ
-    createSpur(-75, -105, -95, -105); // Spur into PoRoRo Gelato
-    createSpur(-75, -35, -95, -35);   // Spur into Journey Promenade
-    createSpur(-75, 35, -95, 35);     // Spur into Skills Lab
-    createSpur(-75, 105, -95, 105);   // Spur into Contact Relay
-
-    // Crosswalks at main intersections
-    const createZebra = (x, z, width = 16, rotY = 0) => {
-      const g = new THREE.Group();
-      g.position.set(x, 0.035, z);
-      g.rotation.y = rotY;
-      const bars = Math.floor(width / 1.4);
-      const sGeo = new THREE.PlaneGeometry(0.7, 3.2);
-      sGeo.rotateX(-Math.PI / 2);
-      for (let i = 0; i < bars; i++) {
-        const stripe = new THREE.Mesh(sGeo, whiteMat);
-        stripe.position.set(-width / 2 + (i + 0.5) * 1.4, 0, 0);
-        g.add(stripe);
-      }
-      this.scene.add(g);
-    };
-
-    createZebra(0, -22, 16, 0);
-    createZebra(0, 22, 16, 0);
-    createZebra(-22, 0, 16, Math.PI / 2);
-    createZebra(22, 0, 16, Math.PI / 2);
+    createSpur(81, -105, 95, -105);   // Spur into Apexsions Fortress
+    createSpur(81, -35, 95, -35);     // Spur into POS Kasir Plaza
+    createSpur(81, 105, 95, 105);     // Spur into Developer HQ
+    createSpur(-81, -105, -95, -105); // Spur into PoRoRo Gelato
+    createSpur(-81, -35, -95, -35);   // Spur into Journey Promenade
+    createSpur(-81, 35, -95, 35);     // Spur into Skills Lab
+    createSpur(-81, 105, -95, 105);   // Spur into Contact Relay
   }
 
   // 4. CENTRAL CITY COMMONS PARK (SOUTH-EAST INNER BLOCK)
@@ -1080,11 +1292,11 @@ export class Environment {
       this.collision.addCircle(x - Math.cos(rotY) * 9.5, z + Math.sin(rotY) * 9.5, 0.7, "traffic_mast");
     };
 
-    // Placed at Main Boulevard Approaches to Central Roundabout
-    createTrafficGantry(0, -26, 0, "MAIN AVE NORTH");
-    createTrafficGantry(0, 26, Math.PI, "MAIN AVE SOUTH");
-    createTrafficGantry(26, 0, -Math.PI / 2, "EAST BOULEVARD");
-    createTrafficGantry(-26, 0, Math.PI / 2, "WEST BOULEVARD");
+    // Placed safely at Main Boulevard Approaches to Central Roundabout (Radius 16m)
+    createTrafficGantry(0, -18, 0, "MAIN AVE NORTH");
+    createTrafficGantry(0, 18, Math.PI, "MAIN AVE SOUTH");
+    createTrafficGantry(18, 0, -Math.PI / 2, "EAST BOULEVARD");
+    createTrafficGantry(-18, 0, Math.PI / 2, "WEST BOULEVARD");
 
     // BUILDER B: OVERHEAD HIGHWAY DIRECTIONAL SIGN GANTRY
     const createHighwayGantry = (x, z, rotY, line1, line2) => {
@@ -1163,9 +1375,9 @@ export class Environment {
       this.collision.addBox(x, z, 4.4, 2.4, "bus_stop_shelter");
     };
 
-    // Bus stops spaced along safe sidewalk spans
-    createBusStop(11.8, -36, -Math.PI / 2);
-    createBusStop(-11.8, -36, Math.PI / 2);
+    // Bus stops spaced along safe sidewalk spans (jauh dari jembatan dan persimpangan)
+    createBusStop(11.8, -44, -Math.PI / 2);
+    createBusStop(-11.8, -44, Math.PI / 2);
     createBusStop(11.8, 36, -Math.PI / 2);
     createBusStop(-11.8, 36, Math.PI / 2);
     createBusStop(36, 11.8, 0);
