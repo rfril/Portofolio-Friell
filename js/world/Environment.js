@@ -588,6 +588,71 @@ export class Environment {
       this.scene.add(segGroup);
     };
 
+    // =========================================================================
+    // HELPER 3: SEAMLESS CURVED ROAD BEND (SWEEPING HIGHWAY & CRESCENT TURNS)
+    // =========================================================================
+    const createCurvedRoad = (centerX, centerZ, radius, width, startAngle, angleLength) => {
+      const innerR = radius - width / 2;
+      const outerR = radius + width / 2;
+      const segments = Math.max(24, Math.floor(Math.abs(angleLength) * radius / 3));
+
+      // Asphalt Road Surface
+      const roadGeo = new THREE.RingGeometry(innerR, outerR, segments, 1, startAngle, angleLength);
+      roadGeo.rotateX(-Math.PI / 2);
+      const road = new THREE.Mesh(roadGeo, roadMat);
+      road.position.set(centerX, 0.02, centerZ);
+      road.receiveShadow = true;
+      this.scene.add(road);
+
+      // White Continuous Edge Lines
+      const edgeInGeo = new THREE.RingGeometry(innerR + 0.25, innerR + 0.47, segments, 1, startAngle, angleLength);
+      edgeInGeo.rotateX(-Math.PI / 2);
+      const edgeIn = new THREE.Mesh(edgeInGeo, whiteMat);
+      edgeIn.position.set(centerX, 0.024, centerZ);
+      this.scene.add(edgeIn);
+
+      const edgeOutGeo = new THREE.RingGeometry(outerR - 0.47, outerR - 0.25, segments, 1, startAngle, angleLength);
+      edgeOutGeo.rotateX(-Math.PI / 2);
+      const edgeOut = new THREE.Mesh(edgeOutGeo, whiteMat);
+      edgeOut.position.set(centerX, 0.024, centerZ);
+      this.scene.add(edgeOut);
+
+      // Yellow Dashed Center Divider Line
+      const arcLength = Math.abs(angleLength) * radius;
+      const dashSpacing = 8.0;
+      const numDashes = Math.max(1, Math.floor(arcLength / dashSpacing));
+      const yellowGeo = new THREE.PlaneGeometry(0.35, 3.2);
+      yellowGeo.rotateX(-Math.PI / 2);
+
+      for (let i = 0; i < numDashes; i++) {
+        const t = (i + 0.5) / numDashes;
+        const angle = startAngle + t * angleLength;
+        const dx = radius * Math.cos(angle);
+        const dz = -radius * Math.sin(angle);
+
+        const dash = new THREE.Mesh(yellowGeo, yellowMat);
+        dash.position.set(centerX + dx, 0.025, centerZ + dz);
+        dash.rotation.y = angle + Math.PI;
+        this.scene.add(dash);
+      }
+
+      // Granite Sidewalk Curbs
+      const walkW = 3.5;
+      const walkInGeo = new THREE.RingGeometry(innerR - walkW, innerR, segments, 1, startAngle, angleLength);
+      walkInGeo.rotateX(-Math.PI / 2);
+      const walkIn = new THREE.Mesh(walkInGeo, curbMat);
+      walkIn.position.set(centerX, 0.08, centerZ);
+      walkIn.receiveShadow = true;
+      this.scene.add(walkIn);
+
+      const walkOutGeo = new THREE.RingGeometry(outerR, outerR + walkW, segments, 1, startAngle, angleLength);
+      walkOutGeo.rotateX(-Math.PI / 2);
+      const walkOut = new THREE.Mesh(walkOutGeo, curbMat);
+      walkOut.position.set(centerX, 0.08, centerZ);
+      walkOut.receiveShadow = true;
+      this.scene.add(walkOut);
+    };
+
     // 1. CENTRAL ROUNDABOUT (0, 0)
     const roundAboutGeo = new THREE.RingGeometry(0, 16, 36);
     roundAboutGeo.rotateX(-Math.PI / 2);
@@ -639,10 +704,7 @@ export class Environment {
     createJunction(270, 0, 14, 16);
     createJunction(-270, 0, 14, 16);
 
-    createJunction(270, -270, 14, 14);
-    createJunction(-270, -270, 14, 14);
-    createJunction(270, 270, 14, 14);
-    createJunction(-270, 270, 14, 14);
+    // 4 Outer Parkway High-Speed Corners diganti dengan 40m Sweeping Curves di bawah
 
     createJunction(75, -270, 12, 14);
     createJunction(-75, -270, 12, 14);
@@ -701,30 +763,42 @@ export class Environment {
     createRoadSegment(81, 140, 133, 140, 14);
     createRoadSegment(147, 140, 263, 140, 14);
 
-    // 4. DIAGONAL BROADWAY AVENUE (South-East: Dari Fork (0, 140) menuju (140, 270))
-    // Membentuk percabangan segitiga alami tempat berdirinya Gedung Flatiron!
-    createRoadSegment(8, 147, 133, 263, 14);
+    // 4. GRAND PARKSIDE CRESCENT (JALUR LENGKUNG HALUS RADIUS 85m)
+    // Menghubungkan East Boulevard (85, 0) ke South Main Ave (0, 85) dengan tikungan mulus memeluk Central Commons Park!
+    // Bebas dari sudut patah 90 derajat & bebas dari jalan silang janggal.
+    createCurvedRoad(85, 85, 85, 12, Math.PI / 2, Math.PI / 2);
 
-    // 5. OUTER GRAND PARKWAY CIRCUIT (X = +-270, Z = +-270, Width = 14m)
-    createRoadSegment(-263, -270, -81, -270, 14);
-    createRoadSegment(-69, -270, -8, -270, 14);
-    createRoadSegment(8, -270, 69, -270, 14);
-    createRoadSegment(81, -270, 263, -270, 14);
+    // 5. OUTER GRAND PARKWAY CIRCUIT DENGAN 4 TIKUNGAN HALUS SWEEPING (RADIUS 40m)
+    // Menghubungkan North, South, East, West Parkway tanpa tabrakan sudut 90 derajat tajam!
+    // Corner 1: North-East (230, -230)
+    createCurvedRoad(230, -230, 40, 14, 0, Math.PI / 2);
+    // Corner 2: North-West (-230, -230)
+    createCurvedRoad(-230, -230, 40, 14, Math.PI / 2, Math.PI / 2);
+    // Corner 3: South-West (-230, 230)
+    createCurvedRoad(-230, 230, 40, 14, Math.PI, Math.PI / 2);
+    // Corner 4: South-East (230, 230)
+    createCurvedRoad(230, 230, 40, 14, 3 * Math.PI / 2, Math.PI / 2);
 
-    createRoadSegment(-263, 270, -81, 270, 14);
-    createRoadSegment(-69, 270, -8, 270, 14);
-    createRoadSegment(8, 270, 69, 270, 14);
-    createRoadSegment(81, 270, 263, 270, 14);
+    // Straight Parkway Segments (Menyambung presisi ke ujung lengkungan +-230m):
+    // North Parkway (Z = -270)
+    createRoadSegment(-230, -270, -8, -270, 14);
+    createRoadSegment(8, -270, 230, -270, 14);
 
-    createRoadSegment(270, -263, 270, -67, 14);
+    // South Parkway (Z = 270)
+    createRoadSegment(-230, 270, -8, 270, 14);
+    createRoadSegment(8, 270, 230, 270, 14);
+
+    // East Parkway (X = 270)
+    createRoadSegment(270, -230, 270, -67, 14);
     // Bridge at Z: -67 to -57
     createRoadSegment(270, -57, 270, -8, 14);
-    createRoadSegment(270, 8, 270, 263, 14);
+    createRoadSegment(270, 8, 270, 230, 14);
 
-    createRoadSegment(-270, -263, -270, -67, 14);
+    // West Parkway (X = -270)
+    createRoadSegment(-270, -230, -270, -67, 14);
     // Bridge at Z: -67 to -57
     createRoadSegment(-270, -57, -270, -8, 14);
-    createRoadSegment(-270, 8, -270, 263, 14);
+    createRoadSegment(-270, 8, -270, 230, 14);
 
     // 6. OFF-ROAD SPURS MENUJU 7 ZONA PORTOFOLIO (BERSIH DARI JALUR UTAMA)
     const createSpur = (startX, startZ, endX, endZ) => {
@@ -1823,7 +1897,7 @@ export class Environment {
 
     // DISTRICT 7: SOUTH BROADWAY FORK & THE FLATIRON WEDGE BUILDING
     // Berdiri megah di percabangan antara Main Ave South dan South Broadway (X: 24, Z: 165)
-    createFlatironBuilding(24, 165, -0.45, 32, 16, 58, "flatiron_south_prow");
+    createFlatironBuilding(16, 96, -0.785, 30, 16, 58, "flatiron_crescent_prow");
 
     // DISTRICT 8: EAST MIDTOWN COMMERCIAL STRIP (X: 135 to 250, Z: -130 to 130)
     createTimesSquareTower(135, -35, 16, 16, 76, matGlassCyan, "ts_tower_em", {
