@@ -653,19 +653,87 @@ export class Environment {
       this.scene.add(walkOut);
     };
 
-    // 1. CENTRAL ROUNDABOUT (0, 0)
-    const roundAboutGeo = new THREE.RingGeometry(0, 16, 36);
+    // 1. CENTRAL ROUNDABOUT (0, 0) — SEAMLESS ALIGNMENT DENGAN 4 AVENUE 16M
+    // Diameter bundaran 36m (Radius 18m) menutup sempurna persimpangan 4 jalan utama (lebar 16m: [-8, 8] pada X/Z +-16)
+    // Bebas patahan sudut, dilengkapi 4 trotoar lengkung pojok, garis sirkulasi, dan medali pusat spawn.
+    const roundAboutGeo = new THREE.CircleGeometry(18.0, 48);
     roundAboutGeo.rotateX(-Math.PI / 2);
     const roundAbout = new THREE.Mesh(roundAboutGeo, roadMat);
     roundAbout.position.set(0, 0.02, 0);
     roundAbout.receiveShadow = true;
     this.scene.add(roundAbout);
 
-    const plazaRingGeo = new THREE.RingGeometry(4.5, 5.8, 32);
-    plazaRingGeo.rotateX(-Math.PI / 2);
-    const plazaRing = new THREE.Mesh(plazaRingGeo, new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 }));
-    plazaRing.position.set(0, 0.025, 0);
-    this.scene.add(plazaRing);
+    // Medali Dekoratif Titik Spawn di Pusat Bundaran (Radius 5.2m, ramah kendara / drivable flat surface)
+    const spawnMedallionGeo = new THREE.CircleGeometry(5.2, 48);
+    spawnMedallionGeo.rotateX(-Math.PI / 2);
+    const spawnMedallion = new THREE.Mesh(spawnMedallionGeo, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 }));
+    spawnMedallion.position.set(0, 0.022, 0);
+    spawnMedallion.receiveShadow = true;
+    this.scene.add(spawnMedallion);
+
+    // Cincin Emas Medali Spawn (Radius 4.8m - 5.2m)
+    const goldRingGeo = new THREE.RingGeometry(4.8, 5.2, 48);
+    goldRingGeo.rotateX(-Math.PI / 2);
+    const goldRing = new THREE.Mesh(goldRingGeo, new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.8 }));
+    goldRing.position.set(0, 0.025, 0);
+    this.scene.add(goldRing);
+
+    // Cincin Aksen Cyan Dalam (Radius 2.4m - 2.65m)
+    const innerCyanRingGeo = new THREE.RingGeometry(2.4, 2.65, 36);
+    innerCyanRingGeo.rotateX(-Math.PI / 2);
+    const innerCyanRing = new THREE.Mesh(innerCyanRingGeo, new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+    innerCyanRing.position.set(0, 0.026, 0);
+    this.scene.add(innerCyanRing);
+
+    // 4 Arah Panah Kardinal (Menunjuk lurus ke 4 jalan utama: Utara, Selatan, Timur, Barat)
+    const chevronGeo = new THREE.PlaneGeometry(0.5, 1.8);
+    chevronGeo.rotateX(-Math.PI / 2);
+    const chevronMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    [[0, -3.8, 0], [0, 3.8, Math.PI], [3.8, 0, -Math.PI / 2], [-3.8, 0, Math.PI / 2]].forEach(([cx, cz, crot]) => {
+      const ch = new THREE.Mesh(chevronGeo, chevronMat);
+      ch.position.set(cx, 0.026, cz);
+      ch.rotation.y = crot;
+      this.scene.add(ch);
+    });
+
+    // Garis Putus-Putus Putih Pembatas Lajur Sirkulasi Bundaran (Radius 11.5m)
+    // Menghubungkan secara visual lajur tengah setiap jalan masuk
+    const dashCircGeo = new THREE.PlaneGeometry(0.35, 2.2);
+    dashCircGeo.rotateX(-Math.PI / 2);
+    const numCircDashes = 16;
+    for (let i = 0; i < numCircDashes; i++) {
+      const theta = (i + 0.5) * (2 * Math.PI / numCircDashes);
+      const dash = new THREE.Mesh(dashCircGeo, whiteMat);
+      dash.position.set(11.5 * Math.cos(theta), 0.025, -11.5 * Math.sin(theta));
+      dash.rotation.y = theta + Math.PI;
+      this.scene.add(dash);
+    }
+
+    // 4 Trotoar Lengkung Pojok Bundaran (Menghubungkan trotoar 4 jalan utama secara mulus di R: 18m - 21.5m)
+    const curbW = 3.5;
+    const cornerAngleLength = 0.58; // Panjang sudut busur lengkung pojok
+    const cornerQuads = [
+      { name: "NE", startAngle: Math.PI / 4 - cornerAngleLength / 2 },
+      { name: "NW", startAngle: 3 * Math.PI / 4 - cornerAngleLength / 2 },
+      { name: "SW", startAngle: 5 * Math.PI / 4 - cornerAngleLength / 2 },
+      { name: "SE", startAngle: 7 * Math.PI / 4 - cornerAngleLength / 2 }
+    ];
+
+    cornerQuads.forEach(q => {
+      const walkCornerGeo = new THREE.RingGeometry(18.0, 18.0 + curbW, 16, 1, q.startAngle, cornerAngleLength);
+      walkCornerGeo.rotateX(-Math.PI / 2);
+      const walkCorner = new THREE.Mesh(walkCornerGeo, curbMat);
+      walkCorner.position.set(0, 0.08, 0);
+      walkCorner.receiveShadow = true;
+      this.scene.add(walkCorner);
+
+      // Garis putih lengkung pembatas tepi jalan bundaran di pojok
+      const edgeCornerGeo = new THREE.RingGeometry(17.65, 17.95, 16, 1, q.startAngle, cornerAngleLength);
+      edgeCornerGeo.rotateX(-Math.PI / 2);
+      const edgeCorner = new THREE.Mesh(edgeCornerGeo, whiteMat);
+      edgeCorner.position.set(0, 0.025, 0);
+      this.scene.add(edgeCorner);
+    });
 
     const createZebra = (x, z, width, rotY) => {
       const g = new THREE.Group();
@@ -1921,7 +1989,7 @@ export class Environment {
     });
     createLShapedComplex(-175, 75, 0, 30, 30, 36, matBrick, "l_complex_sw1");
     createLShapedComplex(-175, -75, Math.PI / 2, 30, 30, 36, matCharcoal, "l_complex_sw2");
-    createSuperSkyscraper(-215, 0, 18, 18, 84, matGlassDark, "skyscraper_wm_1");
+    createSuperSkyscraper(-215, 38, 18, 18, 84, matGlassDark, "skyscraper_wm_1");
     createDiagridTower(-215, 75, 18, 18, 86, matGlassCyan, "diagrid_wm_2");
     createTerracedTower(-215, -75, 18, 18, 72, matCorporateWhite, "terraced_wm_3");
     createRotundaTower(-175, -115, 8.0, 68, matGlassBlue, "rotunda_wm_4");
@@ -1932,7 +2000,7 @@ export class Environment {
     }
 
     // DISTRICT 10: FAR NORTH PARKWAY HIGH-RISE CORRIDOR (Z: -200)
-    const northParkwayX = [-215, -165, -115, -65, -28, 28, 65, 115, 165, 215];
+    const northParkwayX = [-215, -165, -115, -40, 40, 115, 165, 215];
     northParkwayX.forEach((px, i) => {
       const h = 72 + (i % 4) * 8;
       const m = [matGlassBlue, matGlassCyan, matGlassGold, matGlassEmerald][i % 4];
@@ -1946,7 +2014,7 @@ export class Environment {
     });
 
     // DISTRICT 11: FAR SOUTH PARKWAY HIGH-RISE CORRIDOR (Z: 200)
-    const southParkwayX = [-215, -165, -115, -65, -28, 65, 115, 165, 215];
+    const southParkwayX = [-215, -165, -115, -40, 40, 115, 165, 215];
     southParkwayX.forEach((px, i) => {
       const h = 74 + (i % 4) * 7;
       const m = [matGlassGold, matGlassBlue, matGlassEmerald, matGlassCyan][i % 4];
@@ -2126,35 +2194,35 @@ export class Environment {
       this.collision.addBox(x, z, 2.0, 4.0, "parked_" + type);
     };
 
-    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back safely at Z: -15)
+    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back safely at X: 93, Z: -16)
     const lot1 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot1.position.set(90, 0.05, -16);
+    lot1.position.set(93, 0.05, -16);
     lot1.receiveShadow = true;
     this.scene.add(lot1);
 
-    createCar(88, -12, Math.PI / 2, "vanWhite");
-    createCar(88, -16, Math.PI / 2, "taxi");
-    createCar(88, -20, Math.PI / 2, "sedanBlue");
+    createCar(91, -12, Math.PI / 2, "vanWhite");
+    createCar(91, -16, Math.PI / 2, "taxi");
+    createCar(91, -20, Math.PI / 2, "sedanBlue");
 
-    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (Z: -125)
+    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (Set back safely at X: -93, Z: -125)
     const lot2 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot2.position.set(-90, 0.05, -125);
+    lot2.position.set(-93, 0.05, -125);
     lot2.receiveShadow = true;
     this.scene.add(lot2);
 
-    createCar(-88, -120, Math.PI / 2, "taxi");
-    createCar(-88, -125, Math.PI / 2, "sportsRed");
-    createCar(-88, -130, Math.PI / 2, "sedanSilver");
+    createCar(-91, -120, Math.PI / 2, "taxi");
+    createCar(-91, -125, Math.PI / 2, "sportsRed");
+    createCar(-91, -130, Math.PI / 2, "sedanSilver");
 
-    // Dedicated Parking Lot 3: Developer HQ Courtyard (Z: 125)
+    // Dedicated Parking Lot 3: Developer HQ Courtyard (Set back safely at X: 93, Z: 125)
     const lot3 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot3.position.set(90, 0.05, 125);
+    lot3.position.set(93, 0.05, 125);
     lot3.receiveShadow = true;
     this.scene.add(lot3);
 
-    createCar(88, 120, Math.PI / 2, "sedanBlue");
-    createCar(88, 125, Math.PI / 2, "sportsRed");
-    createCar(88, 130, Math.PI / 2, "sedanSilver");
+    createCar(91, 120, Math.PI / 2, "sedanBlue");
+    createCar(91, 125, Math.PI / 2, "sportsRed");
+    createCar(91, 130, Math.PI / 2, "sedanSilver");
   }
 
   // 9. STREETLIGHTS & TREES ALIGNED NEATLY ON OUTER SIDEWALKS
