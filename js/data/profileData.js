@@ -9,9 +9,8 @@ export const profileData = {
   status: "Siswa SMK Negeri 71 Jakarta",
   major: "Rekayasa Perangkat Lunak (RPL)",
   goal: "Game Developer & Systems Engineer",
-  birthDate: "26 April 2010",
-  location: "Jakarta Timur, Indonesia",
-  avatarUrl: "assets/avatar-friel.jpg",
+  location: "Indonesia",
+  avatarUrl: "assets/developer-avatar.svg",
   
   tagline: "Dari Pemain Menjadi Kreator — Mengeksplorasi Dunia Pengembangan Game & Rekayasa Perangkat Lunak",
   

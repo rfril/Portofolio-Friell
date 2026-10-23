@@ -1,7 +1,7 @@
 /**
  * AREA 6: CONTACT & COMMUNICATION RELAY ZONE
  * Menara transmisi satelit & stasiun komunikasi digital
- * untuk membuka dialog kontak terverifikasi (WhatsApp, GitHub, Website Server).
+ * untuk membuka dialog kontak terverifikasi (Email, GitHub, Website Server).
  * Terletak rapi di South-West Communications Campus (X: -105, Z: 105), 35m dari jalan raya.
  */
 

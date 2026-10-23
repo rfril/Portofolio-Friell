@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="70%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    
+    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+
+    <linearGradient id="cyberIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+
+    <linearGradient id="hoodieGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+
+    <linearGradient id="visorReflect" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#06b6d4" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle & Geometric Cyber Ring -->
+  <circle cx="200" cy="200" r="190" fill="url(#bgGlow)" stroke="#1e293b" stroke-width="4"/>
+  <circle cx="200" cy="200" r="180" fill="none" stroke="url(#neonCyan)" stroke-width="2" stroke-dasharray="12 8" opacity="0.45"/>
+  <circle cx="200" cy="200" r="165" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.3"/>
+
+  <!-- Hexagonal Tech Halo -->
+  <polygon points="200,45 320,115 320,255 200,325 80,255 80,115" fill="none" stroke="url(#cyberIndigo)" stroke-width="2" opacity="0.35"/>
+
+  <!-- Character Hoodie Base (Shoulders & Torso) -->
+  <path d="M70,380 C85,310 120,270 160,260 L240,260 C280,270 315,310 330,380 Z" fill="url(#hoodieGrad)"/>
+  
+  <!-- Hoodie Cyber Seams & Accent Trims -->
+  <path d="M110,380 C125,325 150,295 180,285" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.8"/>
+  <path d="M290,380 C275,325 250,295 220,285" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.8"/>
+
+  <!-- Hoodie Collar / Neck V-Line -->
+  <path d="M160,260 L200,310 L240,260 Z" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+  <path d="M185,290 L200,310 L215,290" fill="none" stroke="url(#neonCyan)" stroke-width="3" filter="url(#neonGlow)"/>
+
+  <!-- Head / Helmet Base Structure -->
+  <path d="M140,165 C140,105 165,75 200,75 C235,75 260,105 260,165 C260,225 235,255 200,255 C165,255 140,225 140,165 Z" fill="#0b1120" stroke="#1e293b" stroke-width="3"/>
+
+  <!-- Sleek Cyber Visor (Mirrored Tech Screen) -->
+  <path d="M148,145 C155,135 175,130 200,130 C225,130 245,135 252,145 C256,165 254,185 246,195 C235,205 215,208 200,208 C185,208 165,205 154,195 C146,185 144,165 148,145 Z" fill="url(#visorReflect)" stroke="#38bdf8" stroke-width="2.5" filter="url(#neonGlow)"/>
+
+  <!-- Digital Code Matrix Reflection across Visor -->
+  <path d="M165,152 L235,152" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+  <path d="M160,165 L210,165" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+  <path d="M180,178 L238,178" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+  <circle cx="170" cy="190" r="2.5" fill="#ffffff" opacity="0.9"/>
+  <circle cx="182" cy="190" r="2.5" fill="#38bdf8"/>
+  <circle cx="194" cy="190" r="2.5" fill="#38bdf8"/>
+
+  <!-- Esports / Game Developer Headset -->
+  <!-- Headband -->
+  <path d="M132,165 C130,95 160,60 200,60 C240,60 270,95 268,165" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round"/>
+  <path d="M138,160 C138,98 165,66 200,66 C235,66 262,98 262,160" fill="none" stroke="url(#neonCyan)" stroke-width="3" opacity="0.9" filter="url(#neonGlow)"/>
+
+  <!-- Left Ear Cup -->
+  <g transform="translate(118, 140)">
+    <rect x="0" y="0" width="22" height="50" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+    <circle cx="11" cy="25" r="7" fill="none" stroke="url(#neonCyan)" stroke-width="2" filter="url(#neonGlow)"/>
+    <circle cx="11" cy="25" r="3" fill="#38bdf8"/>
+  </g>
+
+  <!-- Right Ear Cup -->
+  <g transform="translate(260, 140)">
+    <rect x="0" y="0" width="22" height="50" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+    <circle cx="11" cy="25" r="7" fill="none" stroke="url(#neonCyan)" stroke-width="2" filter="url(#neonGlow)"/>
+    <circle cx="11" cy="25" r="3" fill="#38bdf8"/>
+  </g>
+
+  <!-- Streamer / Dev Microphone Boom -->
+  <path d="M125,178 C125,215 155,232 178,230" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+  <rect x="176" y="224" width="12" height="12" rx="4" fill="#38bdf8" filter="url(#neonGlow)"/>
+
+  <!-- Cyber Badge Bottom Tag -->
+  <rect x="135" y="342" width="130" height="26" rx="6" fill="#090d16" stroke="url(#neonCyan)" stroke-width="1.5"/>
+  <text x="200" y="359" fill="#38bdf8" font-family="'Space Grotesk', 'Courier New', monospace" font-size="12" font-weight="700" letter-spacing="2" text-anchor="middle">GAME DEVELOPER</text>
+</svg>
