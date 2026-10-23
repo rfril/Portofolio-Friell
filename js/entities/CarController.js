@@ -20,6 +20,9 @@ export class CarController {
     this.lateralSlip = 0;
     this.isBraking = false;
     this.isDrifting = false;
+    this.driftDirection = 0;
+    this.driftStraightTimer = 0;
+    this.wasHandbrakePressed = false;
     this.velocity = new THREE.Vector3(0, 0, 0);
 
     // Visual references
@@ -530,6 +533,9 @@ export class CarController {
     this.steerAngle = 0;
     this.lateralSlip = 0;
     this.isDrifting = false;
+    this.driftDirection = 0;
+    this.driftStraightTimer = 0;
+    this.wasHandbrakePressed = false;
     this.velocity.set(0, 0, 0);
     if (this.audio && this.audio.updateDriftSound) {
       this.audio.updateDriftSound(false, 0);
@@ -544,14 +550,62 @@ export class CarController {
     const steerInput = this.input.getSteering();
     const handbrake = this.input.isBraking();
 
-    // 1. Handbrake & Drift State Detection
-    const isMoving = Math.abs(this.speed) > 4.0;
-    this.isDrifting = handbrake && isMoving;
-    this.isBraking = handbrake || (this.speed > 0.5 && throttle < -0.1) || (this.speed < -0.5 && throttle > 0.1);
+    // Deteksi ketukan rem tangan (one-shot trigger / tap-to-drift)
+    const handbrakeJustPressed = handbrake && !this.wasHandbrakePressed;
+    this.wasHandbrakePressed = handbrake;
 
-    // 2. Steering Dynamics (Enhanced for Drift Counter-Steer)
-    const steerMultiplier = this.isDrifting ? 1.25 : 1.0;
-    const targetSteerAngle = -steerInput * CONFIG.CAR.STEER_MAX_ANGLE * steerMultiplier;
+    // Syarat kecepatan tinggi untuk memicu drift (~48+ km/h)
+    const minDriftSpeed = CONFIG.CAR.DRIFT_MIN_SPEED || 22.0;
+    const isHighSpeed = this.speed > minDriftSpeed;
+    const isTurning = Math.abs(steerInput) > 0.15;
+
+    // 1. STATE MACHINE DRIFT (TAP-TO-DRIFT ALA RIDGE RACER / NEED FOR SPEED)
+    if (!this.isDrifting) {
+      // Hanya bisa memicu drift jika: KECEPATAN TINGGI + SEDANG BELOK + TAP REM TANGAN!
+      // (Tidak perlu ditahan, cukup tap 1x saat belok di kecepatan tinggi)
+      if (handbrakeJustPressed && isHighSpeed && isTurning) {
+        this.isDrifting = true;
+        this.driftDirection = Math.sign(steerInput);
+        this.driftStraightTimer = 0;
+      }
+    } else {
+      // Kondisi keluar dari drift secara alami & mulus:
+      // a. Kecepatan mobil turun di bawah ambang minimal drift
+      if (this.speed < (CONFIG.CAR.DRIFT_EXIT_SPEED || 14.0)) {
+        this.isDrifting = false;
+      }
+      // b. Pemain menekan rem mundur (S / Down)
+      else if (throttle < -0.1) {
+        this.isDrifting = false;
+      }
+      // c. Setir diluruskan atau counter-steer untuk meluruskan mobil
+      else if (Math.abs(steerInput) < 0.1 || (Math.sign(steerInput) !== 0 && Math.sign(steerInput) !== this.driftDirection)) {
+        this.driftStraightTimer += deltaTime;
+        if (this.driftStraightTimer > 0.35) {
+          this.isDrifting = false;
+        }
+      } else {
+        this.driftStraightTimer = 0;
+      }
+
+      // d. Tap rem tangan lagi saat lurus membatalkan drift
+      if (handbrakeJustPressed && !isTurning) {
+        this.isDrifting = false;
+      }
+    }
+
+    // 2. LOGIKA PENGEREMAN
+    // Saat kecepatan biasa / tidak drift: Rem tangan berfungsi 100% seperti rem biasa (menghentikan mobil)
+    if (handbrake && !this.isDrifting) {
+      const brakeDecel = (CONFIG.CAR.BRAKE_FORCE || 36.0) * deltaTime;
+      if (this.speed > 0) this.speed = Math.max(0, this.speed - brakeDecel);
+      else if (this.speed < 0) this.speed = Math.min(0, this.speed + brakeDecel);
+    }
+
+    this.isBraking = (handbrake && !this.isDrifting) || (this.speed > 0.5 && throttle < -0.1) || (this.speed < -0.5 && throttle > 0.1);
+
+    // 3. STEERING DYNAMICS
+    const targetSteerAngle = -steerInput * CONFIG.CAR.STEER_MAX_ANGLE;
     this.steerAngle += (targetSteerAngle - this.steerAngle) * Math.min(1.0, CONFIG.CAR.STEER_SPEED * deltaTime * 6);
 
     // Front wheels visual steer rotation
@@ -560,10 +614,10 @@ export class CarController {
       this.frontRightPivot.rotation.y = this.steerAngle;
     }
 
-    // 3. Acceleration / Deceleration
+    // 4. ACCELERATION / COASTING
     if (throttle > 0) {
-      // Forward gas (hypercar punch acceleration)
-      const accelRate = this.isDrifting ? CONFIG.CAR.ACCELERATION * 0.75 : CONFIG.CAR.ACCELERATION;
+      // Forward gas (bisa menekan gas untuk powerslide mempertahankan laju drift)
+      const accelRate = this.isDrifting ? CONFIG.CAR.ACCELERATION * 0.8 : CONFIG.CAR.ACCELERATION;
       this.speed += throttle * accelRate * deltaTime;
       if (this.speed > CONFIG.CAR.MAX_SPEED_FORWARD) {
         this.speed = CONFIG.CAR.MAX_SPEED_FORWARD;
@@ -587,8 +641,9 @@ export class CarController {
       }
     } else {
       // Natural rolling friction coasting
+      const frictionRate = this.isDrifting ? (CONFIG.CAR.HANDBRAKE_DECEL || 8.0) : CONFIG.CAR.NATURAL_FRICTION;
       if (Math.abs(this.speed) > 0.1) {
-        const decel = CONFIG.CAR.NATURAL_FRICTION * deltaTime;
+        const decel = frictionRate * deltaTime;
         if (this.speed > 0) {
           this.speed = Math.max(0, this.speed - decel);
         } else {
@@ -599,35 +654,34 @@ export class CarController {
       }
     }
 
-    // Handbrake: smoothly decelerates without stopping instantly, maintaining powerslide momentum
-    if (handbrake) {
-      const brakeDecel = (CONFIG.CAR.HANDBRAKE_DECEL || 14.0) * deltaTime;
-      if (this.speed > 0) this.speed = Math.max(0, this.speed - brakeDecel);
-      else if (this.speed < 0) this.speed = Math.min(0, this.speed + brakeDecel);
-    }
-
     // Taillights brake glow effect
     if (this.tailLightMat) {
-      if (this.isBraking) {
+      if (this.isBraking || this.isDrifting) {
         this.tailLightMat.emissive.setHex(0xef4444);
-        this.tailLightMat.emissiveIntensity = 2.4;
+        this.tailLightMat.emissiveIntensity = this.isDrifting ? 1.8 : 2.5;
       } else {
         this.tailLightMat.emissive.setHex(0x991b1b);
         this.tailLightMat.emissiveIntensity = 0.4;
       }
     }
 
-    // 4. Vehicle Turning & Yaw Rotation
+    // 5. VEHICLE TURNING & YAW ROTATION (HALUS & TERKONTROL SAAT DRIFT)
     if (Math.abs(this.speed) > 0.15) {
       const turnDirection = Math.sign(this.speed);
       const speedRatio = Math.min(1.0, Math.max(0.35, Math.abs(this.speed) / 16.0));
-      // Amplified yaw during handbrake drift!
-      const yawMultiplier = this.isDrifting ? (CONFIG.CAR.DRIFT_STEER_BOOST || 2.2) : 1.0;
-      const deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.2 * yawMultiplier * deltaTime;
+
+      let deltaYaw;
+      if (this.isDrifting) {
+        // Belok saat drift: halus dan stabil (multiplier 1.35x, tidak ngebut/blender)
+        const steerAmt = steerInput !== 0 ? -steerInput : -this.driftDirection * 0.5;
+        deltaYaw = steerAmt * turnDirection * speedRatio * 2.2 * (CONFIG.CAR.DRIFT_STEER_BOOST || 1.35) * deltaTime;
+      } else {
+        deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.2 * deltaTime;
+      }
       this.mesh.rotation.y += deltaYaw;
     }
 
-    // 5. Velocity Vector & Lateral Drift Physics
+    // 6. VELOCITY VECTOR & LATERAL DRIFT PHYSICS
     const carHeading = new THREE.Vector3(0, 0, 1).applyAxisAngle(
       new THREE.Vector3(0, 1, 0),
       this.mesh.rotation.y
@@ -640,23 +694,26 @@ export class CarController {
     const targetHeadingVel = carHeading.clone().multiplyScalar(this.speed);
 
     if (this.isDrifting) {
-      // High-slip physics: preserve momentum angle, slip outward
-      const driftRetention = Math.max(0, 1.0 - 0.45 * deltaTime);
+      // Meluncur mulus mengikuti momentum kurva (Ridge Racer feel)
+      const driftRetention = Math.max(0, 1.0 - 0.25 * deltaTime);
       this.velocity.multiplyScalar(driftRetention);
-      // Blend forward propulsion if pressing gas while drifting (powerslide!)
+
+      // Menekan gas mendorong laju powerslide
       if (throttle > 0) {
-        this.velocity.add(carHeading.clone().multiplyScalar(this.speed * 0.45 * deltaTime));
+        this.velocity.add(carHeading.clone().multiplyScalar(this.speed * 0.35 * deltaTime));
       }
-      // Add outward lateral slide component proportional to steer
-      const slideForce = -this.steerAngle * Math.abs(this.speed) * 0.65 * deltaTime;
-      this.velocity.add(carRight.clone().multiplyScalar(slideForce));
+      // Dorongan lateral terkontrol ke arah luar kurva
+      const lateralForce = -this.driftDirection * Math.abs(this.speed) * 0.35 * deltaTime;
+      this.velocity.add(carRight.clone().multiplyScalar(lateralForce));
+
+      this.speed = Math.max(this.speed * 0.994, this.velocity.length());
     } else {
-      // Normal grip driving: quickly align velocity with car heading
-      const gripRate = Math.min(1.0, (CONFIG.CAR.DRIFT_GRIP_RECOVERY || 4.5) * deltaTime * 2.5);
+      // Normal grip: pemulihan cengkeraman cepat setelah lurus
+      const gripRate = Math.min(1.0, (CONFIG.CAR.DRIFT_GRIP_RECOVERY || 5.0) * deltaTime * 2.5);
       this.velocity.lerp(targetHeadingVel, gripRate);
     }
 
-    // Calculate lateral slip for effects
+    // Hitung lateral slip
     this.lateralSlip = carRight.dot(this.velocity);
 
     // Apply displacement

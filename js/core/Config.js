@@ -16,22 +16,24 @@ export const CONFIG = {
     FOG_FAR: 440
   },
 
-  // Toy Vehicle Kinematics (Bruno Simon Inspired Driving Feel + Hypercar Drift)
+  // Toy Vehicle Kinematics (Bruno Simon Inspired Driving Feel + Smooth Tap-to-Drift)
   CAR: {
-    MAX_SPEED_FORWARD: 48.0, // Kecepatan dinaikkan dari 38.0 ke 48.0 (105+ km/h!)
-    MAX_SPEED_REVERSE: 18.0, // Kecepatan mundur dinaikkan ke 18.0
-    ACCELERATION: 36.0,      // Akselerasi lebih bertenaga & responsif
-    BRAKE_FORCE: 35.0,       // Gaya rem kaki
-    HANDBRAKE_DECEL: 14.0,   // Rem tangan: meluncur mulus tanpa berhenti mendadak
-    DRIFT_STEER_BOOST: 2.2,  // Multiplier rotasi oversteer saat drift
-    DRIFT_GRIP_RECOVERY: 4.5,// Kecepatan cengkeraman ban kembali setelah melepas rem tangan
+    MAX_SPEED_FORWARD: 48.0, // Kecepatan 106 km/h
+    MAX_SPEED_REVERSE: 18.0,
+    ACCELERATION: 36.0,
+    BRAKE_FORCE: 36.0,       // Rem kaki & rem tangan saat kecepatan normal
+    DRIFT_MIN_SPEED: 22.0,   // Ambang kecepatan tinggi untuk memicu drift (~48+ km/h)
+    DRIFT_EXIT_SPEED: 14.0,  // Kecepatan minimal untuk mempertahankan drift
+    DRIFT_STEER_BOOST: 1.35, // Kemudi stabil & halus saat drift (tidak terlalu cepat/liar)
+    DRIFT_GRIP_RECOVERY: 5.0,// Pemulihan traksi setelah lurus
+    HANDBRAKE_DECEL: 8.0,    // Deselerasi lembut saat powerslide
     NATURAL_FRICTION: 10.0,
     STEER_SPEED: 3.2,
-    STEER_MAX_ANGLE: 0.62,   // ~35 derajat untuk sudut drift leluasa
+    STEER_MAX_ANGLE: 0.62,   // ~35 derajat
     STEER_RETURN_SPEED: 4.8,
-    DRIFT_SLIP_FACTOR: 0.94, // Kemudahan sliding ban belakang
+    DRIFT_SLIP_FACTOR: 0.94,
     BODY_ROLL_FACTOR: 0.10,  // Kemiringan bodi saat drift
-    BODY_PITCH_FACTOR: 0.05, // Kemiringan bodi saat akselerasi/rem
+    BODY_PITCH_FACTOR: 0.05,
     WHEEL_RADIUS: 0.65,
     RESPAWN_POSITION: { x: 0, y: 0.45, z: 0 },
     RESPAWN_ROTATION: 0
