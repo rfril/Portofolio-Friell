@@ -763,13 +763,8 @@ export class Environment {
     createRoadSegment(81, 140, 133, 140, 14);
     createRoadSegment(147, 140, 263, 140, 14);
 
-    // 4. GRAND PARKSIDE CRESCENT (JALUR LENGKUNG HALUS RADIUS 85m)
-    // Menghubungkan East Boulevard (85, 0) ke South Main Ave (0, 85) dengan tikungan mulus memeluk Central Commons Park!
-    // Bebas dari sudut patah 90 derajat & bebas dari jalan silang janggal.
-    createCurvedRoad(85, 85, 85, 12, Math.PI / 2, Math.PI / 2);
-
-    // 5. OUTER GRAND PARKWAY CIRCUIT DENGAN 4 TIKUNGAN HALUS SWEEPING (RADIUS 40m)
-    // Menghubungkan North, South, East, West Parkway tanpa tabrakan sudut 90 derajat tajam!
+    // 4. OUTER GRAND PARKWAY CIRCUIT DENGAN 4 TIKUNGAN HALUS SWEEPING (RADIUS 40m)
+    // Menghubungkan North, South, East, West Parkway menjadi sirkuit lingkar bebas tabrakan sudut 90 derajat tajam!
     // Corner 1: North-East (230, -230)
     createCurvedRoad(230, -230, 40, 14, 0, Math.PI / 2);
     // Corner 2: North-West (-230, -230)
@@ -779,14 +774,18 @@ export class Environment {
     // Corner 4: South-East (230, 230)
     createCurvedRoad(230, 230, 40, 14, 3 * Math.PI / 2, Math.PI / 2);
 
-    // Straight Parkway Segments (Menyambung presisi ke ujung lengkungan +-230m):
+    // Straight Parkway Segments (Menyambung presisi ke ujung lengkungan +-230m & membuka junction +-75m):
     // North Parkway (Z = -270)
-    createRoadSegment(-230, -270, -8, -270, 14);
-    createRoadSegment(8, -270, 230, -270, 14);
+    createRoadSegment(-230, -270, -81, -270, 14);
+    createRoadSegment(-69, -270, -8, -270, 14);
+    createRoadSegment(8, -270, 69, -270, 14);
+    createRoadSegment(81, -270, 230, -270, 14);
 
     // South Parkway (Z = 270)
-    createRoadSegment(-230, 270, -8, 270, 14);
-    createRoadSegment(8, 270, 230, 270, 14);
+    createRoadSegment(-230, 270, -81, 270, 14);
+    createRoadSegment(-69, 270, -8, 270, 14);
+    createRoadSegment(8, 270, 69, 270, 14);
+    createRoadSegment(81, 270, 230, 270, 14);
 
     // East Parkway (X = 270)
     createRoadSegment(270, -230, 270, -67, 14);
@@ -1897,7 +1896,7 @@ export class Environment {
 
     // DISTRICT 7: SOUTH BROADWAY FORK & THE FLATIRON WEDGE BUILDING
     // Berdiri megah di percabangan antara Main Ave South dan South Broadway (X: 24, Z: 165)
-    createFlatironBuilding(16, 96, -0.785, 30, 16, 58, "flatiron_crescent_prow");
+    createFlatironBuilding(38, 175, Math.PI, 30, 16, 58, "flatiron_south_district");
 
     // DISTRICT 8: EAST MIDTOWN COMMERCIAL STRIP (X: 135 to 250, Z: -130 to 130)
     createTimesSquareTower(135, -35, 16, 16, 76, matGlassCyan, "ts_tower_em", {
