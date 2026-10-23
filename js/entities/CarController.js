@@ -270,10 +270,13 @@ export class CarController {
 
     // 3. Vehicle Turning & Yaw Rotation
     if (Math.abs(this.speed) > 0.2) {
-      const turnDirection = this.speed > 0 ? 1 : -1;
       const turnMultiplier = 1.35;
-      const deltaYaw = this.steerAngle * (this.speed / CONFIG.CAR.MAX_SPEED_FORWARD) * turnMultiplier * deltaTime;
-      this.mesh.rotation.y += deltaYaw * turnDirection;
+      const speedRatio = Math.abs(this.speed) / CONFIG.CAR.MAX_SPEED_FORWARD;
+      
+      // Saat mundur (speed < 0), balik arah putaran yaw agar belok kiri tetap bergerak ke kiri (arcade / intuitive reverse)
+      const reverseFactor = this.speed > 0 ? 1 : -1;
+      const deltaYaw = this.steerAngle * speedRatio * turnMultiplier * reverseFactor * deltaTime;
+      this.mesh.rotation.y += deltaYaw;
 
       // Tire skid particles when turning sharply at high speed
       if (this.particles && Math.abs(this.steerAngle) > 0.25 && Math.abs(this.speed) > 18) {
