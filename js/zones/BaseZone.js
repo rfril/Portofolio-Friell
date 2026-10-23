@@ -56,7 +56,11 @@ export class BaseZone {
     const ctx = canvas.getContext("2d");
 
     ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
-    ctx.roundRect(10, 10, 492, 108, 24);
+    if (ctx.roundRect) {
+      ctx.roundRect(10, 10, 492, 108, 24);
+    } else {
+      ctx.rect(10, 10, 492, 108);
+    }
     ctx.fill();
 
     ctx.lineWidth = 4;

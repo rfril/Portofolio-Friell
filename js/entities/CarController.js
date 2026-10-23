@@ -38,7 +38,7 @@ export class CarController {
     this.scene.add(this.mesh);
 
     // Initial position
-    this.reset();
+    this.reset(false);
   }
 
   buildCarModel() {
@@ -184,7 +184,7 @@ export class CarController {
     this.mesh.add(this.rearRightWheel);
   }
 
-  reset() {
+  reset(playSound = true) {
     this.mesh.position.set(
       CONFIG.CAR.RESPAWN_POSITION.x,
       CONFIG.CAR.RESPAWN_POSITION.y,
@@ -194,7 +194,9 @@ export class CarController {
     this.speed = 0;
     this.steerAngle = 0;
     this.lateralSlip = 0;
-    this.audio.playResetSound();
+    if (playSound && this.audio) {
+      this.audio.playResetSound();
+    }
   }
 
   update(deltaTime) {

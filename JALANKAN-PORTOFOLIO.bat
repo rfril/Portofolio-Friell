@@ -13,10 +13,10 @@ cd /d "%~dp0"
 
 start "" http://localhost:3000
 
-where npx >nul 2>&1
+where node >nul 2>&1
 if %ERRORLEVEL% equ 0 (
-    echo Menjalankan via npx serve...
-    call npx serve -l 3000 .
+    echo Menjalankan via Node.js server.js...
+    node server.js
     goto end
 )
 

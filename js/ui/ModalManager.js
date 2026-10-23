@@ -55,7 +55,7 @@ export class ModalManager {
   open(preferredTab = "apexsions") {
     // Map zone id to tab id
     const zoneToTab = {
-      spawn: "profile",
+      spawn: "about",
       journey: "journey",
       apexsions: "apexsions",
       kasir: "kasir",
@@ -130,6 +130,8 @@ export class ModalManager {
       this.renderAboutMe();
     } else if (this.activeTab === "contact") {
       this.renderContact();
+    } else {
+      this.renderProjectDetail("apexsions");
     }
   }
 

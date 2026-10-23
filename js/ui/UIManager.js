@@ -21,7 +21,6 @@ export class UIManager {
     this.resetBtn = document.getElementById("resetCarBtn");
     this.hornBtn = document.getElementById("hornBtn");
     this.portfolioMenuBtn = document.getElementById("portfolioMenuBtn");
-    this.classicModeBtn = document.getElementById("classicModeBtn");
 
     this.bindEvents();
   }

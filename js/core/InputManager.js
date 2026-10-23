@@ -50,6 +50,11 @@ export class InputManager {
 
     const key = e.key.toLowerCase();
 
+    // Prevent default browser scrolling on arrow keys and spacebar
+    if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(key)) {
+      e.preventDefault();
+    }
+
     // Movement keys
     if (key === "w" || key === "arrowup") this.keys.forward = true;
     if (key === "s" || key === "arrowdown") this.keys.backward = true;

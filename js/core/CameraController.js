@@ -96,6 +96,9 @@ export class CameraController {
       const targetFov = 50 + speedRatio * 14;
       this.camera.fov += (targetFov - this.camera.fov) * 0.08;
       this.camera.updateProjectionMatrix();
+    } else if (Math.abs(this.camera.fov - modeConfig.fov) > 0.1) {
+      this.camera.fov += (modeConfig.fov - this.camera.fov) * 0.1;
+      this.camera.updateProjectionMatrix();
     }
 
     // Smooth Lerp Camera Position

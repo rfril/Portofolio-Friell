@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Portofolio Pribadi 3D Interaktif Game Developer — Rafriel Raditya Widodo (SMKN 71 Jakarta)",
   "type": "module",
+  "main": "server.js",
   "scripts": {
-    "dev": "npx serve -l 3000 .",
-    "start": "npx serve -l 3000 .",
-    "serve": "python -m http.server 3000"
+    "dev": "node server.js",
+    "start": "node server.js",
+    "serve": "node server.js",
+    "serve:py": "python -m http.server 3000"
   },
   "keywords": [
     "portfolio",
