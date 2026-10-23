@@ -6,23 +6,22 @@ echo   PORTOFOLIO 3D INTERAKTIF GAME DEVELOPER - RAFRIEL RADITYA WIDODO
 echo   Siswa RPL SMK Negeri 71 Jakarta
 echo =======================================================================
 echo.
-echo Menjalankan local server port 3000...
+echo Menjalankan local server...
 echo.
 
 cd /d "%~dp0"
 
-start "" http://localhost:3000
-
 where node >nul 2>&1
 if %ERRORLEVEL% equ 0 (
     echo Menjalankan via Node.js server.js...
-    node server.js
+    node server.js --open
     goto end
 )
 
 where python >nul 2>&1
 if %ERRORLEVEL% equ 0 (
     echo Menjalankan via Python HTTP Server...
+    start "" http://localhost:3000
     python -m http.server 3000
     goto end
 )

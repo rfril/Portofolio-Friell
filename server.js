@@ -1,12 +1,14 @@
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import net from 'net';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = process.env.PORT || 3000;
+let DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
 
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
@@ -21,39 +23,70 @@ const mimeTypes = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer((req, res) => {
-  let reqPath = req.url.split('?')[0].split('#')[0];
-  let filePath = path.join(__dirname, reqPath);
+function createPortfolioServer() {
+  return http.createServer((req, res) => {
+    let reqPath = req.url.split('?')[0].split('#')[0];
+    let filePath = path.join(__dirname, reqPath);
 
-  // If path is root or directory, serve index.html
-  if (reqPath === '/' || reqPath === '') {
-    filePath = path.join(__dirname, 'index.html');
-  }
-
-  fs.stat(filePath, (err, stats) => {
-    if (err || !stats.isFile()) {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-      res.end('404 Not Found');
-      return;
+    if (reqPath === '/' || reqPath === '') {
+      filePath = path.join(__dirname, 'index.html');
     }
 
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    fs.stat(filePath, (err, stats) => {
+      if (err || !stats.isFile()) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('404 Not Found');
+        return;
+      }
 
-    res.writeHead(200, {
-      'Content-Type': contentType,
-      'Cache-Control': 'no-cache'
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'no-cache'
+      });
+
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
     });
-
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
   });
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`=======================================================================`);
-  console.log(`  PORTOFOLIO 3D INTERAKTIF RAFRIEL RADITYA WIDODO`);
-  console.log(`  Server lokal aktif: http://localhost:${PORT}`);
-  console.log(`  Mode Dokumen Standar: http://localhost:${PORT}/#classic`);
-  console.log(`=======================================================================`);
+function findAvailablePort(startPort, callback) {
+  const tester = net.createServer();
+  tester.once('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      findAvailablePort(startPort + 1, callback);
+    } else {
+      callback(err, null);
+    }
+  });
+
+  tester.once('listening', () => {
+    tester.once('close', () => callback(null, startPort)).close();
+  });
+
+  tester.listen(startPort);
+}
+
+findAvailablePort(DEFAULT_PORT, (err, port) => {
+  if (err) {
+    console.error('Error finding port:', err);
+    process.exit(1);
+  }
+
+  const app = createPortfolioServer();
+  app.listen(port, () => {
+    console.log(`=======================================================================`);
+    console.log(`  PORTOFOLIO 3D INTERAKTIF RAFRIEL RADITYA WIDODO`);
+    console.log(`  Server lokal aktif: http://localhost:${port}`);
+    console.log(`  Mode Dokumen Standar: http://localhost:${port}/#classic`);
+    console.log(`=======================================================================`);
+
+    if (process.argv.includes('--open')) {
+      const startCmd = process.platform === 'win32' ? 'start' : 'open';
+      exec(`${startCmd} http://localhost:${port}`);
+    }
+  });
 });
