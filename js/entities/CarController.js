@@ -270,16 +270,14 @@ export class CarController {
     }
 
     // 3. Vehicle Turning & Yaw Rotation
-    const isMoving = Math.abs(this.speed) > 0.2;
-    const isSteering = Math.abs(this.steerAngle) > 0.05;
-
-    // Aktif saat mobil bergerak ATAU saat setir dibelokkan ketika berhenti (agar mobil tidak macet saat menempel dinding)
-    if (isMoving || isSteering) {
-      const turnMultiplier = 1.35;
-      const speedRatio = isMoving ? (Math.abs(this.speed) / CONFIG.CAR.MAX_SPEED_FORWARD) : 0.45;
-      
-      // Saat belok kiri (A), mobil berputar ke kiri baik saat maju maupun mundur (konsisten & intuitif)
-      const deltaYaw = this.steerAngle * speedRatio * turnMultiplier * deltaTime;
+    // Berputar HANYA ketika mobil bergerak (bukan berputar di tempat seperti gasing saat diam)
+    // Menggunakan arah bertanda (turnDirection = Math.sign(this.speed)) sehingga:
+    // - Maju + Kiri (W+A): mobil melengkung ke kiri
+    // - Mundur + Kiri (S+A): buritan mobil mundur ke kiri (konsisten & intuitif)
+    if (Math.abs(this.speed) > 0.15) {
+      const turnDirection = Math.sign(this.speed);
+      const speedRatio = Math.min(1.0, Math.max(0.35, Math.abs(this.speed) / 14.0));
+      const deltaYaw = this.steerAngle * turnDirection * speedRatio * 2.2 * deltaTime;
       this.mesh.rotation.y += deltaYaw;
 
       // Tire skid particles when turning sharply at high speed
