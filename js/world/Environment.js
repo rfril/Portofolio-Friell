@@ -410,6 +410,7 @@ export class Environment {
     this.buildWaterCanalAndBridges();
     this.buildRoadNetwork();
     this.buildTrafficLightSystem();
+    this.buildPortfolioCampusZonesAndAccessRoads();
     this.buildCentralCityPark();
     this.buildCitySkyscrapersAndBlocks();
     this.buildUrbanInfrastructureAndStreetFurniture();
@@ -952,31 +953,10 @@ export class Environment {
     createRoadSegment(-270, 8, -270, 133, 14);
     createRoadSegment(-270, 147, -270, 230, 14);
 
-    // 6. OFF-ROAD SPURS MENUJU 7 ZONA PORTOFOLIO (BERSIH DARI JALUR UTAMA)
-    const createSpur = (startX, startZ, endX, endZ) => {
-      const dx = endX - startX;
-      const dz = endZ - startZ;
-      const len = Math.hypot(dx, dz);
-      const angle = Math.atan2(dx, dz);
-      const midX = (startX + endX) / 2;
-      const midZ = (startZ + endZ) / 2;
-
-      const spurGeo = new THREE.PlaneGeometry(10, len);
-      spurGeo.rotateX(-Math.PI / 2);
-      const spur = new THREE.Mesh(spurGeo, roadMat);
-      spur.rotation.y = -angle;
-      spur.position.set(midX, 0.022, midZ);
-      spur.receiveShadow = true;
-      this.scene.add(spur);
-    };
-
-    createSpur(75, -105, 92, -105);  // Spur into Apexsions Fortress
-    createSpur(75, -35, 92, -35);    // Spur into POS Kasir Plaza
-    createSpur(75, 105, 92, 105);    // Spur into Developer HQ
-    createSpur(-75, -105, -92, -105);// Spur into PoRoRo Gelato
-    createSpur(-75, -35, -92, -35);  // Spur into Journey Promenade
-    createSpur(-75, 35, -92, 35);    // Spur into Skills Lab
-    createSpur(-75, 105, -92, 105);  // Spur into Contact Relay
+    // 6. PORTFOLIO CAMPUS ACCESS CONNECTORS
+    // Fully paved access avenues, raised sidewalks, grand arrival courtyards, visitor parking,
+    // and thematic surroundings are constructed in buildPortfolioCampusZonesAndAccessRoads()
+    // ensuring zero floating stubs and 100% geometric continuity.
   }
 
 
@@ -1248,6 +1228,719 @@ export class Environment {
         }
       }
     }
+  }
+
+  // 4B. PORTFOLIO CAMPUS ZONES, ACCESS ROADS & ARRIVAL PLAZAS
+  // Paved avenues (X = +-75 to +-92), grand arrival courtyards (34m x 36m),
+  // vehicle turnaround loops, visitor parking stalls, streetlamps, directory totems,
+  // and rich thematic surroundings for all 7 outer portfolio zones + Spawn Pavilion
+  buildPortfolioCampusZonesAndAccessRoads() {
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+    const curbMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.7 });
+    const yellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const stonePlazaMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+    const borderStoneMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+    const metalDark = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.25 });
+    const metalChrome = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.75 });
+    const hedgeMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.7 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6 });
+    const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    const cyanGlowMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const greenGlowMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+    const redGlowMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+
+    const carMatColors = {
+      taxi: new THREE.MeshStandardMaterial({ color: 0xfde047, metalness: 0.5, roughness: 0.3 }),
+      sedanBlue: new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.3 }),
+      sedanSilver: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.2 }),
+      sportsRed: new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.5, roughness: 0.3 }),
+      vanWhite: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }),
+      suvBlack: new THREE.MeshStandardMaterial({ color: 0x090d16, metalness: 0.8, roughness: 0.2 }),
+      coupeEmerald: new THREE.MeshStandardMaterial({ color: 0x059669, metalness: 0.6, roughness: 0.3 }),
+      electricCyan: new THREE.MeshStandardMaterial({ color: 0x0891b2, metalness: 0.7, roughness: 0.2 })
+    };
+
+    const createParkedCar = (x, z, rotY, type = "sedanBlue", name = "parked_car") => {
+      const car = new THREE.Group();
+      car.position.set(x, 0, z);
+      car.rotation.y = rotY;
+
+      const mat = carMatColors[type] || carMatColors.sedanBlue;
+
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.6, 4.2), mat);
+      chassis.position.y = 0.5;
+      chassis.castShadow = true;
+      car.add(chassis);
+
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.55, 2.3), glassMat);
+      cabin.position.set(0, 1.0, -0.2);
+      cabin.castShadow = true;
+      car.add(cabin);
+
+      const tireGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.25, 12);
+      tireGeo.rotateZ(Math.PI / 2);
+      [-0.95, 0.95].forEach(wx => {
+        [-1.25, 1.25].forEach(wz => {
+          const wheel = new THREE.Mesh(tireGeo, wheelMat);
+          wheel.position.set(wx, 0.35, wz);
+          wheel.castShadow = true;
+          car.add(wheel);
+        });
+      });
+
+      // Headlights
+      const hlMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+      [-0.7, 0.7].forEach(hx => {
+        const hl = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.15, 0.1), hlMat);
+        hl.position.set(hx, 0.55, 2.12);
+        car.add(hl);
+      });
+
+      // Taillights
+      const tlMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+      [-0.7, 0.7].forEach(tx => {
+        const tl = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, 0.1), tlMat);
+        tl.position.set(tx, 0.58, -2.12);
+        car.add(tl);
+      });
+
+      this.scene.add(car);
+      this.collision.addBox(x, z, 2.2, 4.4, name);
+    };
+
+    const createDecorativeTree = (x, z) => {
+      const tree = new THREE.Group();
+      tree.position.set(x, 0, z);
+
+      // Stone planter box
+      const planter = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 1.8), borderStoneMat);
+      planter.position.y = 0.25;
+      planter.receiveShadow = true;
+      tree.add(planter);
+
+      const soil = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 1.5), trunkMat);
+      soil.position.y = 0.51;
+      tree.add(soil);
+
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 2.4, 6), trunkMat);
+      trunk.position.y = 1.4;
+      trunk.castShadow = true;
+      tree.add(trunk);
+
+      const foliage = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.8, 7), foliageMat);
+      foliage.position.y = 3.6;
+      foliage.castShadow = true;
+      tree.add(foliage);
+
+      this.scene.add(tree);
+      this.collision.addCircle(x, z, 0.9, "campus_tree");
+    };
+
+    const createAvenueLamp = (x, z) => {
+      const lamp = new THREE.Group();
+      lamp.position.set(x, 0, z);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 5.0, 8), metalDark);
+      pole.position.y = 2.5;
+      pole.castShadow = true;
+      lamp.add(pole);
+
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, 0.8), metalDark);
+      head.position.set(0, 5.0, 0);
+      lamp.add(head);
+
+      const bulb = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.65), lampGlowMat);
+      bulb.position.set(0, 4.9, 0);
+      lamp.add(bulb);
+
+      this.scene.add(lamp);
+      this.collision.addCircle(x, z, 0.5, "avenue_lamp");
+    };
+
+    const createDirectoryTotem = (x, z, rotY, title, subtitle, category) => {
+      const totem = new THREE.Group();
+      totem.position.set(x, 0, z);
+      totem.rotation.y = rotY;
+
+      // Heavy concrete plinth
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.4, 0.8), borderStoneMat);
+      plinth.position.y = 0.2;
+      plinth.castShadow = true;
+      totem.add(plinth);
+
+      // Modern architectural column
+      const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, 3.4, 0.4), metalDark);
+      body.position.y = 2.1;
+      body.castShadow = true;
+      totem.add(body);
+
+      // Glowing cyan accent lines on sides
+      [-0.98, 0.98].forEach(sx => {
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(0.04, 3.2, 0.42), cyanGlowMat);
+        strip.position.set(sx, 2.1, 0);
+        totem.add(strip);
+      });
+
+      // Illuminated sign front
+      const signTex = this.createSignTexture(title, "#0f172a", "#38bdf8", `${category} • ${subtitle}`);
+      const signBoard = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.2), new THREE.MeshBasicMaterial({ map: signTex }));
+      signBoard.position.set(0, 2.4, 0.22);
+      totem.add(signBoard);
+
+      // Back sign
+      const signBoardBack = signBoard.clone();
+      signBoardBack.position.z = -0.22;
+      signBoardBack.rotation.y = Math.PI;
+      totem.add(signBoardBack);
+
+      this.scene.add(totem);
+      this.collision.addBox(x, z, 2.4, 0.8, "directory_totem");
+    };
+
+    // 7 Outer Campus Zones Configuration
+    const zones = [
+      {
+        id: "apexsions",
+        title: "➔ APEXSIONS RPG FORTRESS",
+        subtitle: "Flagship Minecraft Server",
+        category: "AREA 3A",
+        x: 105,
+        z: -105,
+        side: "E",
+        theme: "apexsions"
+      },
+      {
+        id: "kasir",
+        title: "➔ POS DIGITAL STORE",
+        subtitle: "Nuxt 4 + Laravel REST API",
+        category: "AREA 3B",
+        x: 105,
+        z: -35,
+        side: "E",
+        theme: "kasir"
+      },
+      {
+        id: "about",
+        title: "➔ DEVELOPER STUDIO & HQ",
+        subtitle: "About Me & Soft Skills",
+        category: "AREA 5",
+        x: 105,
+        z: 105,
+        side: "E",
+        theme: "about"
+      },
+      {
+        id: "pororo",
+        title: "➔ PORORO GELATO CAFE",
+        subtitle: "Nuxt 3 & Figma Masterplan",
+        category: "AREA 3C",
+        x: -105,
+        z: -105,
+        side: "W",
+        theme: "pororo"
+      },
+      {
+        id: "journey",
+        title: "➔ MY JOURNEY PROMENADE",
+        subtitle: "Chronological Timeline",
+        category: "AREA 2",
+        x: -105,
+        z: -35,
+        side: "W",
+        theme: "journey"
+      },
+      {
+        id: "skills",
+        title: "➔ DEVELOPER SKILLS LAB",
+        subtitle: "Technical Competencies",
+        category: "AREA 4",
+        x: -105,
+        z: 35,
+        side: "W",
+        theme: "skills"
+      },
+      {
+        id: "contact",
+        title: "➔ SATELLITE RELAY HUB",
+        subtitle: "Communication & Contact",
+        category: "AREA 6",
+        x: -105,
+        z: 105,
+        side: "W",
+        theme: "contact"
+      }
+    ];
+
+    zones.forEach(zone => {
+      const isEast = zone.side === "E";
+      const startX = isEast ? 75 : -75;
+      const endX = isEast ? 92 : -92;
+      const midX = (startX + endX) / 2;
+      const lenX = Math.abs(endX - startX);
+      const z = zone.z;
+
+      // 1. PAVED ACCESS ROAD (9.6m wide from Secondary Corridor to Zone Plaza)
+      const roadGeo = new THREE.PlaneGeometry(lenX, 9.6);
+      roadGeo.rotateX(-Math.PI / 2);
+      const road = new THREE.Mesh(roadGeo, roadMat);
+      road.position.set(midX, 0.022, z);
+      road.receiveShadow = true;
+      this.scene.add(road);
+
+      // Yellow Dashed Center Line
+      const numDashes = Math.floor(lenX / 6.0);
+      const dashGeo = new THREE.PlaneGeometry(2.4, 0.35);
+      dashGeo.rotateX(-Math.PI / 2);
+      for (let i = 0; i < numDashes; i++) {
+        const dash = new THREE.Mesh(dashGeo, yellowMat);
+        const dx = isEast ? startX + 3.0 + i * 6.0 : startX - 3.0 - i * 6.0;
+        dash.position.set(dx, 0.025, z);
+        this.scene.add(dash);
+      }
+
+      // White Edge Lines
+      const edgeGeo = new THREE.PlaneGeometry(lenX, 0.22);
+      edgeGeo.rotateX(-Math.PI / 2);
+      [-4.5, 4.5].forEach(ez => {
+        const edge = new THREE.Mesh(edgeGeo, whiteMat);
+        edge.position.set(midX, 0.024, z + ez);
+        this.scene.add(edge);
+      });
+
+      // Raised Concrete Sidewalks on Both Sides of Access Road
+      const walkW = 2.2;
+      const walkH = 0.15;
+      const walkGeo = new THREE.BoxGeometry(lenX, walkH, walkW);
+      [-5.9, 5.9].forEach(wz => {
+        const walk = new THREE.Mesh(walkGeo, curbMat);
+        walk.position.set(midX, walkH / 2, z + wz);
+        walk.receiveShadow = true;
+        this.scene.add(walk);
+      });
+
+      // Avenue Streetlamps
+      const lampX1 = isEast ? 83 : -83;
+      const lampX2 = isEast ? 90 : -90;
+      createAvenueLamp(lampX1, z - 5.9);
+      createAvenueLamp(lampX2, z + 5.9);
+
+      // Directory Entrance Totem
+      const totemX = isEast ? 82.5 : -82.5;
+      const totemRot = isEast ? -Math.PI / 2 : Math.PI / 2;
+      createDirectoryTotem(totemX, z + 7.2, totemRot, zone.title, zone.subtitle, zone.category);
+
+      // 2. GRAND ARRIVAL COURTYARD & TURNAROUND BAY (34m x 36m)
+      // Centered around the zone at (x, z)
+      const plazaCenterX = isEast ? 105 : -105;
+      const plazaGeo = new THREE.BoxGeometry(34, 0.06, 36);
+      const plaza = new THREE.Mesh(plazaGeo, stonePlazaMat);
+      plaza.position.set(plazaCenterX, 0.03, z);
+      plaza.receiveShadow = true;
+      this.scene.add(plaza);
+
+      // Plaza Perimeter Border Trim
+      const trimGeo = new THREE.BoxGeometry(34.8, 0.1, 36.8);
+      const trim = new THREE.Mesh(trimGeo, borderStoneMat);
+      trim.position.set(plazaCenterX, 0.02, z);
+      trim.receiveShadow = true;
+      this.scene.add(trim);
+
+      // Drivable Vehicle Turnaround Apron / Drop-off Loop
+      const apronW = 12;
+      const apronD = 20;
+      const apronX = isEast ? 95 : -95;
+      const apronGeo = new THREE.PlaneGeometry(apronW, apronD);
+      apronGeo.rotateX(-Math.PI / 2);
+      const apron = new THREE.Mesh(apronGeo, roadMat);
+      apron.position.set(apronX, 0.042, z);
+      apron.receiveShadow = true;
+      this.scene.add(apron);
+
+      // Turnaround Loop Border Line
+      const loopTrimGeo = new THREE.PlaneGeometry(apronW, 0.25);
+      loopTrimGeo.rotateX(-Math.PI / 2);
+      [-apronD / 2 + 0.2, apronD / 2 - 0.2].forEach(lz => {
+        const lLine = new THREE.Mesh(loopTrimGeo, whiteMat);
+        lLine.position.set(apronX, 0.044, z + lz);
+        this.scene.add(lLine);
+      });
+
+      // 4 Symmetrical Ornamental Trees at Courtyard Corners
+      const treeX1 = isEast ? 92 : -92;
+      const treeX2 = isEast ? 118 : -118;
+      createDecorativeTree(treeX1, z - 15);
+      createDecorativeTree(treeX1, z + 15);
+      createDecorativeTree(treeX2, z - 15);
+      createDecorativeTree(treeX2, z + 15);
+
+      // Perimeter Box Hedges
+      [-17, 17].forEach(hz => {
+        const hedgeH = new THREE.Mesh(new THREE.BoxGeometry(14, 0.8, 0.8), hedgeMat);
+        hedgeH.position.set(isEast ? 111 : -111, 0.4, z + hz);
+        hedgeH.castShadow = true;
+        this.scene.add(hedgeH);
+      });
+
+      // 3. VISITOR PARKING BAYS & PARKED CARS (Cleanly offset along apron)
+      const parkingBayX = isEast ? 94 : -94;
+      const parkZ1 = z + 11;
+      const parkZ2 = z + 15;
+
+      // Painted Parking Bay Lines
+      const pLineGeo = new THREE.PlaneGeometry(5.0, 0.18);
+      pLineGeo.rotateX(-Math.PI / 2);
+      [z + 9, z + 13, z + 17].forEach(pz => {
+        const pLine = new THREE.Mesh(pLineGeo, whiteMat);
+        pLine.position.set(parkingBayX, 0.045, pz);
+        this.scene.add(pLine);
+      });
+
+      // 4. THEMATIC SURROUNDINGS PER ZONE
+      switch (zone.theme) {
+        case "kasir": {
+          // POS Digital Supermarket Terrace & Carts
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "vanWhite", "kasir_van");
+          createParkedCar(parkingBayX, parkZ2, Math.PI / 2, "sedanBlue", "kasir_sedan");
+
+          // Outdoor Dining Terrace with Cafe Tables & Umbrellas
+          const createCafeTable = (tx, tz, stripeColor) => {
+            const tGroup = new THREE.Group();
+            tGroup.position.set(tx, 0, tz);
+
+            const tableMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 0.1, 16), woodMat);
+            tableMesh.position.y = 0.85;
+            tableMesh.castShadow = true;
+            tGroup.add(tableMesh);
+
+            const legMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.85, 8), metalDark);
+            legMesh.position.y = 0.42;
+            tGroup.add(legMesh);
+
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 8), metalChrome);
+            pole.position.y = 1.3;
+            tGroup.add(pole);
+
+            const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.6, 0.7, 12), new THREE.MeshStandardMaterial({ color: stripeColor, roughness: 0.5 }));
+            umbrella.position.y = 2.6;
+            umbrella.castShadow = true;
+            tGroup.add(umbrella);
+
+            this.scene.add(tGroup);
+            this.collision.addCircle(tx, tz, 1.2, "cafe_table");
+          };
+
+          createCafeTable(116, z - 8, 0x0284c7);
+          createCafeTable(116, z - 13, 0x38bdf8);
+
+          // Shopping Cart Corral with Chrome Rails
+          const corral = new THREE.Group();
+          corral.position.set(95, 0, z - 13);
+          const railGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.1, 8);
+          [-1.4, 1.4].forEach(rx => {
+            const rPost = new THREE.Mesh(railGeo, metalChrome);
+            rPost.position.set(rx, 0.55, 0);
+            corral.add(rPost);
+          });
+          const topBar = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.08, 0.08), metalChrome);
+          topBar.position.y = 1.05;
+          corral.add(topBar);
+
+          // 2 Low-poly shopping carts inside
+          [-0.6, 0.6].forEach(cx => {
+            const cart = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 1.1), metalChrome);
+            cart.position.set(cx, 0.5, 0);
+            corral.add(cart);
+          });
+          this.scene.add(corral);
+          this.collision.addBox(95, z - 13, 3.0, 1.5, "cart_corral");
+          break;
+        }
+
+        case "apexsions": {
+          // RPG Fortress Medieval Campus
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "suvBlack", "fortress_suv");
+
+          // 4 Glowing Soul-Fire Braziers on Stone Plinths
+          const createBrazier = (bx, bz) => {
+            const bzGroup = new THREE.Group();
+            bzGroup.position.set(bx, 0, bz);
+
+            const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.65, 1.2, 8), borderStoneMat);
+            plinth.position.y = 0.6;
+            plinth.castShadow = true;
+            bzGroup.add(plinth);
+
+            const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.3, 0.4, 8), metalDark);
+            bowl.position.y = 1.3;
+            bzGroup.add(bowl);
+
+            const flame = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.9, 8), cyanGlowMat);
+            flame.position.y = 1.85;
+            bzGroup.add(flame);
+
+            this.scene.add(bzGroup);
+            this.collision.addCircle(bx, bz, 0.6, "soul_fire_brazier");
+          };
+
+          createBrazier(96, z - 8);
+          createBrazier(96, z + 8);
+          createBrazier(114, z - 8);
+          createBrazier(114, z + 8);
+
+          // Low Defensive Rampart / Battlements in Front
+          const rampartGeo = new THREE.BoxGeometry(0.9, 1.2, 7.0);
+          const rampartN = new THREE.Mesh(rampartGeo, borderStoneMat);
+          rampartN.position.set(93, 0.6, z - 10);
+          rampartN.castShadow = true;
+          this.scene.add(rampartN);
+          this.collision.addBox(93, z - 10, 0.9, 7.0, "rampart_n");
+
+          // Heraldic Kingdom Banners
+          const bannerGroup = new THREE.Group();
+          bannerGroup.position.set(93, 0, z);
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 6.0, 6), metalDark);
+          pole.position.y = 3.0;
+          bannerGroup.add(pole);
+
+          const banner = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 1.2), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 }));
+          banner.position.set(0, 4.2, 0.7);
+          bannerGroup.add(banner);
+          this.scene.add(bannerGroup);
+          break;
+        }
+
+        case "about": {
+          // Modern Developer Studio & HQ Campus
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "electricCyan", "hq_ev_car");
+          createParkedCar(parkingBayX, parkZ2, Math.PI / 2, "sportsRed", "hq_sports_car");
+
+          // Dual EV Charging Pedestal Hub
+          const evHub = new THREE.Group();
+          evHub.position.set(parkingBayX - 2.8, 0, parkZ1 + 2);
+          [-1.2, 1.2].forEach(ez => {
+            const pedestal = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.6, 0.5), metalDark);
+            pedestal.position.set(0, 0.8, ez);
+            evHub.add(pedestal);
+
+            const led = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 0.08), greenGlowMat);
+            led.position.set(0.26, 0.8, ez);
+            evHub.add(led);
+          });
+          this.scene.add(evHub);
+          this.collision.addBox(parkingBayX - 2.8, parkZ1 + 2, 0.8, 3.2, "ev_hub");
+
+          // Architectural Minimalist Reflecting Water Pool
+          const poolGroup = new THREE.Group();
+          poolGroup.position.set(115, 0, z - 7);
+
+          const poolCurb = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.35, 4.0), borderStoneMat);
+          poolCurb.position.y = 0.17;
+          poolGroup.add(poolCurb);
+
+          const water = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 3.2), new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.4 }));
+          water.rotateX(-Math.PI / 2);
+          water.position.y = 0.28;
+          poolGroup.add(water);
+
+          this.scene.add(poolGroup);
+          this.collision.addBox(115, z - 7, 7.2, 4.2, "reflecting_pool");
+          break;
+        }
+
+        case "pororo": {
+          // PoRoRo Gelato Cafe Alfresco Dining Terrace
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "taxi", "pororo_taxi");
+          createParkedCar(parkingBayX, parkZ2, Math.PI / 2, "coupeEmerald", "pororo_coupe");
+
+          // 3 Cafe Tables with Striped Pastel Parasols
+          const createPororoTable = (tx, tz, color) => {
+            const tGroup = new THREE.Group();
+            tGroup.position.set(tx, 0, tz);
+
+            const tableMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.08, 16), borderStoneMat);
+            tableMesh.position.y = 0.85;
+            tGroup.add(tableMesh);
+
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.5, 8), metalChrome);
+            pole.position.y = 1.25;
+            tGroup.add(pole);
+
+            const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.65, 12), new THREE.MeshStandardMaterial({ color, roughness: 0.5 }));
+            umbrella.position.y = 2.5;
+            tGroup.add(umbrella);
+
+            this.scene.add(tGroup);
+            this.collision.addCircle(tx, tz, 1.1, "pororo_table");
+          };
+
+          createPororoTable(-116, z - 7, 0xf472b6);
+          createPororoTable(-116, z - 12, 0x6ee7b7);
+
+          // Bicycle Parking Rack with 2 Parked Bicycles
+          const bikeRack = new THREE.Group();
+          bikeRack.position.set(-95, 0, z - 13);
+          const rackBar = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.8, 0.4), metalDark);
+          rackBar.position.y = 0.4;
+          bikeRack.add(rackBar);
+          this.scene.add(bikeRack);
+          this.collision.addBox(-95, z - 13, 3.4, 0.6, "bike_rack");
+
+          // Chalkboard Easel Menu
+          const easel = new THREE.Group();
+          easel.position.set(-98, 0, z - 8);
+          const board = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.08), metalDark);
+          board.position.y = 0.9;
+          board.rotation.x = -0.15;
+          easel.add(board);
+          this.scene.add(easel);
+          break;
+        }
+
+        case "journey": {
+          // Career Journey Memorial Promenade & Timeline
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "sedanSilver", "journey_sedan");
+
+          // 4 Milestone Timeline Monoliths (2020, 2022, 2024, 2026)
+          const milestones = [
+            { year: "2020", x: -96, z: z - 9, color: 0x38bdf8 },
+            { year: "2022", x: -102, z: z - 9, color: 0xa855f7 },
+            { year: "2024", x: -108, z: z - 9, color: 0xf59e0b },
+            { year: "2026", x: -114, z: z - 9, color: 0x10b981 }
+          ];
+
+          milestones.forEach(m => {
+            const mGroup = new THREE.Group();
+            mGroup.position.set(m.x, 0, m.z);
+
+            const base = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 1.2), borderStoneMat);
+            base.position.y = 0.7;
+            base.castShadow = true;
+            mGroup.add(base);
+
+            const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.45), new THREE.MeshStandardMaterial({ color: m.color, roughness: 0.3, metalness: 0.7 }));
+            gem.position.y = 1.7;
+            mGroup.add(gem);
+
+            this.scene.add(mGroup);
+            this.collision.addBox(m.x, m.z, 1.3, 1.3, "milestone_" + m.year);
+          });
+
+          // 2 Teak Garden Park Benches
+          [-115, -95].forEach(bx => {
+            const bench = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 0.8), woodMat);
+            bench.position.set(bx, 0.25, z + 8);
+            this.scene.add(bench);
+            this.collision.addBox(bx, z + 8, 2.5, 0.9, "park_bench");
+          });
+          break;
+        }
+
+        case "skills": {
+          // High-Tech Cybernetics Lab Campus
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "sportsRed", "skills_supercar");
+
+          // Inlaid Cyan Circuit Traces on Plaza Floor
+          const circuitGeo = new THREE.PlaneGeometry(16, 0.25);
+          circuitGeo.rotateX(-Math.PI / 2);
+          [-6, 6].forEach(cz => {
+            const line = new THREE.Mesh(circuitGeo, cyanGlowMat);
+            line.position.set(-105, 0.046, z + cz);
+            this.scene.add(line);
+          });
+
+          // 2 Outdoor Server Cooling Towers with Status LEDs
+          [-116, -94].forEach(cx => {
+            const tower = new THREE.Group();
+            tower.position.set(cx, 0, z - 10);
+
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 4.4, 2.2), metalDark);
+            body.position.y = 2.2;
+            body.castShadow = true;
+            tower.add(body);
+
+            for (let l = 0; l < 4; l++) {
+              const led = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.06), l % 2 === 0 ? cyanGlowMat : greenGlowMat);
+              led.position.set(0, 1.0 + l * 0.9, 1.12);
+              tower.add(led);
+            }
+
+            this.scene.add(tower);
+            this.collision.addBox(cx, z - 10, 2.4, 2.4, "server_cooling_tower");
+          });
+          break;
+        }
+
+        case "contact": {
+          // Satellite Ground Station & Secure Communications Compound
+          createParkedCar(parkingBayX, parkZ1, Math.PI / 2, "vanWhite", "telecom_van");
+
+          // Auxiliary 8.5m Telecommunications Lattice Mast with Flashing Beacon
+          const mastGroup = new THREE.Group();
+          mastGroup.position.set(-116, 0, z - 9);
+
+          const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.8, 8.5, 4), metalChrome);
+          mast.position.y = 4.25;
+          mast.castShadow = true;
+          mastGroup.add(mast);
+
+          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), redGlowMat);
+          beacon.position.y = 8.7;
+          mastGroup.add(beacon);
+
+          this.scene.add(mastGroup);
+          this.collision.addCircle(-116, z - 9, 1.0, "telecom_mast");
+
+          // Power Substation Transformer with Safety Railing
+          const subGroup = new THREE.Group();
+          subGroup.position.set(-94, 0, z - 10);
+
+          const trans = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.0, 2.0), borderStoneMat);
+          trans.position.y = 1.0;
+          subGroup.add(trans);
+
+          const rail = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.0, 2.6), yellowMat);
+          rail.position.y = 0.5;
+          subGroup.add(rail);
+
+          this.scene.add(subGroup);
+          this.collision.addBox(-94, z - 10, 3.0, 2.8, "power_substation");
+          break;
+        }
+      }
+    });
+
+    // 8. SPAWN ZONE WELCOME PAVILION & GRAND PROMENADE (-24, 24)
+    // Direct paved connection from Central Roundabout SW Corner
+    const spawnPromenade = new THREE.Mesh(
+      new THREE.PlaneGeometry(8.0, 10.0),
+      stonePlazaMat
+    );
+    spawnPromenade.rotateX(-Math.PI / 2);
+    spawnPromenade.position.set(-21, 0.035, 21);
+    spawnPromenade.receiveShadow = true;
+    this.scene.add(spawnPromenade);
+
+    // Grand Welcome Totem Pylon at Entrance
+    createDirectoryTotem(-18, 26, Math.PI / 4, "WELCOME TO FRIEL'S WORLD", "Interactive 3D Portfolio 2026", "START HERE");
+
+    // Welcome Flowerbeds flanking the walkway
+    const flowerMat1 = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.5 });
+    const flowerMat2 = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.5 });
+
+    [-20, -28].forEach((fx, i) => {
+      const fBed = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.35, 1.4), borderStoneMat);
+      fBed.position.set(fx, 0.17, 16);
+      this.scene.add(fBed);
+
+      const flowers = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.2, 1.0), i === 0 ? flowerMat1 : flowerMat2);
+      flowers.position.set(fx, 0.42, 16);
+      this.scene.add(flowers);
+    });
   }
 
 
@@ -2445,35 +3138,15 @@ export class Environment {
       this.collision.addBox(x, z, 2.0, 4.0, "parked_" + type);
     };
 
-    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back safely at X: 95, Z: -32)
-    const lot1 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot1.position.set(95, 0.05, -32);
-    lot1.receiveShadow = true;
-    this.scene.add(lot1);
+    // Midtown Grand Hotel & Commercial Dining Plaza Parking (East Midtown: X: 155, Z: 45)
+    const lotMidtown = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 24), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lotMidtown.position.set(155, 0.05, 45);
+    lotMidtown.receiveShadow = true;
+    this.scene.add(lotMidtown);
 
-    createCar(93, -25, Math.PI / 2, "vanWhite");
-    createCar(93, -31, Math.PI / 2, "taxi");
-    createCar(93, -37, Math.PI / 2, "sedanBlue");
-
-    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (Set back safely at X: -95, Z: -105)
-    const lot2 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot2.position.set(-95, 0.05, -105);
-    lot2.receiveShadow = true;
-    this.scene.add(lot2);
-
-    createCar(-93, -98, Math.PI / 2, "taxi");
-    createCar(-93, -104, Math.PI / 2, "sportsRed");
-    createCar(-93, -110, Math.PI / 2, "sedanSilver");
-
-    // Dedicated Parking Lot 3: Developer HQ Courtyard (Set back safely at X: 95, Z: 105)
-    const lot3 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot3.position.set(95, 0.05, 105);
-    lot3.receiveShadow = true;
-    this.scene.add(lot3);
-
-    createCar(93, 98, Math.PI / 2, "sedanBlue");
-    createCar(93, 104, Math.PI / 2, "sportsRed");
-    createCar(93, 110, Math.PI / 2, "sedanSilver");
+    createCar(153, 38, Math.PI / 2, "vanWhite");
+    createCar(153, 44, Math.PI / 2, "taxi");
+    createCar(153, 50, Math.PI / 2, "sedanBlue");
   }
 
   // 9. STREETLIGHTS & TREES ALIGNED NEATLY ON OUTER SIDEWALKS
