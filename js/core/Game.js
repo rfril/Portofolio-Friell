@@ -15,6 +15,7 @@ import { CarController } from "../entities/CarController.js";
 import { World } from "../world/World.js";
 import { UIManager } from "../ui/UIManager.js";
 import { ModalManager } from "../ui/ModalManager.js";
+import { SettingsManager } from "../ui/SettingsManager.js";
 import { MobileControls } from "../ui/MobileControls.js";
 
 export class Game {
@@ -38,6 +39,7 @@ export class Game {
 
     this.ui = new UIManager(this);
     this.modal = new ModalManager(this.state, this.audio, this.progression);
+    this.settings = new SettingsManager(this.cameraController, this.audio, this.state);
     this.mobileControls = new MobileControls(this.input, this);
 
     this.bindActionEvents();
@@ -152,9 +154,16 @@ export class Game {
       }
     });
 
+    // [O] Settings Modal
+    this.input.onAction("settings", () => {
+      if (this.settings) this.settings.toggle();
+    });
+
     // [ESC] Escape / Close modal
     this.input.onAction("escape", () => {
-      if (this.modal.isOpen()) {
+      if (this.settings && this.settings.isOpen()) {
+        this.settings.close();
+      } else if (this.modal.isOpen()) {
         this.modal.close();
       }
     });

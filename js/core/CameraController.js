@@ -37,7 +37,36 @@ export class CameraController {
 
     this.shakeIntensity = 0;
 
+    // Sensitivity & Invert Settings
+    // Base default diturunkan ~33% agar gerakan kamera default lebih halus, stabil, dan tidak liar
+    this.baseMouseSensX = 0.0050; // Sebelumnya 0.0075
+    this.baseMouseSensY = 0.0042; // Sebelumnya 0.0065
+    this.baseTouchSensX = 0.0055; // Sebelumnya 0.0085
+    this.baseTouchSensY = 0.0046; // Sebelumnya 0.0075
+
+    const savedSens = parseFloat(localStorage.getItem("rafriel_cam_sensitivity"));
+    this.sensitivity = !isNaN(savedSens) && savedSens >= 0.2 && savedSens <= 2.5 ? savedSens : 1.0;
+    this.invertY = localStorage.getItem("rafriel_cam_inverty") === "true";
+
     this.bindPointerEvents();
+  }
+
+  setSensitivity(val) {
+    this.sensitivity = Math.max(0.2, Math.min(2.5, Number(val) || 1.0));
+    localStorage.setItem("rafriel_cam_sensitivity", String(this.sensitivity));
+  }
+
+  getSensitivity() {
+    return this.sensitivity;
+  }
+
+  setInvertY(val) {
+    this.invertY = !!val;
+    localStorage.setItem("rafriel_cam_inverty", String(this.invertY));
+  }
+
+  getInvertY() {
+    return this.invertY;
   }
 
   setTarget(target) {
@@ -125,9 +154,11 @@ export class CameraController {
       this.lastPointerX = e.clientX;
       this.lastPointerY = e.clientY;
 
-      // Geser kamera secara intuitif & presisi
-      this.orbitYaw -= deltaX * 0.0075;
-      this.orbitPitch -= deltaY * 0.0065;
+      // Geser kamera secara intuitif & presisi (terkalibrasi sensitivitas setting)
+      const sensX = this.baseMouseSensX * this.sensitivity;
+      const sensY = this.baseMouseSensY * this.sensitivity * (this.invertY ? -1 : 1);
+      this.orbitYaw -= deltaX * sensX;
+      this.orbitPitch -= deltaY * sensY;
 
       // Batasi sudut elevasi pitch (-0.95 radian ~ -55° memungkinkan mendongak penuh ke langit dan gedung tinggi)
       this.orbitPitch = Math.max(-0.95, Math.min(0.70, this.orbitPitch));
@@ -179,8 +210,10 @@ export class CameraController {
         this.lastPointerX = touch.clientX;
         this.lastPointerY = touch.clientY;
 
-        this.orbitYaw -= deltaX * 0.0085;
-        this.orbitPitch -= deltaY * 0.0075;
+        const sensX = this.baseTouchSensX * this.sensitivity;
+        const sensY = this.baseTouchSensY * this.sensitivity * (this.invertY ? -1 : 1);
+        this.orbitYaw -= deltaX * sensX;
+        this.orbitPitch -= deltaY * sensY;
         this.orbitPitch = Math.max(-0.95, Math.min(0.70, this.orbitPitch));
       },
       { passive: true }

@@ -68,6 +68,7 @@ export class InputManager {
     if (key === "c") this.triggerAction("camera");
     if (key === "h") this.triggerAction("horn");
     if (key === "p") this.triggerAction("portfolio");
+    if (key === "o") this.triggerAction("settings");
     if (key === "escape") this.triggerAction("escape");
   }
 

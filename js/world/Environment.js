@@ -750,10 +750,10 @@ export class Environment {
       this.scene.add(g);
     };
 
-    createZebra(0, -17.5, 16, 0);
-    createZebra(0, 17.5, 16, 0);
-    createZebra(-17.5, 0, 16, Math.PI / 2);
-    createZebra(17.5, 0, 16, Math.PI / 2);
+    createZebra(0, -19.5, 16, 0);
+    createZebra(0, 19.5, 16, 0);
+    createZebra(-19.5, 0, 16, Math.PI / 2);
+    createZebra(19.5, 0, 16, Math.PI / 2);
 
     // 2. PRIMARY SIGNALIZED HUBS (SUPERBLOCK JUNCTIONS)
     createJunction(0, -140, 16, 14);   // North Central Hub
@@ -766,70 +766,75 @@ export class Environment {
     createJunction(75, 140, 12, 14);   // East Secondary x South Connector
     createJunction(-75, 140, 12, 14);  // West Secondary x South Connector
 
-    // Outer Parkway Junctions (X = +-270, Z = +-270)
+    // Secondary Corridors x Main Boulevard (Z = 0)
+    createJunction(75, 0, 12, 16);     // East Secondary x Boulevard
+    createJunction(-75, 0, 12, 16);    // West Secondary x Boulevard
+
+    // Outer Parkway Junctions (X = +-270, Z = +-270, +-140, 0)
     createJunction(0, -270, 16, 14);
     createJunction(0, 270, 16, 14);
     createJunction(270, 0, 14, 16);
     createJunction(-270, 0, 14, 16);
-
-    // 4 Outer Parkway High-Speed Corners diganti dengan 40m Sweeping Curves di bawah
 
     createJunction(75, -270, 12, 14);
     createJunction(-75, -270, 12, 14);
     createJunction(75, 270, 12, 14);
     createJunction(-75, 270, 12, 14);
 
-    // 3. UNBROKEN SUPERBLOCK STRAIGHTAWAYS
+    createJunction(270, -140, 14, 14);
+    createJunction(-270, -140, 14, 14);
+    createJunction(270, 140, 14, 14);
+    createJunction(-270, 140, 14, 14);
+
+    // 3. UNBROKEN SUPERBLOCK STRAIGHTAWAYS (ZERO SEGMENT-ON-SEGMENT OVERLAPS)
     // Main North-South Avenue (X = 0, Width = 16m)
-    createRoadSegment(0, -16, 0, -57, 16);     // Roundabout to Canal Bridge South
+    createRoadSegment(0, -18, 0, -57, 16);     // Roundabout to Canal Bridge South
     // Canal Bridge at Z: -67 to -57
     createRoadSegment(0, -67, 0, -133, 16);    // Bridge to North Hub
     createRoadSegment(0, -147, 0, -263, 16);   // North Hub to Outer Parkway
     createRoadSegment(0, -277, 0, -338, 16);   // North Stub
 
-    createRoadSegment(0, 16, 0, 133, 16);      // Roundabout to South Hub (117m stretch!)
+    createRoadSegment(0, 18, 0, 133, 16);      // Roundabout to South Hub (115m stretch!)
     createRoadSegment(0, 147, 0, 263, 16);     // South Hub to Outer Parkway (116m stretch!)
     createRoadSegment(0, 277, 0, 338, 16);     // South Stub
 
     // Main East-West Boulevard (Z = 0, Width = 16m)
-    createRoadSegment(16, 0, 133, 0, 16);      // Roundabout to East Hub (117m stretch!)
-    createRoadSegment(147, 0, 263, 0, 16);     // East Hub to Outer Parkway (116m stretch!)
+    createRoadSegment(18, 0, 69, 0, 16);       // Roundabout to East Secondary Junction
+    createRoadSegment(81, 0, 133, 0, 16);      // East Secondary to East Hub
+    createRoadSegment(147, 0, 263, 0, 16);     // East Hub to Outer Parkway
     createRoadSegment(277, 0, 338, 0, 16);     // East Stub
 
-    createRoadSegment(-16, 0, -133, 0, 16);    // Roundabout to West Hub (117m stretch!)
-    createRoadSegment(-147, 0, -263, 0, 16);   // West Hub to Outer Parkway (116m stretch!)
+    createRoadSegment(-18, 0, -69, 0, 16);     // Roundabout to West Secondary Junction
+    createRoadSegment(-81, 0, -133, 0, 16);    // West Secondary to West Hub
+    createRoadSegment(-147, 0, -263, 0, 16);   // West Hub to Outer Parkway
     createRoadSegment(-277, 0, -338, 0, 16);   // West Stub
 
     // East Secondary Corridor (X = 75, Width = 12m)
-    createRoadSegment(75, 0, 75, -57, 12);     // To Canal Bridge South
+    createRoadSegment(75, -8, 75, -57, 12);    // Junction Z=0 North to Canal Bridge
     // Canal Bridge at Z: -67 to -57
     createRoadSegment(75, -67, 75, -133, 12);
     createRoadSegment(75, -147, 75, -263, 12);
-    createRoadSegment(75, 0, 75, 133, 12);
+    createRoadSegment(75, 8, 75, 133, 12);     // Junction Z=0 South to South Connector
     createRoadSegment(75, 147, 75, 263, 12);
 
     // West Secondary Corridor (X = -75, Width = 12m)
-    createRoadSegment(-75, 0, -75, -57, 12);    // To Canal Bridge South
+    createRoadSegment(-75, -8, -75, -57, 12);   // Junction Z=0 North to Canal Bridge
     // Canal Bridge at Z: -67 to -57
     createRoadSegment(-75, -67, -75, -133, 12);
     createRoadSegment(-75, -147, -75, -263, 12);
-    createRoadSegment(-75, 0, -75, 133, 12);
+    createRoadSegment(-75, 8, -75, 133, 12);    // Junction Z=0 South to South Connector
     createRoadSegment(-75, 147, -75, 263, 12);
 
     // Cross Connectors (Z = +-140, Width = 14m)
-    createRoadSegment(-263, -140, -147, -140, 14);
-    createRoadSegment(-133, -140, -81, -140, 14);
-    createRoadSegment(-69, -140, -8, -140, 14);
-    createRoadSegment(8, -140, 69, -140, 14);
-    createRoadSegment(81, -140, 133, -140, 14);
-    createRoadSegment(147, -140, 263, -140, 14);
+    createRoadSegment(-263, -140, -81, -140, 14); // West Parkway to West Secondary
+    createRoadSegment(-69, -140, -8, -140, 14);   // West Secondary to Main Avenue
+    createRoadSegment(8, -140, 69, -140, 14);     // Main Avenue to East Secondary
+    createRoadSegment(81, -140, 263, -140, 14);   // East Secondary to East Parkway
 
-    createRoadSegment(-263, 140, -147, 140, 14);
-    createRoadSegment(-133, 140, -81, 140, 14);
+    createRoadSegment(-263, 140, -81, 140, 14);
     createRoadSegment(-69, 140, -8, 140, 14);
     createRoadSegment(8, 140, 69, 140, 14);
-    createRoadSegment(81, 140, 133, 140, 14);
-    createRoadSegment(147, 140, 263, 140, 14);
+    createRoadSegment(81, 140, 263, 140, 14);
 
     // 4. OUTER GRAND PARKWAY CIRCUIT DENGAN 4 TIKUNGAN HALUS SWEEPING (RADIUS 40m)
     // Menghubungkan North, South, East, West Parkway menjadi sirkuit lingkar bebas tabrakan sudut 90 derajat tajam!
@@ -842,7 +847,7 @@ export class Environment {
     // Corner 4: South-East (230, 230)
     createCurvedRoad(230, 230, 40, 14, 3 * Math.PI / 2, Math.PI / 2);
 
-    // Straight Parkway Segments (Menyambung presisi ke ujung lengkungan +-230m & membuka junction +-75m):
+    // Straight Parkway Segments (Menyambung presisi ke ujung lengkungan +-230m & membuka junction +-75m, +-140m):
     // North Parkway (Z = -270)
     createRoadSegment(-230, -270, -81, -270, 14);
     createRoadSegment(-69, -270, -8, -270, 14);
@@ -856,16 +861,20 @@ export class Environment {
     createRoadSegment(81, 270, 230, 270, 14);
 
     // East Parkway (X = 270)
-    createRoadSegment(270, -230, 270, -67, 14);
+    createRoadSegment(270, -230, 270, -147, 14);
+    createRoadSegment(270, -133, 270, -67, 14);
     // Bridge at Z: -67 to -57
     createRoadSegment(270, -57, 270, -8, 14);
-    createRoadSegment(270, 8, 270, 230, 14);
+    createRoadSegment(270, 8, 270, 133, 14);
+    createRoadSegment(270, 147, 270, 230, 14);
 
     // West Parkway (X = -270)
-    createRoadSegment(-270, -230, -270, -67, 14);
+    createRoadSegment(-270, -230, -270, -147, 14);
+    createRoadSegment(-270, -133, -270, -67, 14);
     // Bridge at Z: -67 to -57
     createRoadSegment(-270, -57, -270, -8, 14);
-    createRoadSegment(-270, 8, -270, 230, 14);
+    createRoadSegment(-270, 8, -270, 133, 14);
+    createRoadSegment(-270, 147, -270, 230, 14);
 
     // 6. OFF-ROAD SPURS MENUJU 7 ZONA PORTOFOLIO (BERSIH DARI JALUR UTAMA)
     const createSpur = (startX, startZ, endX, endZ) => {
@@ -1060,11 +1069,11 @@ export class Environment {
       }
     };
 
-    // 1. Central Roundabout (Radius 16m)
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -18, facingDir: "-Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 18, facingDir: "+Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 18, facingDir: "+X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -18, facingDir: "-X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
+    // 1. Central Roundabout (Radius 18m)
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -20, facingDir: "-Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 20, facingDir: "+Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 20, facingDir: "+X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -20, facingDir: "-X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
 
     // 2. North Central Hub (0, -140)
     createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -149, facingDir: "-Z", streetName: "MAIN AVE SOUTH", phaseGroup: "A" });

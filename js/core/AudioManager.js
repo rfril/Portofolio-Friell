@@ -8,6 +8,8 @@ export class AudioManager {
   constructor() {
     this.ctx = null;
     this.isMuted = localStorage.getItem("rafriel_portfolio_muted") === "true";
+    const savedVol = parseFloat(localStorage.getItem("rafriel_master_volume"));
+    this.masterVolume = !isNaN(savedVol) && savedVol >= 0 && savedVol <= 1.0 ? savedVol : 0.85;
     this.masterGain = null;
     this.engineGain = null;
     this.engineOsc = null;
@@ -30,7 +32,7 @@ export class AudioManager {
 
       this.ctx = new AudioCtx();
       this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.85, this.ctx.currentTime);
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
       this.masterGain.connect(this.ctx.destination);
 
       this.isInitialized = true;
@@ -48,16 +50,35 @@ export class AudioManager {
     }
   }
 
-  toggleMute() {
-    this.isMuted = !this.isMuted;
+  setMasterVolume(val) {
+    this.masterVolume = Math.max(0.0, Math.min(1.0, Number(val) || 0));
+    localStorage.setItem("rafriel_master_volume", String(this.masterVolume));
+
+    if (this.masterGain && this.ctx) {
+      const targetGain = this.isMuted ? 0 : this.masterVolume;
+      this.masterGain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.05);
+    }
+    window.dispatchEvent(new CustomEvent("volumeChanged", { detail: { volume: this.masterVolume, isMuted: this.isMuted } }));
+  }
+
+  getMasterVolume() {
+    return this.masterVolume;
+  }
+
+  setMuted(muted) {
+    this.isMuted = !!muted;
     localStorage.setItem("rafriel_portfolio_muted", String(this.isMuted));
 
     if (this.masterGain && this.ctx) {
-      const targetGain = this.isMuted ? 0 : 0.85;
+      const targetGain = this.isMuted ? 0 : this.masterVolume;
       this.masterGain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.05);
     }
-
+    window.dispatchEvent(new CustomEvent("muteChanged", { detail: { isMuted: this.isMuted } }));
     return this.isMuted;
+  }
+
+  toggleMute() {
+    return this.setMuted(!this.isMuted);
   }
 
   startEngine() {

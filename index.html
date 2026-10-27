@@ -95,6 +95,12 @@
           <i class="fa-solid fa-volume-high"></i>
         </button>
 
+        <!-- Settings Modal Toggle [O] -->
+        <button class="hud-btn" id="settingsBtn" title="Buka Pengaturan Sensitivitas & Audio (O)">
+          <i class="fa-solid fa-gear"></i>
+          <span>Setting (O)</span>
+        </button>
+
         <!-- Return to Classic Web Mode Button -->
         <button class="hud-btn btn-classic-mode" id="switchToClassicBtnNav" onclick="document.getElementById('switchToClassicBtn').click();" title="Buka Tampilan Portofolio Web Standar">
           <i class="fa-solid fa-file-lines"></i>
@@ -189,6 +195,117 @@
 
         <!-- Modal Dynamic Content Body -->
         <div class="modal-content-area" id="modalContentArea"></div>
+      </div>
+    </div>
+
+    <!-- Settings & Preferences Modal Dialog -->
+    <div class="project-modal-backdrop" id="settingsModalBackdrop">
+      <div class="project-modal-card settings-modal-card">
+        <div class="settings-modal-header">
+          <div class="settings-modal-title-group">
+            <div class="settings-header-icon">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+            <div>
+              <h2 class="settings-modal-title">Pengaturan Game</h2>
+              <p class="settings-modal-subtitle">Sesuaikan sensitivitas kamera dan tata kelola audio 3D.</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="settingsCloseBtn" aria-label="Tutup Pengaturan (ESC)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="settings-modal-body">
+          <!-- SECTION 1: KAMERA & ORBIT -->
+          <div class="settings-group">
+            <div class="settings-group-title">
+              <i class="fa-solid fa-video text-accent"></i>
+              <span>Kamera & Kendali Orbit</span>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <label for="camSensSlider" class="setting-label">Sensitivitas Putaran Kamera</label>
+                <p class="setting-desc">Kecepatan putaran bebas kamera saat menggeser mouse atau layar sentuh.</p>
+              </div>
+              <div class="setting-control-slider">
+                <span class="setting-val-badge" id="camSensValue">100%</span>
+                <input type="range" id="camSensSlider" min="30" max="220" step="5" value="100" class="custom-range-slider">
+              </div>
+            </div>
+
+            <div class="setting-presets">
+              <span class="preset-label">Preset:</span>
+              <button type="button" class="btn-sens-preset" data-sens="0.6">Lambat (60%)</button>
+              <button type="button" class="btn-sens-preset active" data-sens="1.0">Default (100%)</button>
+              <button type="button" class="btn-sens-preset" data-sens="1.5">Cepat (150%)</button>
+            </div>
+
+            <div class="setting-row setting-row-toggle">
+              <div class="setting-info">
+                <span class="setting-label">Balik Sumbu Vertikal (Invert Pitch)</span>
+                <p class="setting-desc">Tukar arah atas/bawah kamera saat menggerakkan pointer.</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="invertYToggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- SECTION 2: AUDIO -->
+          <div class="settings-group">
+            <div class="settings-group-title">
+              <i class="fa-solid fa-volume-high text-gold"></i>
+              <span>Volume & Suara Prosedural</span>
+            </div>
+
+            <div class="setting-row">
+              <div class="setting-info">
+                <label for="masterVolSlider" class="setting-label">Volume Utama (Master Volume)</label>
+                <p class="setting-desc">Mengatur keras lembutnya mesin, derit ban saat drift, dan efek klakson.</p>
+              </div>
+              <div class="setting-control-slider">
+                <span class="setting-val-badge" id="masterVolValue">85%</span>
+                <input type="range" id="masterVolSlider" min="0" max="100" step="5" value="85" class="custom-range-slider">
+              </div>
+            </div>
+
+            <div class="setting-row setting-row-toggle">
+              <div class="setting-info">
+                <span class="setting-label">Bisukan Suara (Mute)</span>
+                <p class="setting-desc">Nonaktifkan seluruh suara engine dan efek audio.</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="muteAudioToggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-test-row">
+              <button type="button" class="btn-sound-test" id="testHornBtn">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span>Tes Klakson</span>
+              </button>
+              <button type="button" class="btn-sound-test" id="testChimeBtn">
+                <i class="fa-solid fa-gem"></i>
+                <span>Tes Diamond Chime</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-modal-footer">
+          <button type="button" class="btn-settings-reset" id="resetSettingsBtn">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Kembalikan Default</span>
+          </button>
+          <button type="button" class="btn-settings-done" id="saveSettingsBtn">
+            <i class="fa-solid fa-check"></i>
+            <span>Selesai</span>
+          </button>
+        </div>
       </div>
     </div>
 
