@@ -58,44 +58,94 @@ export class Environment {
     };
 
     // Helper Window Texture for Skyscrapers with Randomized Office Lights
-    this.createWindowTexture = (baseColorHex = "#0f172a", litColorHex = "#38bdf8", rows = 8, cols = 4, secondaryLit = "#fef08a") => {
+    this.createWindowTexture = (baseColorHex = "#1e293b", litColorHex = "#38bdf8", rows = 14, cols = 6, secondaryLit = "#fef08a", frameColor = "#475569") => {
       const canvas = document.createElement("canvas");
-      canvas.width = 256;
-      canvas.height = 512;
+      canvas.width = 512;
+      canvas.height = 1024;
       const ctx = canvas.getContext("2d");
 
+      // Architectural facade base color
       ctx.fillStyle = baseColorHex;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const padX = 14;
-      const padY = 16;
+      const padX = 12;
+      const padY = 14;
       const winW = (canvas.width - padX * (cols + 1)) / cols;
       const winH = (canvas.height - padY * (rows + 1)) / rows;
 
+      // Draw horizontal floor spandrels / architectural cornices
+      ctx.fillStyle = frameColor;
+      for (let r = 0; r <= rows; r++) {
+        const sy = r * (winH + padY);
+        ctx.fillRect(0, sy, canvas.width, padY);
+      }
+
+      // Draw vertical structural mullions
+      for (let c = 0; c <= cols; c++) {
+        const sx = c * (winW + padX);
+        ctx.fillRect(sx, 0, padX, canvas.height);
+      }
+
+      // Render individual window panes with realistic illumination & depth
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const wx = padX + c * (winW + padX);
           const wy = padY + r * (winH + padY);
           const rand = Math.random();
 
-          if (rand < 0.55) {
-            ctx.fillStyle = litColorHex;
-            ctx.shadowColor = litColorHex;
-            ctx.shadowBlur = 6;
-          } else if (rand < 0.72) {
-            ctx.fillStyle = secondaryLit;
-            ctx.shadowColor = secondaryLit;
-            ctx.shadowBlur = 4;
-          } else {
-            ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-            ctx.shadowBlur = 0;
-          }
+          // Dark window frame bevel
+          ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+          ctx.fillRect(wx - 1, wy - 1, winW + 2, winH + 2);
 
-          ctx.fillRect(wx, wy, winW, winH);
+          if (rand < 0.62) {
+            // Primary lit window (office workspace / tech illumination)
+            ctx.fillStyle = litColorHex;
+            ctx.fillRect(wx, wy, winW, winH);
+
+            const grad = ctx.createLinearGradient(wx, wy, wx, wy + winH);
+            grad.addColorStop(0, "rgba(255, 255, 255, 0.35)");
+            grad.addColorStop(0.7, "rgba(0, 0, 0, 0)");
+            grad.addColorStop(1, "rgba(0, 0, 0, 0.3)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(wx, wy, winW, winH);
+          } else if (rand < 0.84) {
+            // Secondary lit window (warm ambient penthouse / executive suite)
+            ctx.fillStyle = secondaryLit;
+            ctx.fillRect(wx, wy, winW, winH);
+
+            const grad = ctx.createLinearGradient(wx, wy, wx, wy + winH);
+            grad.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+            grad.addColorStop(1, "rgba(0, 0, 0, 0.2)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(wx, wy, winW, winH);
+          } else {
+            // Reflective daytime tinted glass pane (reflecting sky & horizon)
+            const skyReflect = ctx.createLinearGradient(wx, wy, wx, wy + winH);
+            skyReflect.addColorStop(0, "#1e3a8a");
+            skyReflect.addColorStop(0.5, "#0f172a");
+            skyReflect.addColorStop(1, "#1e293b");
+            ctx.fillStyle = skyReflect;
+            ctx.fillRect(wx, wy, winW, winH);
+
+            // Occasional interior blinds in unlit windows
+            if (rand > 0.92) {
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+              ctx.lineWidth = 1;
+              for (let b = wy + 4; b < wy + winH - 2; b += 7) {
+                ctx.beginPath();
+                ctx.moveTo(wx + 2, b);
+                ctx.lineTo(wx + winW - 2, b);
+                ctx.stroke();
+              }
+            }
+          }
         }
       }
 
-      return new THREE.CanvasTexture(canvas);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      return tex;
     };
 
     // Helper Helipad Circular Target Texture
@@ -654,50 +704,50 @@ export class Environment {
     };
 
     // 1. CENTRAL ROUNDABOUT (0, 0) — SEAMLESS ALIGNMENT DENGAN 4 AVENUE 16M
-    // Diameter bundaran 36m (Radius 18m) menutup sempurna persimpangan 4 jalan utama (lebar 16m: [-8, 8] pada X/Z +-16)
-    // Bebas patahan sudut, dilengkapi 4 trotoar lengkung pojok, garis sirkulasi, dan medali pusat spawn.
-    const roundAboutGeo = new THREE.CircleGeometry(18.0, 48);
-    roundAboutGeo.rotateX(-Math.PI / 2);
-    const roundAbout = new THREE.Mesh(roundAboutGeo, roadMat);
-    roundAbout.position.set(0, 0.02, 0);
-    roundAbout.receiveShadow = true;
-    this.scene.add(roundAbout);
+    // Full intersection asphalt plate (36m x 36m) flush at y = 0.02
+    const roundIntersection = new THREE.Mesh(
+      new THREE.PlaneGeometry(36, 36),
+      roadMat
+    );
+    roundIntersection.rotateX(-Math.PI / 2);
+    roundIntersection.position.set(0, 0.02, 0);
+    roundIntersection.receiveShadow = true;
+    this.scene.add(roundIntersection);
 
-    // Medali Dekoratif Titik Spawn di Pusat Bundaran (Radius 5.2m, ramah kendara / drivable flat surface)
-    const spawnMedallionGeo = new THREE.CircleGeometry(5.2, 48);
+    // Decorative Central Spawn Medallion (Radius 5.5m, flush at y = 0.022 for smooth driving)
+    const spawnMedallionGeo = new THREE.CircleGeometry(5.5, 48);
     spawnMedallionGeo.rotateX(-Math.PI / 2);
-    const spawnMedallion = new THREE.Mesh(spawnMedallionGeo, new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 }));
+    const spawnMedallion = new THREE.Mesh(spawnMedallionGeo, new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 }));
     spawnMedallion.position.set(0, 0.022, 0);
     spawnMedallion.receiveShadow = true;
     this.scene.add(spawnMedallion);
 
-    // Cincin Emas Medali Spawn (Radius 4.8m - 5.2m)
-    const goldRingGeo = new THREE.RingGeometry(4.8, 5.2, 48);
+    // Gold Outer Ring (Radius 5.1m - 5.5m)
+    const goldRingGeo = new THREE.RingGeometry(5.1, 5.5, 48);
     goldRingGeo.rotateX(-Math.PI / 2);
-    const goldRing = new THREE.Mesh(goldRingGeo, new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.8 }));
+    const goldRing = new THREE.Mesh(goldRingGeo, new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.85 }));
     goldRing.position.set(0, 0.025, 0);
     this.scene.add(goldRing);
 
-    // Cincin Aksen Cyan Dalam (Radius 2.4m - 2.65m)
-    const innerCyanRingGeo = new THREE.RingGeometry(2.4, 2.65, 36);
+    // Inner Cyan Glowing Ring (Radius 2.6m - 2.85m)
+    const innerCyanRingGeo = new THREE.RingGeometry(2.6, 2.85, 40);
     innerCyanRingGeo.rotateX(-Math.PI / 2);
     const innerCyanRing = new THREE.Mesh(innerCyanRingGeo, new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
     innerCyanRing.position.set(0, 0.026, 0);
     this.scene.add(innerCyanRing);
 
-    // 4 Arah Panah Kardinal (Menunjuk lurus ke 4 jalan utama: Utara, Selatan, Timur, Barat)
-    const chevronGeo = new THREE.PlaneGeometry(0.5, 1.8);
+    // Central Compass Star Emblem (4 Cardinal Arrows)
+    const chevronGeo = new THREE.PlaneGeometry(0.6, 2.0);
     chevronGeo.rotateX(-Math.PI / 2);
     const chevronMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
-    [[0, -3.8, 0], [0, 3.8, Math.PI], [3.8, 0, -Math.PI / 2], [-3.8, 0, Math.PI / 2]].forEach(([cx, cz, crot]) => {
+    [[0, -4.0, 0], [0, 4.0, Math.PI], [4.0, 0, -Math.PI / 2], [-4.0, 0, Math.PI / 2]].forEach(([cx, cz, crot]) => {
       const ch = new THREE.Mesh(chevronGeo, chevronMat);
       ch.position.set(cx, 0.026, cz);
       ch.rotation.y = crot;
       this.scene.add(ch);
     });
 
-    // Garis Putus-Putus Putih Pembatas Lajur Sirkulasi Bundaran (Radius 11.5m)
-    // Menghubungkan secara visual lajur tengah setiap jalan masuk
+    // Circular Dashed Lane Markings (Circulating traffic lane at R = 11.5m)
     const dashCircGeo = new THREE.PlaneGeometry(0.35, 2.2);
     dashCircGeo.rotateX(-Math.PI / 2);
     const numCircDashes = 16;
@@ -709,58 +759,86 @@ export class Environment {
       this.scene.add(dash);
     }
 
-    // 4 Trotoar Lengkung Pojok Bundaran (Menghubungkan trotoar 4 jalan utama secara mulus di R: 18m - 21.5m)
-    const curbW = 3.5;
-    const cornerAngleLength = 0.58; // Panjang sudut busur lengkung pojok
-    const cornerQuads = [
-      { name: "NE", startAngle: Math.PI / 4 - cornerAngleLength / 2 },
-      { name: "NW", startAngle: 3 * Math.PI / 4 - cornerAngleLength / 2 },
-      { name: "SW", startAngle: 5 * Math.PI / 4 - cornerAngleLength / 2 },
-      { name: "SE", startAngle: 7 * Math.PI / 4 - cornerAngleLength / 2 }
-    ];
+    // 4 SEAMLESS CORNER SIDEWALK FILLETS (R = 10m curve connecting straight sidewalks with ZERO gap)
+    // Connecting North Avenue (X: [-8, 8], Z <= -18), South Avenue (X: [-8, 8], Z >= 18),
+    // East Boulevard (Z: [-8, 8], X >= 18), West Boulevard (Z: [-8, 8], X <= -18)
+    const createCornerSidewalk = (cornerType) => {
+      const shape = new THREE.Shape();
+      const steps = 16;
+      const filletR = 10.0;
+      const walkH = 0.15;
 
-    cornerQuads.forEach(q => {
-      const walkCornerGeo = new THREE.RingGeometry(18.0, 18.0 + curbW, 16, 1, q.startAngle, cornerAngleLength);
-      walkCornerGeo.rotateX(-Math.PI / 2);
-      const walkCorner = new THREE.Mesh(walkCornerGeo, curbMat);
-      walkCorner.position.set(0, 0.08, 0);
-      walkCorner.receiveShadow = true;
-      this.scene.add(walkCorner);
-
-      // Garis putih lengkung pembatas tepi jalan bundaran di pojok
-      const edgeCornerGeo = new THREE.RingGeometry(17.65, 17.95, 16, 1, q.startAngle, cornerAngleLength);
-      edgeCornerGeo.rotateX(-Math.PI / 2);
-      const edgeCorner = new THREE.Mesh(edgeCornerGeo, whiteMat);
-      edgeCorner.position.set(0, 0.025, 0);
-      this.scene.add(edgeCorner);
-    });
-
-    const createZebra = (x, z, width, rotY) => {
-      const g = new THREE.Group();
-      g.position.set(x, 0.026, z);
-      g.rotation.y = rotY;
-      const bars = Math.floor(width / 1.4);
-      const sGeo = new THREE.PlaneGeometry(0.7, 2.6);
-      sGeo.rotateX(-Math.PI / 2);
-      for (let i = 0; i < bars; i++) {
-        const stripe = new THREE.Mesh(sGeo, whiteMat);
-        stripe.position.set(-width / 2 + (i + 0.5) * 1.4, 0, 0);
-        g.add(stripe);
+      if (cornerType === "NE") {
+        // Center of arc at (18, -18)
+        shape.moveTo(18, -18);
+        shape.lineTo(11.5, -18);
+        shape.lineTo(8, -18);
+        for (let i = 0; i <= steps; i++) {
+          const theta = Math.PI - (i / steps) * (Math.PI / 2);
+          const px = 18 + filletR * Math.cos(theta);
+          const pz = -18 + filletR * Math.sin(theta);
+          shape.lineTo(px, pz);
+        }
+        shape.lineTo(18, -11.5);
+        shape.closePath();
+      } else if (cornerType === "NW") {
+        // Center of arc at (-18, -18)
+        shape.moveTo(-18, -18);
+        shape.lineTo(-18, -11.5);
+        shape.lineTo(-18, -8);
+        for (let i = 0; i <= steps; i++) {
+          const theta = 3 * Math.PI / 2 - (i / steps) * (Math.PI / 2);
+          const px = -18 + filletR * Math.cos(theta);
+          const pz = -18 + filletR * Math.sin(theta);
+          shape.lineTo(px, pz);
+        }
+        shape.lineTo(-11.5, -18);
+        shape.closePath();
+      } else if (cornerType === "SW") {
+        // Center of arc at (-18, 18)
+        shape.moveTo(-18, 18);
+        shape.lineTo(-11.5, 18);
+        shape.lineTo(-8, 18);
+        for (let i = 0; i <= steps; i++) {
+          const theta = 0 - (i / steps) * (Math.PI / 2);
+          const px = -18 + filletR * Math.cos(theta);
+          const pz = 18 + filletR * Math.sin(theta);
+          shape.lineTo(px, pz);
+        }
+        shape.lineTo(-18, 11.5);
+        shape.closePath();
+      } else if (cornerType === "SE") {
+        // Center of arc at (18, 18)
+        shape.moveTo(18, 18);
+        shape.lineTo(18, 11.5);
+        shape.lineTo(18, 8);
+        for (let i = 0; i <= steps; i++) {
+          const theta = Math.PI / 2 - (i / steps) * (Math.PI / 2);
+          const px = 18 + filletR * Math.cos(theta);
+          const pz = 18 + filletR * Math.sin(theta);
+          shape.lineTo(px, pz);
+        }
+        shape.lineTo(11.5, 18);
+        shape.closePath();
       }
-      this.scene.add(g);
+
+      const extrudeSettings = { depth: walkH, bevelEnabled: false };
+      const geom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      geom.rotateX(Math.PI / 2);
+
+      const mesh = new THREE.Mesh(geom, curbMat);
+      mesh.position.y = walkH;
+      mesh.receiveShadow = true;
+      mesh.castShadow = true;
+      this.scene.add(mesh);
     };
 
-    createZebra(0, -19.5, 16, 0);
-    createZebra(0, 19.5, 16, 0);
-    createZebra(-19.5, 0, 16, Math.PI / 2);
-    createZebra(19.5, 0, 16, Math.PI / 2);
-
-    // 2. PRIMARY SIGNALIZED HUBS (SUPERBLOCK JUNCTIONS)
+    ["NE", "NW", "SW", "SE"].forEach(c => createCornerSidewalk(c));
+    
+// 2. PRIMARY SIGNALIZED HUBS (SUPERBLOCK JUNCTIONS)
     createJunction(0, -140, 16, 14);   // North Central Hub
     createJunction(0, 140, 16, 14);    // South Central Hub
-    createJunction(140, 0, 14, 16);    // East Central Hub
-    createJunction(-140, 0, 14, 16);   // West Central Hub
-
+    
     createJunction(75, -140, 12, 14);  // East Secondary x North Connector
     createJunction(-75, -140, 12, 14); // West Secondary x North Connector
     createJunction(75, 140, 12, 14);   // East Secondary x South Connector
@@ -800,13 +878,11 @@ export class Environment {
 
     // Main East-West Boulevard (Z = 0, Width = 16m)
     createRoadSegment(18, 0, 69, 0, 16);       // Roundabout to East Secondary Junction
-    createRoadSegment(81, 0, 133, 0, 16);      // East Secondary to East Hub
-    createRoadSegment(147, 0, 263, 0, 16);     // East Hub to Outer Parkway
+    createRoadSegment(81, 0, 263, 0, 16);      // East Secondary to Outer Parkway (Unbroken Straightaway!)
     createRoadSegment(277, 0, 338, 0, 16);     // East Stub
 
     createRoadSegment(-18, 0, -69, 0, 16);     // Roundabout to West Secondary Junction
-    createRoadSegment(-81, 0, -133, 0, 16);    // West Secondary to West Hub
-    createRoadSegment(-147, 0, -263, 0, 16);   // West Hub to Outer Parkway
+    createRoadSegment(-81, 0, -263, 0, 16);    // West Secondary to Outer Parkway (Unbroken Straightaway!)
     createRoadSegment(-277, 0, -338, 0, 16);   // West Stub
 
     // East Secondary Corridor (X = 75, Width = 12m)
@@ -1069,36 +1145,63 @@ export class Environment {
       }
     };
 
-    // 1. Central Roundabout (Radius 18m)
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -20, facingDir: "-Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 20, facingDir: "+Z", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 20, facingDir: "+X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -20, facingDir: "-X", streetName: "CENTRAL ROUNDABOUT", phaseGroup: "B" });
+    // Helper zebra crosswalk for intersections
+    const createIntersectionZebra = (x, z, width, rotY) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0.026, z);
+      g.rotation.y = rotY;
+      const bars = Math.floor(width / 1.4);
+      const sGeo = new THREE.PlaneGeometry(0.7, 2.6);
+      sGeo.rotateX(-Math.PI / 2);
+      for (let i = 0; i < bars; i++) {
+        const stripe = new THREE.Mesh(sGeo, whiteMat);
+        stripe.position.set(-width / 2 + (i + 0.5) * 1.4, 0, 0);
+        g.add(stripe);
+      }
+      this.scene.add(g);
+    };
 
-    // 2. North Central Hub (0, -140)
+    // 1. East Secondary Junction (75, 0) — Real 4-Way Signalized Intersection
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 75, roadWidth: 12, stopPos: -10, facingDir: "-Z", streetName: "EAST CORRIDOR SOUTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: 75, roadWidth: 12, stopPos: 10, facingDir: "+Z", streetName: "EAST CORRIDOR NORTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 67, facingDir: "-X", streetName: "CENTRAL BLVD EAST", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 83, facingDir: "+X", streetName: "CENTRAL BLVD WEST", phaseGroup: "B" });
+    createIntersectionZebra(75, -9, 12, 0);
+    createIntersectionZebra(75, 9, 12, 0);
+    createIntersectionZebra(68, 0, 16, Math.PI / 2);
+    createIntersectionZebra(82, 0, 16, Math.PI / 2);
+
+    // 2. West Secondary Junction (-75, 0) — Real 4-Way Signalized Intersection
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: -75, roadWidth: 12, stopPos: -10, facingDir: "-Z", streetName: "WEST CORRIDOR SOUTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "NS", roadCenter: -75, roadWidth: 12, stopPos: 10, facingDir: "+Z", streetName: "WEST CORRIDOR NORTH", phaseGroup: "A" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -83, facingDir: "-X", streetName: "CENTRAL BLVD EAST", phaseGroup: "B" });
+    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -67, facingDir: "+X", streetName: "CENTRAL BLVD WEST", phaseGroup: "B" });
+    createIntersectionZebra(-75, -9, 12, 0);
+    createIntersectionZebra(-75, 9, 12, 0);
+    createIntersectionZebra(-82, 0, 16, Math.PI / 2);
+    createIntersectionZebra(-68, 0, 16, Math.PI / 2);
+
+    // 3. North Central Hub (0, -140) — Real 4-Way Signalized Intersection
     createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -149, facingDir: "-Z", streetName: "MAIN AVE SOUTH", phaseGroup: "A" });
     createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: -131, facingDir: "+Z", streetName: "MAIN AVE NORTH", phaseGroup: "A" });
     createApproachTrafficGantry({ roadType: "EW", roadCenter: -140, roadWidth: 14, stopPos: 10, facingDir: "+X", streetName: "METRO EXP WEST", phaseGroup: "B" });
     createApproachTrafficGantry({ roadType: "EW", roadCenter: -140, roadWidth: 14, stopPos: -10, facingDir: "-X", streetName: "METRO EXP EAST", phaseGroup: "B" });
+    createIntersectionZebra(0, -148, 16, 0);
+    createIntersectionZebra(0, -132, 16, 0);
+    createIntersectionZebra(9, -140, 14, Math.PI / 2);
+    createIntersectionZebra(-9, -140, 14, Math.PI / 2);
 
-    // 3. South Central Hub (0, 140)
+    // 4. South Central Hub (0, 140) — Real 4-Way Signalized Intersection
     createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 131, facingDir: "-Z", streetName: "MAIN AVE SOUTH", phaseGroup: "A" });
     createApproachTrafficGantry({ roadType: "NS", roadCenter: 0, roadWidth: 16, stopPos: 149, facingDir: "+Z", streetName: "MAIN AVE NORTH", phaseGroup: "A" });
     createApproachTrafficGantry({ roadType: "EW", roadCenter: 140, roadWidth: 14, stopPos: 10, facingDir: "+X", streetName: "METRO EXP WEST", phaseGroup: "B" });
     createApproachTrafficGantry({ roadType: "EW", roadCenter: 140, roadWidth: 14, stopPos: -10, facingDir: "-X", streetName: "METRO EXP EAST", phaseGroup: "B" });
-
-    // 4. East Central Hub (140, 0)
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: 140, roadWidth: 14, stopPos: -10, facingDir: "-Z", streetName: "COMMERCE SOUTH", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: 140, roadWidth: 14, stopPos: 10, facingDir: "+Z", streetName: "COMMERCE NORTH", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 131, facingDir: "-X", streetName: "CENTRAL BLVD EAST", phaseGroup: "B" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: 149, facingDir: "+X", streetName: "CENTRAL BLVD WEST", phaseGroup: "B" });
-
-    // 5. West Central Hub (-140, 0)
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: -140, roadWidth: 14, stopPos: -10, facingDir: "-Z", streetName: "TECH SOUTH", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "NS", roadCenter: -140, roadWidth: 14, stopPos: 10, facingDir: "+Z", streetName: "TECH NORTH", phaseGroup: "A" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -131, facingDir: "+X", streetName: "CENTRAL BLVD WEST", phaseGroup: "B" });
-    createApproachTrafficGantry({ roadType: "EW", roadCenter: 0, roadWidth: 16, stopPos: -149, facingDir: "-X", streetName: "CENTRAL BLVD EAST", phaseGroup: "B" });
+    createIntersectionZebra(0, 132, 16, 0);
+    createIntersectionZebra(0, 148, 16, 0);
+    createIntersectionZebra(9, 140, 14, Math.PI / 2);
+    createIntersectionZebra(-9, 140, 14, Math.PI / 2);
   }
+
 
   updateTrafficLights(time) {
     if (!this.trafficLightSets || this.trafficLightSets.length === 0) return;
@@ -2027,9 +2130,18 @@ export class Environment {
       body.castShadow = true;
       g.add(body);
 
+      // Bright white roof cap cornice
+      const roofCap = new THREE.Mesh(new THREE.BoxGeometry(width + 0.6, 1.4, depth + 0.6), matCorporateWhite);
+      roofCap.position.y = height + 0.7;
+      g.add(roofCap);
+
       const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.35, 12, 6), spireMat);
-      spire.position.y = height + 6;
+      spire.position.y = height + 6.7;
       g.add(spire);
+
+      const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), beaconMat);
+      beacon.position.y = height + 12.8;
+      g.add(beacon);
 
       this.scene.add(g);
     };
