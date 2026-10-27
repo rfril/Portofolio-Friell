@@ -1148,29 +1148,70 @@ export class Environment {
 
 
   // 5. CENTRAL CITY COMMONS PARK (SOUTH-EAST INNER BLOCK: X: 16-62, Z: 20-64)
+  // 5. CENTRAL CITY BOTANICAL COMMONS PARK (SOUTH-EAST INNER SUPERBLOCK: X: 16 to 62, Z: 16 to 62)
+  // Dedicated 100% pure urban botanical sanctuary with zero buildings cramping the space!
   buildCentralCityPark() {
     const parkGroup = new THREE.Group();
-    parkGroup.position.set(38, 0, 42);
+    parkGroup.position.set(39, 0, 39);
 
-    const grassMat = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.85 });
-    const plazaPavingMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.6 });
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.85 });
+    const plazaPavingMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.55 });
+    const pathPavingMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.65 });
     const stoneWallMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
     const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.8 });
-    const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+    const marbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25 });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
-    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6 });
+    const foliageOakMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6 });
+    const foliageBlossomMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.55 });
+    const hedgeMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.65 });
+    const benchWoodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+    const castIronMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.3 });
+    const lanternGlowMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
 
-    const lawn = new THREE.Mesh(new THREE.BoxGeometry(40, 0.3, 40), grassMat);
-    lawn.position.y = 0.15;
+    // Main Lush Grass Lawn (46m x 46m) -> World X: [16, 62], World Z: [16, 62]
+    const lawn = new THREE.Mesh(new THREE.BoxGeometry(46, 0.25, 46), grassMat);
+    lawn.position.y = 0.125;
     lawn.receiveShadow = true;
     parkGroup.add(lawn);
 
-    const plazaRing = new THREE.Mesh(new THREE.CircleGeometry(9.0, 32), plazaPavingMat);
+    // Stone Perimeter Kerb around the entire park block
+    const kerbNorth = new THREE.Mesh(new THREE.BoxGeometry(46.6, 0.35, 0.6), stoneWallMat);
+    kerbNorth.position.set(0, 0.175, -23);
+    parkGroup.add(kerbNorth);
+
+    const kerbSouth = new THREE.Mesh(new THREE.BoxGeometry(46.6, 0.35, 0.6), stoneWallMat);
+    kerbSouth.position.set(0, 0.175, 23);
+    parkGroup.add(kerbSouth);
+
+    const kerbEast = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.35, 46.6), stoneWallMat);
+    kerbEast.position.set(23, 0.175, 0);
+    parkGroup.add(kerbEast);
+
+    const kerbWest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.35, 46.6), stoneWallMat);
+    kerbWest.position.set(-23, 0.175, 0);
+    parkGroup.add(kerbWest);
+
+    // Cross Pedestrian Promenades (Connecting North, South, East, West Entrances to Central Plaza)
+    const nsPath = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 46), pathPavingMat);
+    nsPath.rotateX(-Math.PI / 2);
+    nsPath.position.y = 0.26;
+    nsPath.receiveShadow = true;
+    parkGroup.add(nsPath);
+
+    const ewPath = new THREE.Mesh(new THREE.PlaneGeometry(46, 4.0), pathPavingMat);
+    ewPath.rotateX(-Math.PI / 2);
+    ewPath.position.y = 0.26;
+    ewPath.receiveShadow = true;
+    parkGroup.add(ewPath);
+
+    // Central Grand Fountain Plaza (22m diameter ring)
+    const plazaRing = new THREE.Mesh(new THREE.CircleGeometry(11.0, 36), plazaPavingMat);
     plazaRing.rotateX(-Math.PI / 2);
-    plazaRing.position.y = 0.31;
+    plazaRing.position.y = 0.28;
     plazaRing.receiveShadow = true;
     parkGroup.add(plazaRing);
 
+    // Multi-tier Classical Marble Fountain
     const basin = new THREE.Mesh(new THREE.CylinderGeometry(5.8, 6.2, 1.2, 32), marbleMat);
     basin.position.y = 0.6;
     basin.castShadow = true;
@@ -1188,28 +1229,112 @@ export class Environment {
     upperTier.position.y = 2.8;
     parkGroup.add(upperTier);
 
-    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
     finial.position.y = 3.4;
     parkGroup.add(finial);
 
-    const parkTreeCoords = [
-      [-14, -14], [14, -14], [-14, 14], [14, 14],
-      [0, -14], [0, 14], [-14, 0], [14, 0]
+    // Ornate Trimmed Boxwood Hedges framing the central plaza
+    [
+      [-8.5, -8.5], [8.5, -8.5], [-8.5, 8.5], [8.5, 8.5]
+    ].forEach(([hx, hz]) => {
+      const hedge = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.8, 3.6), hedgeMat);
+      hedge.position.set(hx, 0.65, hz);
+      hedge.castShadow = true;
+      parkGroup.add(hedge);
+
+      const flowerPatch = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.15, 3.4), foliageBlossomMat);
+      flowerPatch.position.set(hx, 1.1, hz);
+      parkGroup.add(flowerPatch);
+    });
+
+    // Classical Park Benches facing the central fountain
+    const benchPositions = [
+      { x: -5.5, z: -3.0, rotY: 0 },
+      { x: 5.5, z: -3.0, rotY: 0 },
+      { x: -5.5, z: 3.0, rotY: Math.PI },
+      { x: 5.5, z: 3.0, rotY: Math.PI },
+      { x: -3.0, z: -5.5, rotY: Math.PI / 2 },
+      { x: -3.0, z: 5.5, rotY: Math.PI / 2 },
+      { x: 3.0, z: -5.5, rotY: -Math.PI / 2 },
+      { x: 3.0, z: 5.5, rotY: -Math.PI / 2 }
     ];
-    parkTreeCoords.forEach(([tx, tz]) => {
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 2.8, 8), trunkMat);
-      trunk.position.set(tx, 1.4, tz);
+    benchPositions.forEach(b => {
+      const bench = new THREE.Group();
+      bench.position.set(b.x, 0.28, b.z);
+      bench.rotation.y = b.rotY;
+
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 0.6), benchWoodMat);
+      seat.position.y = 0.45;
+      bench.add(seat);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.5, 0.08), benchWoodMat);
+      back.position.set(0, 0.75, -0.26);
+      bench.add(back);
+
+      [-0.9, 0.9].forEach(lx => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.55), castIronMat);
+        leg.position.set(lx, 0.22, 0);
+        bench.add(leg);
+      });
+
+      parkGroup.add(bench);
+    });
+
+    // Park Lanterns (Victorian warm post lamps)
+    [
+      [-9.0, -9.0], [9.0, -9.0], [-9.0, 9.0], [9.0, 9.0]
+    ].forEach(([lx, lz]) => {
+      const lamp = new THREE.Group();
+      lamp.position.set(lx, 0.28, lz);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 3.8, 8), castIronMat);
+      pole.position.y = 1.9;
+      lamp.add(pole);
+
+      const lantern = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), lanternGlowMat);
+      lantern.position.y = 3.8;
+      lamp.add(lantern);
+
+      parkGroup.add(lamp);
+    });
+
+    // Lush Symmetrical Trees (12 park trees across the 4 lawn quadrants)
+    const parkTrees = [
+      // NW Lawn Quad
+      { x: -14, z: -14, blossom: false },
+      { x: -8, z: -18, blossom: true },
+      { x: -18, z: -8, blossom: false },
+      // NE Lawn Quad
+      { x: 14, z: -14, blossom: false },
+      { x: 8, z: -18, blossom: true },
+      { x: 18, z: -8, blossom: false },
+      // SW Lawn Quad
+      { x: -14, z: 14, blossom: false },
+      { x: -8, z: 18, blossom: true },
+      { x: -18, z: 8, blossom: false },
+      // SE Lawn Quad
+      { x: 14, z: 14, blossom: false },
+      { x: 8, z: 18, blossom: true },
+      { x: 18, z: 8, blossom: false }
+    ];
+
+    parkTrees.forEach(t => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.38, 3.2, 8), trunkMat);
+      trunk.position.set(t.x, 1.6, t.z);
       trunk.castShadow = true;
       parkGroup.add(trunk);
 
-      const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(1.9, 1), foliageMat);
-      crown.position.set(tx, 3.6, tz);
+      const crownMat = t.blossom ? foliageBlossomMat : foliageOakMat;
+      const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(2.1, 1), crownMat);
+      crown.position.set(t.x, 4.2, t.z);
       crown.castShadow = true;
       parkGroup.add(crown);
+
+      this.collision.addCircle(39 + t.x, 39 + t.z, 0.8, 'park_tree');
     });
 
     this.scene.add(parkGroup);
-    this.collision.addCircle(38, 42, 6.4, "central_fountain");
+    this.collision.addCircle(39, 39, 6.4, 'central_fountain');
   }
 
 
@@ -1933,10 +2058,8 @@ export class Environment {
     createCylinderSkyscraper(-52, -20, 7.5, 64, matGlassDark, "rotunda_nw_techcenter");
     createLoftWithFireEscapes(-28, -20, 14, 10, 26, matSandstone, "loft_nw_studios");
 
-    // DISTRICT 3: CENTRAL COMMONS & DINING PROMENADE (South-East: X: 18 to 65, Z: 18 to 65)
-    createMetroBistro(38, 18, 0, "bistro_parkside_patio");
-    createSuperSkyscraper(54, 38, 15, 15, 78, matGlassBlue, "skyscraper_se_parkview");
-    createCylinderSkyscraper(54, 56, 7.5, 70, matGlassGold, "rotunda_se_parkside");
+    // DISTRICT 3: CENTRAL BOTANICAL COMMONS PARK (South-East: X: 16 to 62, Z: 16 to 62)
+    // 100% Dedicated Pristine City Botanical Park & Fountain Promenade (Zero buildings in park zone!)
 
     // DISTRICT 4: WELCOME & LIFESTYLE DISTRICT (South-West: X: -65 to -18, Z: 18 to 65)
     createConvenienceStore(-50, 24, 0, "convenience_mart_west");
@@ -1975,12 +2098,18 @@ export class Environment {
     // Berdiri megah di percabangan antara Main Ave South dan South Broadway (X: 24, Z: 165)
     createFlatironBuilding(38, 175, Math.PI, 30, 16, 58, "flatiron_south_district");
 
-    // DISTRICT 8: EAST MIDTOWN COMMERCIAL STRIP (X: 135 to 250, Z: -130 to 130)
+    // DISTRICT 8: EAST MIDTOWN COMMERCIAL & DINING BOULEVARD (X: 135 to 250, Z: -130 to 130)
+    // North Midtown High-Rise Skyline (Set back safely at Z: -35, >19m clearance from Boulevard)
     createTimesSquareTower(135, -35, 16, 16, 76, matGlassCyan, "ts_tower_em", {
       mainBillboard: bbSkillCleanCode,
       verticalTicker: tickerDevTips,
       billboardSide: "S"
     });
+    createSuperSkyscraper(175, -35, 16, 16, 82, matGlassBlue, "skyscraper_em_north1");
+    createCylinderSkyscraper(215, -35, 7.5, 72, matGlassGold, "rotunda_em_north2");
+
+    // South Midtown Dining & Hospitality Boulevard (Set back safely with >24m pedestrian terrace buffer)
+    createMetroBistro(135, 50, 0, "bistro_midtown_patio");
     createGrandHotel(175, 45, -Math.PI / 2, "hotel_grand_metropolis");
     createGasAndEVStation(175, -80, 0, "gas_ev_oasis_east");
     createAutoShowroom(175, -115, 0, "showroom_supercars");
@@ -1997,12 +2126,12 @@ export class Environment {
       billboardSide: "N"
     });
     createLShapedComplex(-175, 75, 0, 30, 30, 36, matBrick, "l_complex_sw1");
-    createLShapedComplex(-175, -75, Math.PI / 2, 30, 30, 36, matCharcoal, "l_complex_sw2");
+    createLShapedComplex(-175, -98, Math.PI / 2, 30, 30, 36, matCharcoal, "l_complex_sw2");
     createSuperSkyscraper(-215, 38, 18, 18, 84, matGlassDark, "skyscraper_wm_1");
     createDiagridTower(-215, 75, 18, 18, 86, matGlassCyan, "diagrid_wm_2");
-    createTerracedTower(-215, -75, 18, 18, 72, matCorporateWhite, "terraced_wm_3");
-    createRotundaTower(-175, -115, 8.0, 68, matGlassBlue, "rotunda_wm_4");
-    createLoftWithFireEscapes(-215, -115, 18, 14, 30, matBrick, "loft_wm_5");
+    createTerracedTower(-215, -98, 18, 18, 72, matCorporateWhite, "terraced_wm_3");
+    createRotundaTower(-175, -120, 8.0, 68, matGlassBlue, "rotunda_wm_4");
+    createLoftWithFireEscapes(-215, -120, 18, 14, 30, matBrick, "loft_wm_5");
 
     function createRotundaTower(x, z, r, h, m, n) {
       createCylinderSkyscraper(x, z, r, h, m, n);
@@ -2203,35 +2332,35 @@ export class Environment {
       this.collision.addBox(x, z, 2.0, 4.0, "parked_" + type);
     };
 
-    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back safely at X: 93, Z: -16)
-    const lot1 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot1.position.set(93, 0.05, -16);
+    // Dedicated Parking Lot 1: POS Kasir Shopping Plaza (Set back safely at X: 95, Z: -32)
+    const lot1 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lot1.position.set(95, 0.05, -32);
     lot1.receiveShadow = true;
     this.scene.add(lot1);
 
-    createCar(91, -12, Math.PI / 2, "vanWhite");
-    createCar(91, -16, Math.PI / 2, "taxi");
-    createCar(91, -20, Math.PI / 2, "sedanBlue");
+    createCar(93, -25, Math.PI / 2, "vanWhite");
+    createCar(93, -31, Math.PI / 2, "taxi");
+    createCar(93, -37, Math.PI / 2, "sedanBlue");
 
-    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (Set back safely at X: -93, Z: -125)
-    const lot2 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot2.position.set(-93, 0.05, -125);
+    // Dedicated Parking Lot 2: PoRoRo Gelato Cafe (Set back safely at X: -95, Z: -105)
+    const lot2 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lot2.position.set(-95, 0.05, -105);
     lot2.receiveShadow = true;
     this.scene.add(lot2);
 
-    createCar(-91, -120, Math.PI / 2, "taxi");
-    createCar(-91, -125, Math.PI / 2, "sportsRed");
-    createCar(-91, -130, Math.PI / 2, "sedanSilver");
+    createCar(-93, -98, Math.PI / 2, "taxi");
+    createCar(-93, -104, Math.PI / 2, "sportsRed");
+    createCar(-93, -110, Math.PI / 2, "sedanSilver");
 
-    // Dedicated Parking Lot 3: Developer HQ Courtyard (Set back safely at X: 93, Z: 125)
-    const lot3 = new THREE.Mesh(new THREE.BoxGeometry(14, 0.1, 20), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
-    lot3.position.set(93, 0.05, 125);
+    // Dedicated Parking Lot 3: Developer HQ Courtyard (Set back safely at X: 95, Z: 105)
+    const lot3 = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 22), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+    lot3.position.set(95, 0.05, 105);
     lot3.receiveShadow = true;
     this.scene.add(lot3);
 
-    createCar(91, 120, Math.PI / 2, "sedanBlue");
-    createCar(91, 125, Math.PI / 2, "sportsRed");
-    createCar(91, 130, Math.PI / 2, "sedanSilver");
+    createCar(93, 98, Math.PI / 2, "sedanBlue");
+    createCar(93, 104, Math.PI / 2, "sportsRed");
+    createCar(93, 110, Math.PI / 2, "sedanSilver");
   }
 
   // 9. STREETLIGHTS & TREES ALIGNED NEATLY ON OUTER SIDEWALKS
