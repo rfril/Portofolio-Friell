@@ -984,6 +984,7 @@ export class Environment {
   buildTrafficLightSystem() {
     const metalDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
     const housingMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+    const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
     const createApproachTrafficGantry = ({
       roadType,   // "NS" or "EW"
