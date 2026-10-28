@@ -639,6 +639,71 @@ export class Environment {
       this.scene.add(segGroup);
     };
 
+    // HELPER 4: SEAMLESS CAMPUS GATEWAY T-JUNCTION
+    // Connects primary corridors cleanly to portfolio building branch avenues
+    // ZERO road-on-road overlaps, unbroken opposite sidewalk, and open entrance mouth
+    const createCampusTJunction = (roadX, centerZ, corridorWidth, junctionDepth, branchSide, branchWidth = 10.0) => {
+      const g = new THREE.Group();
+      g.position.set(roadX, 0, centerZ);
+
+      // 1. Asphalt Plate (Flush at y = 0.02)
+      const jGeo = new THREE.PlaneGeometry(corridorWidth, junctionDepth);
+      jGeo.rotateX(-Math.PI / 2);
+      const jMesh = new THREE.Mesh(jGeo, roadMat);
+      jMesh.position.y = 0.02;
+      jMesh.receiveShadow = true;
+      g.add(jMesh);
+
+      const curbW = 3.5;
+      const curbH = 0.15;
+      const isEast = (branchSide === "E");
+
+      // 2. Opposite Side Continuous Sidewalk
+      const oppX = isEast
+        ? -corridorWidth / 2 - curbW / 2
+        : corridorWidth / 2 + curbW / 2;
+      const oppSidewalk = new THREE.Mesh(new THREE.BoxGeometry(curbW, curbH, junctionDepth), curbMat);
+      oppSidewalk.position.set(oppX, curbH / 2, 0);
+      oppSidewalk.receiveShadow = true;
+      g.add(oppSidewalk);
+
+      // 3. Turn-Side Corner Sidewalk Blocks (North & South of branch opening)
+      const turnX = isEast
+        ? corridorWidth / 2 + curbW / 2
+        : -corridorWidth / 2 - curbW / 2;
+      const cornerDepth = (junctionDepth - branchWidth) / 2;
+      if (cornerDepth > 0.1) {
+        const cornerGeo = new THREE.BoxGeometry(curbW, curbH, cornerDepth);
+        // North corner
+        const cornerN = new THREE.Mesh(cornerGeo, curbMat);
+        cornerN.position.set(turnX, curbH / 2, -branchWidth / 2 - cornerDepth / 2);
+        cornerN.receiveShadow = true;
+        g.add(cornerN);
+
+        // South corner
+        const cornerS = new THREE.Mesh(cornerGeo, curbMat);
+        cornerS.position.set(turnX, curbH / 2, branchWidth / 2 + cornerDepth / 2);
+        cornerS.receiveShadow = true;
+        g.add(cornerS);
+      }
+
+      // 4. White Zebra Crossing Strip across the entrance mouth
+      const zebraLength = branchWidth;
+      const bars = Math.floor(zebraLength / 1.4);
+      const sGeo = new THREE.PlaneGeometry(0.7, 2.4);
+      sGeo.rotateX(-Math.PI / 2);
+      sGeo.rotateY(Math.PI / 2);
+
+      const mouthX = isEast ? corridorWidth / 2 - 1.2 : -corridorWidth / 2 + 1.2;
+      for (let i = 0; i < bars; i++) {
+        const stripe = new THREE.Mesh(sGeo, whiteMat);
+        stripe.position.set(mouthX, 0.026, -zebraLength / 2 + (i + 0.5) * 1.4);
+        g.add(stripe);
+      }
+
+      this.scene.add(g);
+    };
+
     // =========================================================================
     // HELPER 3: SEAMLESS CURVED ROAD BEND (SWEEPING HIGHWAY & CRESCENT TURNS)
     // =========================================================================
@@ -865,6 +930,19 @@ export class Environment {
     createJunction(270, 140, 14, 14);
     createJunction(-270, 140, 14, 14);
 
+    // 2B. CAMPUS GATEWAY T-JUNCTIONS (FOR ALL PORTFOLIO INFORMATION BUILDINGS)
+    // Dedicated branch junctions with open curb mouths, zebra crossings & ZERO segment overlap
+    createCampusTJunction(75, -105, 12, 12, "E", 10.0);  // Apexsions RPG Fortress (Area 3A)
+    createCampusTJunction(75, -35, 12, 12, "E", 10.0);   // POS Digital Store (Area 3B)
+    createCampusTJunction(75, 105, 12, 12, "E", 10.0);   // Developer HQ & Studio (Area 5)
+
+    createCampusTJunction(-75, -105, 12, 12, "W", 10.0); // PoRoRo Gelato Cafe (Area 3C)
+    createCampusTJunction(-75, -35, 12, 12, "W", 10.0);  // My Journey Promenade (Area 2)
+    createCampusTJunction(-75, 35, 12, 12, "W", 10.0);   // Developer Skills Lab (Area 4)
+    createCampusTJunction(-75, 105, 12, 12, "W", 10.0);  // Satellite Relay Hub (Area 6)
+
+    createCampusTJunction(0, 24, 16, 12, "W", 10.0);     // Spawn Welcome Pavilion Gateway (Area 1)
+
     // 3. UNBROKEN SUPERBLOCK STRAIGHTAWAYS (ZERO SEGMENT-ON-SEGMENT OVERLAPS)
     // Main North-South Avenue (X = 0, Width = 16m)
     createRoadSegment(0, -18, 0, -57, 16);     // Roundabout to Canal Bridge South
@@ -873,7 +951,8 @@ export class Environment {
     createRoadSegment(0, -147, 0, -263, 16);   // North Hub to Outer Parkway
     createRoadSegment(0, -277, 0, -338, 16);   // North Stub
 
-    createRoadSegment(0, 18, 0, 133, 16);      // Roundabout to South Hub (115m stretch!)
+    // Spawn Welcome Gateway Junction at (0, 24) spans Z: 18 to 30 (seamlessly connects to Roundabout at Z=18!)
+    createRoadSegment(0, 30, 0, 133, 16);      // Spawn Welcome Gateway to South Hub (103m unbroken stretch!)
     createRoadSegment(0, 147, 0, 263, 16);     // South Hub to Outer Parkway (116m stretch!)
     createRoadSegment(0, 277, 0, 338, 16);     // South Stub
 
@@ -886,20 +965,25 @@ export class Environment {
     createRoadSegment(-81, 0, -263, 0, 16);    // West Secondary to Outer Parkway (Unbroken Straightaway!)
     createRoadSegment(-277, 0, -338, 0, 16);   // West Stub
 
-    // East Secondary Corridor (X = 75, Width = 12m)
-    createRoadSegment(75, -8, 75, -57, 12);    // Junction Z=0 North to Canal Bridge
+    // East Secondary Corridor (X = 75, Width = 12m) - Clean breaks at Campus T-Junctions:
+    createRoadSegment(75, -133, 75, -111, 12); // North Hub to Apexsions Gateway
+    createRoadSegment(75, -99, 75, -67, 12);   // Apexsions Gateway to Canal Bridge South
     // Canal Bridge at Z: -67 to -57
-    createRoadSegment(75, -67, 75, -133, 12);
-    createRoadSegment(75, -147, 75, -263, 12);
-    createRoadSegment(75, 8, 75, 133, 12);     // Junction Z=0 South to South Connector
+    createRoadSegment(75, -57, 75, -41, 12);   // Canal Bridge North to Kasir Gateway
+    createRoadSegment(75, -29, 75, -8, 12);    // Kasir Gateway to Boulevard Z=0
+    createRoadSegment(75, 8, 75, 99, 12);      // Boulevard to About HQ Gateway (91m straightaway!)
+    createRoadSegment(75, 111, 75, 133, 12);   // About HQ Gateway to South Connector
     createRoadSegment(75, 147, 75, 263, 12);
 
-    // West Secondary Corridor (X = -75, Width = 12m)
-    createRoadSegment(-75, -8, -75, -57, 12);   // Junction Z=0 North to Canal Bridge
+    // West Secondary Corridor (X = -75, Width = 12m) - Clean breaks at Campus T-Junctions:
+    createRoadSegment(-75, -133, -75, -111, 12); // North Hub to Pororo Gateway
+    createRoadSegment(-75, -99, -75, -67, 12);   // Pororo Gateway to Canal Bridge South
     // Canal Bridge at Z: -67 to -57
-    createRoadSegment(-75, -67, -75, -133, 12);
-    createRoadSegment(-75, -147, -75, -263, 12);
-    createRoadSegment(-75, 8, -75, 133, 12);    // Junction Z=0 South to South Connector
+    createRoadSegment(-75, -57, -75, -41, 12);   // Canal Bridge North to Journey Gateway
+    createRoadSegment(-75, -29, -75, -8, 12);    // Journey Gateway to Boulevard Z=0
+    createRoadSegment(-75, 8, -75, 29, 12);      // Boulevard to Skills Lab Gateway
+    createRoadSegment(-75, 41, -75, 99, 12);     // Skills Lab Gateway to Contact Hub Gateway (58m stretch!)
+    createRoadSegment(-75, 111, -75, 133, 12);   // Contact Hub Gateway to South Connector
     createRoadSegment(-75, 147, -75, 263, 12);
 
     // Cross Connectors (Z = +-140, Width = 14m)
@@ -1478,95 +1562,90 @@ export class Environment {
 
     zones.forEach(zone => {
       const isEast = zone.side === "E";
-      const startX = isEast ? 75 : -75;
-      const endX = isEast ? 92 : -92;
+      const startX = isEast ? 81 : -81; // Flush at secondary corridor outer edge (no overlap!)
+      const endX = isEast ? 89 : -89;   // Flush at vehicle turnaround apron inner edge (no overlap!)
       const midX = (startX + endX) / 2;
-      const lenX = Math.abs(endX - startX);
+      const lenX = Math.abs(endX - startX); // 8.0m
       const z = zone.z;
+      const avenueW = 10.0;
 
-      // 1. PAVED ACCESS ROAD (9.6m wide from Secondary Corridor to Zone Plaza)
-      const roadGeo = new THREE.PlaneGeometry(lenX, 9.6);
+      // 1. PAVED ACCESS AVENUE (10m wide from Secondary Corridor edge to Zone Courtyard)
+      // Pure seamless connection: starts strictly at corridor edge, ends strictly at apron edge
+      const roadGeo = new THREE.PlaneGeometry(lenX, avenueW);
       roadGeo.rotateX(-Math.PI / 2);
       const road = new THREE.Mesh(roadGeo, roadMat);
-      road.position.set(midX, 0.022, z);
+      road.position.set(midX, 0.02, z);
       road.receiveShadow = true;
       this.scene.add(road);
 
-      // Yellow Dashed Center Line
-      const numDashes = Math.floor(lenX / 6.0);
+      // Yellow Dashed Center Line (Strictly within avenue)
       const dashGeo = new THREE.PlaneGeometry(2.4, 0.35);
       dashGeo.rotateX(-Math.PI / 2);
-      for (let i = 0; i < numDashes; i++) {
-        const dash = new THREE.Mesh(dashGeo, yellowMat);
-        const dx = isEast ? startX + 3.0 + i * 6.0 : startX - 3.0 - i * 6.0;
-        dash.position.set(dx, 0.025, z);
-        this.scene.add(dash);
-      }
+      const dash = new THREE.Mesh(dashGeo, yellowMat);
+      dash.position.set(midX, 0.025, z);
+      this.scene.add(dash);
 
-      // White Edge Lines
+      // White Continuous Edge Lines (Strictly within avenue)
       const edgeGeo = new THREE.PlaneGeometry(lenX, 0.22);
       edgeGeo.rotateX(-Math.PI / 2);
-      [-4.5, 4.5].forEach(ez => {
+      [-4.65, 4.65].forEach(ez => {
         const edge = new THREE.Mesh(edgeGeo, whiteMat);
         edge.position.set(midX, 0.024, z + ez);
         this.scene.add(edge);
       });
 
-      // Raised Concrete Sidewalks on Both Sides of Access Road
+      // Raised Concrete Sidewalks on Both Sides of Access Avenue
+      // Connecting seamlessly between corridor corner curbs and courtyard borders
       const walkW = 2.2;
       const walkH = 0.15;
       const walkGeo = new THREE.BoxGeometry(lenX, walkH, walkW);
-      [-5.9, 5.9].forEach(wz => {
+      [-6.1, 6.1].forEach(wz => {
         const walk = new THREE.Mesh(walkGeo, curbMat);
         walk.position.set(midX, walkH / 2, z + wz);
         walk.receiveShadow = true;
         this.scene.add(walk);
       });
 
-      // Avenue Streetlamps
-      const lampX1 = isEast ? 83 : -83;
-      const lampX2 = isEast ? 90 : -90;
-      createAvenueLamp(lampX1, z - 5.9);
-      createAvenueLamp(lampX2, z + 5.9);
+      // Avenue Streetlamp
+      createAvenueLamp(isEast ? 85 : -85, z - 6.1);
 
       // Directory Entrance Totem
-      const totemX = isEast ? 82.5 : -82.5;
+      const totemX = isEast ? 85 : -85;
       const totemRot = isEast ? -Math.PI / 2 : Math.PI / 2;
-      createDirectoryTotem(totemX, z + 7.2, totemRot, zone.title, zone.subtitle, zone.category);
+      createDirectoryTotem(totemX, z + 7.5, totemRot, zone.title, zone.subtitle, zone.category);
 
       // 2. GRAND ARRIVAL COURTYARD & TURNAROUND BAY (34m x 36m)
-      // Centered around the zone at (x, z)
       const plazaCenterX = isEast ? 105 : -105;
-      const plazaGeo = new THREE.BoxGeometry(34, 0.06, 36);
+      const plazaGeo = new THREE.BoxGeometry(34, 0.04, 36);
       const plaza = new THREE.Mesh(plazaGeo, stonePlazaMat);
-      plaza.position.set(plazaCenterX, 0.03, z);
+      plaza.position.set(plazaCenterX, 0.015, z);
       plaza.receiveShadow = true;
       this.scene.add(plaza);
 
       // Plaza Perimeter Border Trim
-      const trimGeo = new THREE.BoxGeometry(34.8, 0.1, 36.8);
+      const trimGeo = new THREE.BoxGeometry(34.8, 0.08, 36.8);
       const trim = new THREE.Mesh(trimGeo, borderStoneMat);
-      trim.position.set(plazaCenterX, 0.02, z);
+      trim.position.set(plazaCenterX, 0.012, z);
       trim.receiveShadow = true;
       this.scene.add(trim);
 
-      // Drivable Vehicle Turnaround Apron / Drop-off Loop
+      // Drivable Vehicle Turnaround Apron / Drop-off Loop (Flush at y = 0.02)
       const apronW = 12;
       const apronD = 20;
       const apronX = isEast ? 95 : -95;
       const apronGeo = new THREE.PlaneGeometry(apronW, apronD);
       apronGeo.rotateX(-Math.PI / 2);
       const apron = new THREE.Mesh(apronGeo, roadMat);
-      apron.position.set(apronX, 0.042, z);
+      apron.position.set(apronX, 0.02, z);
       apron.receiveShadow = true;
       this.scene.add(apron);
 
-      // Turnaround Loop Border Line
+      // Turnaround Loop Border Lines
       const loopTrimGeo = new THREE.PlaneGeometry(apronW, 0.25);
       loopTrimGeo.rotateX(-Math.PI / 2);
-      [-apronD / 2 + 0.2, apronD / 2 - 0.2].forEach(lz => {
+      [-apronD / 2 + 0.25, apronD / 2 - 0.25].forEach(lz => {
         const lLine = new THREE.Mesh(loopTrimGeo, whiteMat);
-        lLine.position.set(apronX, 0.044, z + lz);
+        lLine.position.set(apronX, 0.024, z + lz);
         this.scene.add(lLine);
       });
 
@@ -1915,30 +1994,77 @@ export class Environment {
     });
 
     // 8. SPAWN ZONE WELCOME PAVILION & GRAND PROMENADE (-24, 24)
-    // Direct paved connection from Central Roundabout SW Corner
-    const spawnPromenade = new THREE.Mesh(
-      new THREE.PlaneGeometry(8.0, 10.0),
-      stonePlazaMat
-    );
-    spawnPromenade.rotateX(-Math.PI / 2);
-    spawnPromenade.position.set(-21, 0.035, 21);
-    spawnPromenade.receiveShadow = true;
-    this.scene.add(spawnPromenade);
+    // Dedicated paved Welcome Avenue connecting South Avenue (X: -8) cleanly into Spawn Pavilion (X: -18)
+    const spawnAveLen = 10.0;
+    const spawnAveMidX = -13.0; // from X = -8 to -18, Z: 19 to 29
+    const spawnAveGeo = new THREE.PlaneGeometry(spawnAveLen, 10.0);
+    spawnAveGeo.rotateX(-Math.PI / 2);
+    const spawnAve = new THREE.Mesh(spawnAveGeo, roadMat);
+    spawnAve.position.set(spawnAveMidX, 0.02, 24);
+    spawnAve.receiveShadow = true;
+    this.scene.add(spawnAve);
+
+    // Spawn Avenue Yellow Center Dash
+    const sDash = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.35), yellowMat);
+    sDash.rotateX(-Math.PI / 2);
+    sDash.position.set(spawnAveMidX, 0.025, 24);
+    this.scene.add(sDash);
+
+    // Spawn Avenue White Edge Lines
+    [-4.65, 4.65].forEach(sez => {
+      const sEdge = new THREE.Mesh(new THREE.PlaneGeometry(spawnAveLen, 0.22), whiteMat);
+      sEdge.rotateX(-Math.PI / 2);
+      sEdge.position.set(spawnAveMidX, 0.024, 24 + sez);
+      this.scene.add(sEdge);
+    });
+
+    // Spawn Avenue Raised Sidewalks
+    [-6.1, 6.1].forEach(swz => {
+      const sWalk = new THREE.Mesh(new THREE.BoxGeometry(spawnAveLen, 0.15, 2.2), curbMat);
+      sWalk.position.set(spawnAveMidX, 0.075, 24 + swz);
+      sWalk.receiveShadow = true;
+      this.scene.add(sWalk);
+    });
+
+    // Spawn Welcome Arrival Plaza & Vehicle Turnaround Bay (X: -18 to -30, Z: 16 to 32)
+    const spawnApronGeo = new THREE.PlaneGeometry(12.0, 16.0);
+    spawnApronGeo.rotateX(-Math.PI / 2);
+    const spawnApron = new THREE.Mesh(spawnApronGeo, roadMat);
+    spawnApron.position.set(-24, 0.02, 24);
+    spawnApron.receiveShadow = true;
+    this.scene.add(spawnApron);
+
+    // Spawn Plaza Foundation Trim
+    const sTrim = new THREE.Mesh(new THREE.BoxGeometry(12.8, 0.08, 16.8), borderStoneMat);
+    sTrim.position.set(-24, 0.012, 24);
+    sTrim.receiveShadow = true;
+    this.scene.add(sTrim);
+
+    // Visitor Parking Stalls at Spawn
+    [-3.0, 3.0].forEach(pz => {
+      const pLine = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 0.18), whiteMat);
+      pLine.rotateX(-Math.PI / 2);
+      pLine.position.set(-26.5, 0.024, 24 + pz);
+      this.scene.add(pLine);
+    });
+
+    // Parked Silver EV Welcome Vehicle
+    createParkedCar(-26.5, 27, 0, "sedanSilver", "spawn_visitor_car");
 
     // Grand Welcome Totem Pylon at Entrance
-    createDirectoryTotem(-18, 26, Math.PI / 4, "WELCOME TO FRIEL'S WORLD", "Interactive 3D Portfolio 2026", "START HERE");
+    createDirectoryTotem(-15, 31.5, Math.PI / 4, "WELCOME TO FRIEL'S WORLD", "Interactive 3D Portfolio 2026", "START HERE");
 
-    // Welcome Flowerbeds flanking the walkway
+    // Welcome Flowerbeds flanking the entrance
     const flowerMat1 = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.5 });
     const flowerMat2 = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.5 });
 
-    [-20, -28].forEach((fx, i) => {
+    [-14, -18].forEach((fx, i) => {
       const fBed = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.35, 1.4), borderStoneMat);
-      fBed.position.set(fx, 0.17, 16);
+      fBed.position.set(fx, 0.17, 16.5);
       this.scene.add(fBed);
 
       const flowers = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.2, 1.0), i === 0 ? flowerMat1 : flowerMat2);
-      flowers.position.set(fx, 0.42, 16);
+      flowers.position.set(fx, 0.42, 16.5);
       this.scene.add(flowers);
     });
   }
